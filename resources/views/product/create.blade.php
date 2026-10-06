@@ -32,6 +32,14 @@
 
         <div class="col-sm-4">
             <div class="form-group">
+                {!! Form::label('part_number', __('product.part_number') . ':') !!} @show_tooltip(__('product.part_number_help'))
+                {!! Form::text('part_number', !empty($duplicate_product->part_number) ? $duplicate_product->part_number : null, ['class' => 'form-control',
+                'placeholder' => __('product.part_number')]); !!}
+            </div>
+        </div>
+
+        <div class="col-sm-4">
+            <div class="form-group">
                 {!! Form::label('sku', __('product.sku') . ':') !!} @show_tooltip(__('tooltip.sku'))
                 {!! Form::text('sku', null, ['class' => 'form-control',
                 'placeholder' => __('product.sku')]); !!}
