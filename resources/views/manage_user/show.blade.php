@@ -36,11 +36,20 @@
                         <p class="text-muted text-center" title="@lang('user.role')">
                             {{$user->role_name}}
                         </p>
+                        @if(!empty($user->designation))
+                            <p class="text-muted text-center" title="@lang('user.designation')">
+                                {{$user->designation}}
+                            </p>
+                        @endif
 
                         <ul class="list-group list-group-unbordered">
                             <li class="list-group-item">
                                 <b>@lang( 'business.username' )</b>
                                 <a class="pull-right">{{$user->username}}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>@lang( 'user.designation' )</b>
+                                <a class="pull-right">{{$user->designation}}</a>
                             </li>
                             <li class="list-group-item">
                                 <b>@lang( 'business.email' )</b>
@@ -91,6 +100,7 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="col-md-6">
+                                            <p><strong>@lang( 'user.designation' ): </strong> {{$user->designation}}</p>
                                             <p><strong>@lang( 'lang_v1.cmmsn_percent' ): </strong> {{$user->cmmsn_percent}}%</p>
                                     </div>
                                     <div class="col-md-6">

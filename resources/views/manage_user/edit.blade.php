@@ -36,6 +36,12 @@
             <div class="clearfix"></div>
             <div class="col-md-4">
                 <div class="form-group">
+                  {!! Form::label('designation', __( 'user.designation' ) . ':') !!}
+                    {!! Form::text('designation', $user->designation, ['class' => 'form-control', 'placeholder' => __( 'user.designation' ) ]); !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
                   {!! Form::label('email', __( 'business.email' ) . ':*') !!}
                     {!! Form::text('email', $user->email, ['class' => 'form-control', 'required', 'placeholder' => __( 'business.email' ) ]); !!}
                 </div>

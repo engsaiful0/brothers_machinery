@@ -33,6 +33,7 @@
                         <tr>
                             <th>@lang( 'business.username' )</th>
                             <th>@lang( 'user.name' )</th>
+                            <th>@lang( 'user.designation' )</th>
                             <th>@lang( 'user.role' )</th>
                             <th>@lang( 'business.email' )</th>
                             <th class="not-export">@lang( 'messages.action' )</th>
@@ -60,13 +61,14 @@
                     fixedHeader:false,
                     ajax: '/users',
                     columnDefs: [ {
-                        "targets": [4],
+                        "targets": [5],
                         "orderable": false,
                         "searchable": false
                     } ],
                     "columns":[
                         {"data":"username"},
                         {"data":"full_name"},
+                        {"data":"designation", "name": "designation"},
                         {"data":"role"},
                         {"data":"email"},
                         {"data":"action"}

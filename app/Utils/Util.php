@@ -1609,7 +1609,7 @@ class Util
     public function createUser($request)
     {
         $user_details = $request->only([
-            'surname', 'first_name', 'last_name', 'email',
+            'surname', 'first_name', 'last_name', 'designation', 'email',
             'user_type', 'crm_contact_id', 'allow_login', 'username', 'password',
             'cmmsn_percent', 'max_sales_discount_percent', 'dob', 'gender', 'marital_status', 'blood_group', 'contact_number', 'alt_number', 'family_number', 'fb_link',
             'twitter_link', 'social_media_1', 'social_media_2', 'custom_field_1',
