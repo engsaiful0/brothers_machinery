@@ -198,20 +198,6 @@
                             @lang('lang_v1.login')
                         </button>
                     </form>
-
-                    <div class="tw-flex tw-items-center tw-flex-col">
-                        <!-- Register Url -->
-
-                        @if (!($request->segment(1) == 'business' && $request->segment(2) == 'register'))
-                            <!-- Register Url -->
-                            @if (config('constants.allow_registration'))
-                                <a href="{{ route('business.getRegister') }}@if (!empty(request()->lang)) {{ '?lang=' . request()->lang }} @endif"
-                                    class="tw-text-sm tw-font-medium tw-text-gray-500 hover:tw-text-gray-500 tw-mt-2">{{ __('business.not_yet_registered') }}
-                                    <span
-                                        class="tw-text-sm tw-font-medium tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-inline-block tw-text-transparent tw-bg-clip-text hover:tw-text-[#467BF5] hover:tw-underline">{{ __('business.register_now') }}</span></a>
-                            @endif
-                        @endif
-                    </div>
                 </div>
             </div>
         </div>
