@@ -37,13 +37,13 @@
         $amount_in_words = 'BDT ' . $words_raw . ' ONLY.';
     }
 
-    $signature_name = '<b>' . trim($receipt_details->signature_user_name ?? $receipt_details->added_by ?? '') . '</b>';
+    $signature_name = trim($receipt_details->sales_person ?? $receipt_details->signature_user_name ?? $receipt_details->added_by ?? '');
     $signature_designation = trim($receipt_details->signature_user_designation ?? '');
     $signature_contact = trim($receipt_details->signature_user_contact ?? '');
 
-    $default_signature = 'Best regards<br><span class="brothers-signature-from">From <b>Brothers Machinery</b></span>';
+    $default_signature = 'Best regards<br><span class="brothers-signature-from">From <strong>Brothers Machinery</strong></span>';
     if ($signature_name !== '') {
-        $default_signature .= '<br>' . e($signature_name);
+        $default_signature .= '<br><strong>' . e($signature_name) . '</strong>';
     }
     if ($signature_designation !== '') {
         $default_signature .= '<br>' . e($signature_designation);
@@ -106,14 +106,13 @@
         text-align: right;
     }
 
-    .brothers-customer-heading {
-        font-weight: bold;
-        margin-bottom: 4px;
-    }
-
     .brothers-customer-name {
         font-weight: bold;
         text-transform: uppercase;
+    }
+
+    .brothers-customer-address {
+        margin-top: 2px;
     }
 
     .brothers-lines-table {
@@ -223,10 +222,12 @@
     <table class="brothers-meta">
         <tr>
             <td class="brothers-meta-left">
-                <div class="brothers-customer-heading">Customer Information</div>
                 <div class="brothers-customer-name">{{ $customer_company }}</div>
-                @if (! empty($receipt_details->customer_city))
-                    <div>{{ $receipt_details->customer_city }}</div>
+                @php
+                    $customer_address_line = trim($receipt_details->customer_address_line ?? $receipt_details->customer_city ?? '');
+                @endphp
+                @if ($customer_address_line !== '')
+                    <div class="brothers-customer-address">{{ $customer_address_line }}</div>
                 @endif
                 @if ($po_ref !== '')
                     <div style="margin-top: 8px;">

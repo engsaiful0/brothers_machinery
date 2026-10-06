@@ -1959,6 +1959,15 @@ class TransactionUtil extends Util
             $output['customer_name'] = ! empty($customer->name) ? $customer->name : ($customer->supplier_business_name ?? '');
             $output['customer_supplier_business_name'] = $customer->supplier_business_name ?? '';
             $output['customer_city'] = $customer->city ?? '';
+            $address_parts = array_filter([
+                trim($customer->address_line_1 ?? ''),
+                trim($customer->address_line_2 ?? ''),
+                trim($customer->city ?? ''),
+                trim($customer->state ?? ''),
+            ], function ($part) {
+                return $part !== '';
+            });
+            $output['customer_address_line'] = implode(', ', $address_parts);
             $output['brothers_po_ref'] = $transaction->custom_field_1 ?? '';
             $output['brothers_challan_no'] = $transaction->custom_field_2 ?? '';
             $output['brothers_second_date'] = $transaction->custom_field_3 ?? '';
@@ -1984,6 +1993,15 @@ class TransactionUtil extends Util
                 : ($output['added_by'] ?? '');
             $output['signature_user_designation'] = ! empty($signature_user) ? ($signature_user->designation ?? '') : '';
             $output['signature_user_contact'] = ! empty($signature_user) ? ($signature_user->contact_number ?? '') : '';
+
+            $sales_person_user = ! empty($transaction->created_by) ? \App\User::find($transaction->created_by) : null;
+            if (! empty($sales_person_user)) {
+                $output['sales_person'] = trim("{$sales_person_user->surname} {$sales_person_user->first_name} {$sales_person_user->last_name}");
+                $output['signature_user_designation'] = $sales_person_user->designation ?? $output['signature_user_designation'];
+                $output['signature_user_contact'] = $sales_person_user->contact_number ?? $output['signature_user_contact'];
+            } else {
+                $output['sales_person'] = $output['signature_user_name'];
+            }
         }
 
         return (object) $output;
