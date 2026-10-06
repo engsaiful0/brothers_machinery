@@ -1101,6 +1101,8 @@ class TransactionUtil extends Util
         if ($il->show_customer == 1) {
             $output['customer_label'] = ! empty($il->customer_label) ? $il->customer_label : '';
             $output['customer_name'] = ! empty($customer->name) ? $customer->name : $customer->supplier_business_name;
+            $output['customer_supplier_business_name'] = $customer->supplier_business_name ?? '';
+            $output['customer_city'] = $customer->city ?? '';
             $output['customer_mobile'] = $customer->mobile;
 
             if ($receipt_printer_type != 'printer') {
@@ -1953,6 +1955,24 @@ class TransactionUtil extends Util
         $output['design'] = $il->design;
         $output['table_tax_headings'] = ! empty($il->table_tax_headings) ? array_filter(json_decode($il->table_tax_headings), 'strlen') : null;
 
+        if (in_array($il->design, ['brothers-machinery', 'classic'], true)) {
+            $output['customer_name'] = ! empty($customer->name) ? $customer->name : ($customer->supplier_business_name ?? '');
+            $output['customer_supplier_business_name'] = $customer->supplier_business_name ?? '';
+            $output['customer_city'] = $customer->city ?? '';
+            $output['brothers_po_ref'] = $transaction->custom_field_1 ?? '';
+            $output['brothers_challan_no'] = $transaction->custom_field_2 ?? '';
+            $output['brothers_second_date'] = $transaction->custom_field_3 ?? '';
+            if (! empty($output['brothers_second_date']) && preg_match('/^\d{4}-\d{2}-\d{2}/', $output['brothers_second_date'])) {
+                try {
+                    $output['brothers_second_date'] = \Carbon\Carbon::parse($output['brothers_second_date'])->format('d.m.Y');
+                } catch (\Exception $e) {
+                    // keep raw value
+                }
+            }
+            $word_format = isset($il->common_settings['num_to_word_format']) ? $il->common_settings['num_to_word_format'] : 'indian';
+            $output['total_in_words'] = $this->numToWord($transaction->final_total, null, $word_format);
+        }
+
         return (object) $output;
     }
 
@@ -2043,6 +2063,7 @@ class TransactionUtil extends Util
             $line_array = [
                 //Field for 1st column
                 'name' => $product->name,
+                'part_number' => ! empty($product->part_number) ? $product->part_number : '',
                 'product_description' => ! empty($show_product_description) ? $product->product_description : null,
                 'variation' => (empty($variation->name) || $variation->name == 'DUMMY') ? '' : $variation->name,
                 'product_variation' => (empty($product_variation->name) || $product_variation->name == 'DUMMY') ? '' : $product_variation->name,
@@ -2133,10 +2154,10 @@ class TransactionUtil extends Util
 
             $line_array['total_line_discount'] = $this->num_f($line_array['line_discount_uf'] * $line_array['quantity_uf'], false, $business_details);
 
-            if ($il->show_brand == 1) {
+            if ($il->show_brand == 1 || in_array($il->design, ['brothers-machinery', 'classic'], true)) {
                 $line_array['brand'] = ! empty($brand->name) ? $brand->name : '';
             }
-            if ($il->show_sku == 1) {
+            if ($il->show_sku == 1 || in_array($il->design, ['brothers-machinery', 'classic'], true)) {
                 $line_array['sub_sku'] = ! empty($variation->sub_sku) ? $variation->sub_sku : '';
             }
             if ($il->show_image == 1) {
@@ -2151,7 +2172,7 @@ class TransactionUtil extends Util
             if ($il->show_cat_code == 1) {
                 $line_array['cat_code'] = ! empty($cat->short_code) ? $cat->short_code : '';
             }
-            if ($il->show_sale_description == 1) {
+            if ($il->show_sale_description == 1 || in_array($il->design, ['brothers-machinery', 'classic'], true)) {
                 $line_array['sell_line_note'] = ! empty($line->sell_line_note) ? nl2br($line->sell_line_note) : '';
             }
             if ($is_lot_number_enabled == 1 && $il->show_lot == 1) {
@@ -2323,10 +2344,10 @@ class TransactionUtil extends Util
                 // }
             }
 
-            if ($il->show_brand == 1) {
+            if ($il->show_brand == 1 || in_array($il->design, ['brothers-machinery', 'classic'], true)) {
                 $line_array['brand'] = ! empty($brand->name) ? $brand->name : '';
             }
-            if ($il->show_sku == 1) {
+            if ($il->show_sku == 1 || in_array($il->design, ['brothers-machinery', 'classic'], true)) {
                 $line_array['sub_sku'] = ! empty($variation->sub_sku) ? $variation->sub_sku : '';
             }
             if ($il->show_cat_code == 1) {

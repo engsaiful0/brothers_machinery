@@ -112,6 +112,7 @@ class ProductController extends Controller
             $products = $query->select(
                 'products.id',
                 'products.name as product',
+                'products.part_number',
                 'products.type',
                 'c1.name as category',
                 'c2.name as sub_category',

@@ -259,7 +259,7 @@ class InvoiceLayoutController extends Controller
             'slim' => __('lang_v1.slim').' ('.__('lang_v1.recomended_for_80mm').')',
             'slim2' => __('lang_v1.slim').' 2 ('.__('lang_v1.recomended_for_58mm').')',
             'english-arabic' => 'English-Arabic ('.__('lang_v1.for_normal_printer').')',
-            
+            'brothers-machinery' => 'Brothers Machinery (pre-printed A4 pad)',
         ];
     }
 }

@@ -281,6 +281,10 @@
                         name: 'products.name'
                     },
                     {
+                        data: 'part_number',
+                        name: 'products.part_number'
+                    },
+                    {
                         data: 'product_locations',
                         name: 'product_locations'
                     },
