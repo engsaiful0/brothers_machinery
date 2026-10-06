@@ -1971,6 +1971,19 @@ class TransactionUtil extends Util
             }
             $word_format = isset($il->common_settings['num_to_word_format']) ? $il->common_settings['num_to_word_format'] : 'indian';
             $output['total_in_words'] = $this->numToWord($transaction->final_total, null, $word_format);
+
+            $signature_user = $user;
+            if (! empty($transaction->commission_agent)) {
+                $commission_user = \App\User::find($transaction->commission_agent);
+                if (! empty($commission_user)) {
+                    $signature_user = $commission_user;
+                }
+            }
+            $output['signature_user_name'] = ! empty($signature_user)
+                ? trim("{$signature_user->surname} {$signature_user->first_name} {$signature_user->last_name}")
+                : ($output['added_by'] ?? '');
+            $output['signature_user_designation'] = ! empty($signature_user) ? ($signature_user->designation ?? '') : '';
+            $output['signature_user_contact'] = ! empty($signature_user) ? ($signature_user->contact_number ?? '') : '';
         }
 
         return (object) $output;

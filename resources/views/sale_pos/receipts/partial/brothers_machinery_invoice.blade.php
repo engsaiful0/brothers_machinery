@@ -1,8 +1,7 @@
 @php
-    $bill_no = trim(($receipt_details->invoice_no_prefix ?? '') . ($receipt_details->invoice_no ?? ''));
-    if (! preg_match('/^BILL#?/i', $bill_no)) {
-        $bill_no = 'BILL#' . preg_replace('/^#+/', '', $bill_no);
-    }
+    $invoice_number = trim($receipt_details->invoice_no ?? '');
+    $invoice_number = preg_replace('/^invoice\s*no\.?\s*/i', '', $invoice_number);
+    $bill_no = 'BILL#' . ltrim($invoice_number, '# ');
 
     $bill_date = ! empty($receipt_details->transaction_date)
         ? \Carbon\Carbon::parse($receipt_details->transaction_date)->format('d.m.Y')
@@ -38,7 +37,20 @@
         $amount_in_words = 'BDT ' . $words_raw . ' ONLY.';
     }
 
-    $default_signature = "Best regards<br>\nFrom Brothers Machinery<br>\nMD. Abu Naim<br>\nBusiness Development Manager<br>\nCell # 01701-813399";
+    $signature_name = '<b>' . trim($receipt_details->signature_user_name ?? $receipt_details->added_by ?? '') . '</b>';
+    $signature_designation = trim($receipt_details->signature_user_designation ?? '');
+    $signature_contact = trim($receipt_details->signature_user_contact ?? '');
+
+    $default_signature = 'Best regards<br><span class="brothers-signature-from">From <b>Brothers Machinery</b></span>';
+    if ($signature_name !== '') {
+        $default_signature .= '<br>' . e($signature_name);
+    }
+    if ($signature_designation !== '') {
+        $default_signature .= '<br>' . e($signature_designation);
+    }
+    if ($signature_contact !== '') {
+        $default_signature .= '<br>Cell # ' . e($signature_contact);
+    }
 @endphp
 
 <style>
@@ -191,6 +203,11 @@
         margin-top: 28px;
         font-size: 12pt;
         line-height: 1.5;
+    }
+
+    .brothers-signature-from {
+        display: inline-block;
+        margin-bottom: 2.5em;
     }
 
     @media print {
