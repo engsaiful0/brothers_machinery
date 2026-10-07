@@ -247,6 +247,7 @@
 						</div>
 					</div>
 					@endcan
+				@include('sell.partials.delivery_challan_field')
 				
 				@php
 			        $custom_field_1_label = !empty($custom_labels['sell']['custom_field_1']) ? $custom_labels['sell']['custom_field_1'] : '';

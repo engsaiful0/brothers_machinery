@@ -34,11 +34,12 @@ class SalePurchaseOrderTest extends TestCase
      */
     public function test_create_passes_purchase_order_fields_to_persistence(): void
     {
-        $input = $this->saleInput() + ['purchase_order_no' => 'PO-001', 'purchase_order_date' => '2026-10-06'];
+        $input = $this->saleInput() + ['purchase_order_no' => 'PO-001', 'purchase_order_date' => '2026-10-06', 'delivery_challan_no' => 'DC-001'];
         $model = Mockery::mock('alias:App\\Transaction');
         $model->shouldReceive('create')->once()->with(Mockery::on(function ($attributes) {
             return $attributes['purchase_order_no'] === 'PO-001'
-                && $attributes['purchase_order_date'] === '2026-10-06';
+                && $attributes['purchase_order_date'] === '2026-10-06'
+                && $attributes['delivery_challan_no'] === 'DC-001';
         }))->andReturn((object) ['id' => 1]);
         $sale = (new TransactionUtil)->createSellTransaction(1, $input, ['total_before_tax' => 100, 'tax' => 0], 1, false);
         $this->assertSame(1, $sale->id);
@@ -51,22 +52,26 @@ class SalePurchaseOrderTest extends TestCase
             public $invoice_no = 'SALE-001';
             public $document = null;
             public $source = null;
-            public $attributes = ['purchase_order_no' => 'PO-OLD', 'purchase_order_date' => '2026-10-01'];
+            public $attributes = ['purchase_order_no' => 'PO-OLD', 'purchase_order_date' => '2026-10-01', 'delivery_challan_no' => 'DC-OLD'];
             public function fill($attributes) { $this->attributes = array_merge($this->attributes, $attributes); }
             public function update() {}
         };
         $util = new TransactionUtil;
         $totals = ['total_before_tax' => 100, 'tax' => 0];
         $util->updateSellTransaction($sale, 1, $this->saleInput(), $totals, 1, false);
+        $this->assertSame('DC-OLD', $sale->attributes['delivery_challan_no']);
         $this->assertSame('PO-OLD', $sale->attributes['purchase_order_no']);
         $this->assertSame('2026-10-01', $sale->attributes['purchase_order_date']);
-        $input = $this->saleInput() + ['purchase_order_no' => 'PO-NEW', 'purchase_order_date' => '2026-10-07'];
+        $input = $this->saleInput() + ['purchase_order_no' => 'PO-NEW', 'purchase_order_date' => '2026-10-07', 'delivery_challan_no' => 'DC-NEW'];
         $util->updateSellTransaction($sale, 1, $input, $totals, 1, false);
+        $this->assertSame('DC-NEW', $sale->attributes['delivery_challan_no']);
         $this->assertSame('PO-NEW', $sale->attributes['purchase_order_no']);
         $this->assertSame('2026-10-07', $sale->attributes['purchase_order_date']);
+        $input['delivery_challan_no'] = null;
         $input['purchase_order_no'] = null;
         $input['purchase_order_date'] = null;
         $util->updateSellTransaction($sale, 1, $input, $totals, 1, false);
+        $this->assertNull($sale->attributes['delivery_challan_no']);
         $this->assertNull($sale->attributes['purchase_order_no']);
         $this->assertNull($sale->attributes['purchase_order_date']);
     }
@@ -87,11 +92,17 @@ class SalePurchaseOrderTest extends TestCase
         $db->table('transactions')->insert(['invoice_no' => 'EXISTING']);
         $migration = require __DIR__.'/../../database/migrations/2026_10_07_000001_add_purchase_order_fields_to_transactions_table.php';
         $migration->up();
+        $challan_migration = require __DIR__.'/../../database/migrations/2026_10_07_000002_add_delivery_challan_no_to_transactions_table.php';
+        $challan_migration->up();
         $existing = $db->table('transactions')->first();
+        $this->assertNull($existing->delivery_challan_no);
         $this->assertNull($existing->purchase_order_no);
         $this->assertNull($existing->purchase_order_date);
-        $db->table('transactions')->where('id', $existing->id)->update(['purchase_order_no' => 'PO-001', 'purchase_order_date' => '2026-10-06']);
+        $db->table('transactions')->where('id', $existing->id)->update(['purchase_order_no' => 'PO-001', 'purchase_order_date' => '2026-10-06', 'delivery_challan_no' => 'DC-001']);
         $this->assertSame('2026-10-06', $db->table('transactions')->first()->purchase_order_date);
+        $this->assertSame('DC-001', $db->table('transactions')->first()->delivery_challan_no);
+        $challan_migration->down();
+        $this->assertFalse($db->schema()->hasColumn('transactions', 'delivery_challan_no'));
         $migration->down();
         $this->assertFalse($db->schema()->hasColumn('transactions', 'purchase_order_no'));
         $this->assertFalse($db->schema()->hasColumn('transactions', 'purchase_order_date'));

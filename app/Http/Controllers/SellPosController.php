@@ -332,6 +332,7 @@ class SellPosController extends Controller
         }
 
         $request->validate([
+            'delivery_challan_no' => 'nullable|string|max:191',
             'purchase_order_no' => 'nullable|string|max:191',
             'purchase_order_date' => 'nullable|date_format:Y-m-d',
         ]);
@@ -1143,6 +1144,7 @@ class SellPosController extends Controller
         }
 
         $request->validate([
+            'delivery_challan_no' => 'nullable|string|max:191',
             'purchase_order_no' => 'nullable|string|max:191',
             'purchase_order_date' => 'nullable|date_format:Y-m-d',
         ]);
