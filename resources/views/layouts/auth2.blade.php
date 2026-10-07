@@ -42,12 +42,14 @@
 
                     <div class="tw-absolute tw-top-2 md:tw-top-5 tw-left-4 md:tw-left-8 tw-flex tw-items-center tw-gap-4"
                         style="text-align: left">
-                        <a href="{{ url('/') }}">
-                            <div
-                                class="lg:tw-w-16 md:tw-h-16 tw-w-12 tw-h-12 tw-flex tw-items-center tw-justify-center tw-mx-auto tw-overflow-hidden tw-p-0.5 tw-mb-4">
-                                <img src="{{ asset('img/logo-small.png')}}" alt="lock" class="tw-object-fill" />
-                            </div>
-                        </a>
+                        @unless($request->is('/'))
+                            <a href="{{ url('/') }}">
+                                <div
+                                    class="lg:tw-w-16 md:tw-h-16 tw-w-12 tw-h-12 tw-flex tw-items-center tw-justify-center tw-mx-auto tw-overflow-hidden tw-p-0.5 tw-mb-4">
+                                    <img src="{{ asset('img/logo-small.png')}}" alt="lock" class="tw-object-fill" />
+                                </div>
+                            </a>
+                        @endunless
                         @if(config('constants.SHOW_REPAIR_STATUS_LOGIN_SCREEN') && Route::has('repair-status'))
                             <a class="tw-text-white tw-font-medium tw-text-sm md:tw-text-base hover:tw-text-white"
                                 href="{{ action([\Modules\Repair\Http\Controllers\CustomerRepairStatusController::class, 'index']) }}">
