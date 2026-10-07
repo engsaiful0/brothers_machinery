@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'delivery_challan_no' => 'Delivery Challan No',
     'purchase_order_no' => 'Purchase Order No',
     'purchase_order_date' => 'Purchase Order Date',
 

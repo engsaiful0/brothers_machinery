@@ -13,7 +13,7 @@
 
     $po_ref = trim($receipt_details->purchase_order_no ?? $receipt_details->brothers_po_ref ?? ($receipt_details->sell_custom_field_1_value ?? ''));
     $po_date = trim($receipt_details->purchase_order_date ?? '');
-    $challan_no = trim($receipt_details->brothers_challan_no ?? ($receipt_details->sell_custom_field_2_value ?? ''));
+    $challan_no = trim($receipt_details->delivery_challan_no ?? $receipt_details->brothers_challan_no ?? ($receipt_details->sell_custom_field_2_value ?? ''));
     $second_date = trim($receipt_details->brothers_second_date ?? ($receipt_details->sell_custom_field_3_value ?? ''));
     if ($second_date !== '' && preg_match('/^\d{4}-\d{2}-\d{2}/', $second_date)) {
         try {
