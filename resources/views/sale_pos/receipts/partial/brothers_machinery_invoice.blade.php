@@ -23,9 +23,10 @@
         }
     }
 
-    $gross_total = $receipt_details->subtotal ?? '0.00';
-    $discount_total = $receipt_details->discount ?? '0.00';
-    $net_total = $receipt_details->total ?? '0.00';
+    $currency_symbols = array_filter(['৳', $receipt_details->currency_symbol ?? '']);
+    $gross_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->subtotal ?? '0.00')));
+    $discount_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->discount ?? '0.00')));
+    $net_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->total ?? '0.00')));
     $net_unformatted = $receipt_details->total_unformatted ?? 0;
 
     $util = app(\App\Utils\Util::class);
