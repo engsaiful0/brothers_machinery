@@ -171,6 +171,7 @@
 						</div>
 					</div>
 				</div>
+				@include('sell.partials.purchase_order_fields')
 				@php
 					if($transaction->status == 'draft' && $transaction->is_quotation == 1){
 						$status = 'quotation';

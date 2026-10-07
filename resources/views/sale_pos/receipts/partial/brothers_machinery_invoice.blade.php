@@ -249,6 +249,13 @@
                 @endif
             </td>
             <td class="brothers-meta-right">
+                @if (!empty($receipt_details->purchase_order_no))
+                    <div>@lang('sale.purchase_order_no'): {{ $receipt_details->purchase_order_no }}</div>
+                @endif
+                @if (!empty($receipt_details->purchase_order_date))
+                    <div>@lang('sale.purchase_order_date'): {{ $receipt_details->purchase_order_date }}</div>
+                @endif
+
                 @if ($bill_date !== '')
                     <div>Dated: {{ $bill_date }}</div>
                 @endif
