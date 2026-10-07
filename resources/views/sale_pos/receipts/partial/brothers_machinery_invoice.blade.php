@@ -11,7 +11,8 @@
         ? $receipt_details->customer_supplier_business_name
         : ($receipt_details->customer_name ?? $receipt_details->contact_name ?? '');
 
-    $po_ref = trim($receipt_details->brothers_po_ref ?? ($receipt_details->sell_custom_field_1_value ?? ''));
+    $po_ref = trim($receipt_details->purchase_order_no ?? $receipt_details->brothers_po_ref ?? ($receipt_details->sell_custom_field_1_value ?? ''));
+    $po_date = trim($receipt_details->purchase_order_date ?? '');
     $challan_no = trim($receipt_details->brothers_challan_no ?? ($receipt_details->sell_custom_field_2_value ?? ''));
     $second_date = trim($receipt_details->brothers_second_date ?? ($receipt_details->sell_custom_field_3_value ?? ''));
     if ($second_date !== '' && preg_match('/^\d{4}-\d{2}-\d{2}/', $second_date)) {
@@ -229,39 +230,23 @@
                 @if ($customer_address_line !== '')
                     <div class="brothers-customer-address">{{ $customer_address_line }}</div>
                 @endif
-                @if ($po_ref !== '')
-                    <div style="margin-top: 8px;">
-                        @if (stripos($po_ref, 'ref:') === 0 || stripos($po_ref, 'purchase order') !== false)
-                            {{ $po_ref }}
-                        @else
-                            Ref: Purchase Order no# {{ $po_ref }}
-                        @endif
-                    </div>
-                @endif
-                @if ($challan_no !== '')
-                    <div>
-                        @if (stripos($challan_no, 'challan') !== false)
-                            {{ $challan_no }}
-                        @else
-                            Our Delivery Challan No#{{ $challan_no }}
-                        @endif
-                    </div>
-                @endif
+            </td>
+            <td class="brothers-meta-right"></td>
+        </tr>
+        <tr>
+            <td class="brothers-meta-left" style="padding-top: 8px;">
+                Ref: Purchase Order No: {{ $po_ref }}
+            </td>
+            <td class="brothers-meta-right" style="padding-top: 8px;">
+                Purchase Order Date: {{ $po_date }}
+            </td>
+        </tr>
+        <tr>
+            <td class="brothers-meta-left">
+                Delivery Challan No: {{ $challan_no }}
             </td>
             <td class="brothers-meta-right">
-                @if (!empty($receipt_details->purchase_order_no))
-                    <div>@lang('sale.purchase_order_no'): {{ $receipt_details->purchase_order_no }}</div>
-                @endif
-                @if (!empty($receipt_details->purchase_order_date))
-                    <div>@lang('sale.purchase_order_date'): {{ $receipt_details->purchase_order_date }}</div>
-                @endif
-
-                @if ($bill_date !== '')
-                    <div>Dated: {{ $bill_date }}</div>
-                @endif
-                @if ($second_date !== '')
-                    <div style="margin-top: 4px;">Dated: {{ $second_date }}</div>
-                @endif
+                Date: {{ $second_date !== '' ? $second_date : $bill_date }}
             </td>
         </tr>
     </table>
