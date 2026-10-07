@@ -215,6 +215,7 @@
 						</div>
 					</div>
 				</div>
+				@include('sell.partials.purchase_order_fields')
 				@if(!empty($status))
 					<input type="hidden" name="status" id="status" value="{{$status}}">
 

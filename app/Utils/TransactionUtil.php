@@ -70,6 +70,8 @@ class TransactionUtil extends Util
             'source' => ! empty($input['source']) ? $input['source'] : null,
             'total_before_tax' => $invoice_total['total_before_tax'],
             'transaction_date' => $input['transaction_date'],
+            'purchase_order_no' => $input['purchase_order_no'] ?? null,
+            'purchase_order_date' => $input['purchase_order_date'] ?? null,
             'tax_id' => ! empty($input['tax_rate_id']) ? $input['tax_rate_id'] : null,
             'discount_type' => ! empty($input['discount_type']) ? $input['discount_type'] : null,
             'discount_amount' => $uf_data ? $this->num_uf($input['discount_amount']) : $input['discount_amount'],
@@ -262,6 +264,13 @@ class TransactionUtil extends Util
             'additional_expense_key_4' => ! empty($input['additional_expense_key_4']) ? $input['additional_expense_key_4'] : null,
             'is_kitchen_order' => ! empty($input['is_kitchen_order']) ? 1 : 0,
         ];
+
+        // Other sale entry points may omit these fields; preserve their existing values.
+        foreach (['purchase_order_no', 'purchase_order_date'] as $field) {
+            if (array_key_exists($field, $input)) {
+                $update_date[$field] = $input[$field];
+            }
+        }
 
         if (! empty($input['transaction_date'])) {
             $update_date['transaction_date'] = $input['transaction_date'];
@@ -1261,6 +1270,10 @@ class TransactionUtil extends Util
         } else {
             $output['invoice_date'] = \Carbon::createFromFormat('Y-m-d H:i:s', $transaction->transaction_date)->format($il->date_time_format);
         }
+
+        $output['purchase_order_no'] = $transaction->purchase_order_no;
+        $output['purchase_order_date'] = ! empty($transaction->purchase_order_date)
+            ? $this->format_date($transaction->purchase_order_date, false, $business_details) : null;
 
         $output['transaction_date'] = $transaction->transaction_date;
         $output['date_time_format'] = $business_details->date_format;

@@ -21,6 +21,12 @@
       @endphp
       <div class="@if(!empty($export_custom_fields)) col-sm-3 @else col-sm-4 @endif">
         <b>@if($sell->type == 'sales_order') {{ __('restaurant.order_no') }} @else {{ __('sale.invoice_no') }} @endif:</b> #{{ $sell->invoice_no }}<br>
+        @if(!empty($sell->purchase_order_no))
+          <b>@lang('sale.purchase_order_no'):</b> {{ $sell->purchase_order_no }}<br>
+        @endif
+        @if(!empty($sell->purchase_order_date))
+          <b>@lang('sale.purchase_order_date'):</b> {{ @format_date($sell->purchase_order_date) }}<br>
+        @endif
         <b>{{ __('sale.status') }}:</b> 
           @if($sell->status == 'draft' && $sell->is_quotation == 1)
             {{ __('lang_v1.quotation') }}

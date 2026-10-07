@@ -331,6 +331,11 @@ class SellPosController extends Controller
             return redirect()->action([\App\Http\Controllers\CashRegisterController::class, 'create']);
         }
 
+        $request->validate([
+            'purchase_order_no' => 'nullable|string|max:191',
+            'purchase_order_date' => 'nullable|date_format:Y-m-d',
+        ]);
+
         try {
             $input = $request->except('_token');
 
@@ -1136,6 +1141,11 @@ class SellPosController extends Controller
             !auth()->user()->can('so.update') && !auth()->user()->can('edit_pos_payment')) {
             abort(403, 'Unauthorized action.');
         }
+
+        $request->validate([
+            'purchase_order_no' => 'nullable|string|max:191',
+            'purchase_order_date' => 'nullable|date_format:Y-m-d',
+        ]);
 
         try {
             $input = $request->except('_token');

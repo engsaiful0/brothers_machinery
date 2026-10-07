@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'purchase_order_no' => 'Purchase Order No',
+    'purchase_order_date' => 'Purchase Order Date',
 
     /*
     |--------------------------------------------------------------------------
