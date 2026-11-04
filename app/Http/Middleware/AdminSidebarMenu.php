@@ -30,18 +30,6 @@ class AdminSidebarMenu
 
             $is_admin = auth()->user()->hasRole('Admin#' . session('business.id')) ? true : false;
 
-            if (auth()->user()->can('crm.plan.index') || auth()->user()->can('crm.visit.index') || auth()->user()->can('crm.report.index') || auth()->user()->can('crm.report.plan') || auth()->user()->can('crm.report.visit') || auth()->user()->can('crm.report.plan-vs-visit') || auth()->user()->can('crm.report.dashboard')) {
-                $menu->dropdown('CRM', function ($sub) {
-                    if (auth()->user()->can('crm.plan.index')) $sub->url(route('crm.plans'), 'Plan', ['icon'=>'','active'=>request()->segment(1)==='crm' && request()->segment(2)==='plans']);
-                    if (auth()->user()->can('crm.visit.index')) $sub->url(route('crm.visits'), 'Visit', ['icon'=>'','active'=>request()->segment(1)==='crm' && request()->segment(2)==='visits']);
-                    if (auth()->user()->can('crm.report.index') || auth()->user()->can('crm.report.plan') || auth()->user()->can('crm.report.visit') || auth()->user()->can('crm.report.plan-vs-visit') || auth()->user()->can('crm.report.dashboard')) {
-                        if (auth()->user()->can('crm.report.plan')) $sub->url(route('crm.reports','plan'), 'Plan Report', ['icon'=>'','active'=>request()->segment(3)==='plan']);
-                        if (auth()->user()->can('crm.report.visit')) $sub->url(route('crm.reports','visit'), 'Visit Report', ['icon'=>'','active'=>request()->segment(3)==='visit']);
-                        if (auth()->user()->can('crm.report.plan-vs-visit')) $sub->url(route('crm.reports','plan-vs-visit'), 'Plan vs Visit Report', ['icon'=>'','active'=>request()->segment(3)==='plan-vs-visit']);
-                        if (auth()->user()->can('crm.report.dashboard')) $sub->url(route('crm.reports','dashboard'), 'CRM Summary Dashboard', ['icon'=>'','active'=>request()->segment(3)==='dashboard']);
-                    }
-                }, ['icon'=>'fa fa-handshake-o','active'=>request()->segment(1)==='crm'])->order(17);
-            }
             //Home
             //     $menu->url(action([\App\Http\Controllers\HomeController::class, 'index']), __('home.home'), ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             //     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -149,6 +137,20 @@ class AdminSidebarMenu
                     <path d="M4 16h3"></path>
                   </svg>', 'id' => 'tour_step4']
                 )->order(15);
+            }
+
+            //CRM is a separate top-level menu beside Contacts.
+            if (auth()->user()->can('crm.plan.index') || auth()->user()->can('crm.visit.index') || auth()->user()->can('crm.report.index') || auth()->user()->can('crm.report.plan') || auth()->user()->can('crm.report.visit') || auth()->user()->can('crm.report.plan-vs-visit') || auth()->user()->can('crm.report.dashboard')) {
+                $menu->dropdown('CRM', function ($sub) {
+                    if (auth()->user()->can('crm.plan.index')) $sub->url(route('crm.plans'), 'Plan', ['icon'=>'','active'=>request()->segment(1)==='crm' && request()->segment(2)==='plans']);
+                    if (auth()->user()->can('crm.visit.index')) $sub->url(route('crm.visits'), 'Visit', ['icon'=>'','active'=>request()->segment(1)==='crm' && request()->segment(2)==='visits']);
+                    if (auth()->user()->can('crm.report.index') || auth()->user()->can('crm.report.plan') || auth()->user()->can('crm.report.visit') || auth()->user()->can('crm.report.plan-vs-visit') || auth()->user()->can('crm.report.dashboard')) {
+                        if (auth()->user()->can('crm.report.plan')) $sub->url(route('crm.reports','plan'), 'Plan Report', ['icon'=>'','active'=>request()->segment(3)==='plan']);
+                        if (auth()->user()->can('crm.report.visit')) $sub->url(route('crm.reports','visit'), 'Visit Report', ['icon'=>'','active'=>request()->segment(3)==='visit']);
+                        if (auth()->user()->can('crm.report.plan-vs-visit')) $sub->url(route('crm.reports','plan-vs-visit'), 'Plan vs Visit Report', ['icon'=>'','active'=>request()->segment(3)==='plan-vs-visit']);
+                        if (auth()->user()->can('crm.report.dashboard')) $sub->url(route('crm.reports','dashboard'), 'CRM Summary Dashboard', ['icon'=>'','active'=>request()->segment(3)==='dashboard']);
+                    }
+                }, ['icon'=>'<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/></svg>','active'=>request()->segment(1)==='crm'])->order(16);
             }
 
             //Products dropdown

@@ -335,6 +335,7 @@ class SellPosController extends Controller
             'delivery_challan_no' => 'nullable|string|max:191',
             'purchase_order_no' => 'nullable|string|max:191',
             'purchase_order_date' => 'nullable|date_format:Y-m-d',
+            'requisition_number' => 'nullable|string|max:191',
         ]);
 
         try {
@@ -1147,6 +1148,7 @@ class SellPosController extends Controller
             'delivery_challan_no' => 'nullable|string|max:191',
             'purchase_order_no' => 'nullable|string|max:191',
             'purchase_order_date' => 'nullable|date_format:Y-m-d',
+            'requisition_number' => 'nullable|string|max:191',
         ]);
 
         try {

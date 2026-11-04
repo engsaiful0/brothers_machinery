@@ -73,6 +73,7 @@ class TransactionUtil extends Util
             'delivery_challan_no' => $input['delivery_challan_no'] ?? null,
             'purchase_order_no' => $input['purchase_order_no'] ?? null,
             'purchase_order_date' => $input['purchase_order_date'] ?? null,
+            'requisition_number' => $input['requisition_number'] ?? null,
             'tax_id' => ! empty($input['tax_rate_id']) ? $input['tax_rate_id'] : null,
             'discount_type' => ! empty($input['discount_type']) ? $input['discount_type'] : null,
             'discount_amount' => $uf_data ? $this->num_uf($input['discount_amount']) : $input['discount_amount'],
@@ -267,7 +268,7 @@ class TransactionUtil extends Util
         ];
 
         // Other sale entry points may omit these fields; preserve their existing values.
-        foreach (['purchase_order_no', 'purchase_order_date', 'delivery_challan_no'] as $field) {
+        foreach (['purchase_order_no', 'purchase_order_date', 'delivery_challan_no', 'requisition_number'] as $field) {
             if (array_key_exists($field, $input)) {
                 $update_date[$field] = $input[$field];
             }

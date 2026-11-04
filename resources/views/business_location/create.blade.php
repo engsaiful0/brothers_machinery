@@ -71,8 +71,16 @@
                 <div class="clearfix"></div>
                 <div class="col-sm-6">
                     <div class="form-group">
-                        {!! Form::label('email', __( 'business.email' ) . ':') !!}
-                        {!! Form::email('email', null, ['class' => 'form-control', 'placeholder' => __( 'business.email')]); !!}
+                        {!! Form::label('emails', 'Email Addresses:') !!}
+                        <div class="location-email-list">
+                            @foreach(old('emails', ['']) as $email)
+                                <div class="input-group location-email-row" style="margin-bottom:6px">
+                                    {!! Form::email('emails[]', $email, ['class' => 'form-control', 'placeholder' => __( 'business.email')]); !!}
+                                    <span class="input-group-btn"><button type="button" class="btn btn-default remove-location-email">&times;</button></span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <button type="button" class="btn btn-xs btn-default add-location-email"><i class="fa fa-plus"></i> Add email</button>
                     </div>
                 </div>
                 <div class="col-sm-6">
@@ -202,5 +210,15 @@
 
         {!! Form::close() !!}
 
-    </div><!-- /.modal-content -->
+</div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
+<script>
+    $(document).off('click.locationEmails', '.add-location-email').on('click.locationEmails', '.add-location-email', function () {
+        $(this).siblings('.location-email-list').append('<div class="input-group location-email-row" style="margin-bottom:6px"><input type="email" name="emails[]" class="form-control" placeholder="Email"><span class="input-group-btn"><button type="button" class="btn btn-default remove-location-email">&times;</button></span></div>');
+    });
+    $(document).off('click.locationEmailsRemove', '.remove-location-email').on('click.locationEmailsRemove', '.remove-location-email', function () {
+        var list = $(this).closest('.location-email-list');
+        if (list.find('.location-email-row').length > 1) $(this).closest('.location-email-row').remove();
+        else $(this).closest('.location-email-row').find('input').val('');
+    });
+</script>

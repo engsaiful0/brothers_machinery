@@ -1211,6 +1211,7 @@ class SellController extends Controller
                     'transactions.id',
                     'transaction_date',
                     'invoice_no',
+                    'transactions.requisition_number',
                     'contacts.name',
                     'contacts.mobile',
                     'contacts.supplier_business_name',
@@ -1374,6 +1375,7 @@ class SellController extends Controller
                     return $invoice_no;
                 })
                 ->editColumn('transaction_date', '{{@format_date($transaction_date)}}')
+                ->editColumn('requisition_number', '{{ $requisition_number }}')
                 ->editColumn('total_items', '{{@format_quantity($total_items)}}')
                 ->editColumn('total_quantity', '{{@format_quantity($total_quantity)}}')
                 ->addColumn('conatct_name', '@if(!empty($supplier_business_name)) {{$supplier_business_name}}, <br>@endif {{$name}}')

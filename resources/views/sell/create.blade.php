@@ -216,6 +216,9 @@
 					</div>
 				</div>
 				@include('sell.partials.purchase_order_fields')
+				@if(($status ?? null) === 'quotation')
+					@include('sell.partials.requisition_number_field')
+				@endif
 				@if(!empty($status))
 					<input type="hidden" name="status" id="status" value="{{$status}}">
 

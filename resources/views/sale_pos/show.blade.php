@@ -22,6 +22,9 @@
       <div class="@if(!empty($export_custom_fields)) col-sm-3 @else col-sm-4 @endif">
         <b>@if($sell->type == 'sales_order') {{ __('restaurant.order_no') }} @else {{ __('sale.invoice_no') }} @endif:</b> #{{ $sell->invoice_no }}<br>
         <b>@lang('sale.delivery_challan_no'):</b> {{ $sell->delivery_challan_no }}<br>
+        @if($sell->is_quotation && !empty($sell->requisition_number))
+          <b>@lang('sale.requisition_number'):</b> {{ $sell->requisition_number }}<br>
+        @endif
         @if(!empty($sell->purchase_order_no))
           <b>@lang('sale.purchase_order_no'):</b> {{ $sell->purchase_order_no }}<br>
         @endif

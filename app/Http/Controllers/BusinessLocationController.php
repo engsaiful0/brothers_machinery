@@ -155,6 +155,12 @@ class BusinessLocationController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        $request->validate([
+            'email' => 'nullable|email|max:191',
+            'emails' => 'nullable|array',
+            'emails.*' => 'nullable|email|max:191',
+        ]);
+
         try {
             $business_id = $request->session()->get('user.business_id');
 
@@ -167,6 +173,10 @@ class BusinessLocationController extends Controller
 
             $input = $request->only(['name', 'landmark', 'city', 'state', 'country', 'zip_code', 'invoice_scheme_id',
                 'invoice_layout_id', 'mobile', 'alternate_number', 'email', 'website', 'custom_field1', 'custom_field2', 'custom_field3', 'custom_field4', 'location_id', 'selling_price_group_id', 'default_payment_accounts', 'featured_products', 'sale_invoice_layout_id', 'sale_invoice_scheme_id']);
+
+            $emails = $this->getLocationEmails($request);
+            $input['email'] = $emails[0] ?? null;
+            $input['emails'] = ! empty($emails) ? $emails : null;
 
             $input['business_id'] = $business_id;
 
@@ -267,10 +277,20 @@ class BusinessLocationController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        $request->validate([
+            'email' => 'nullable|email|max:191',
+            'emails' => 'nullable|array',
+            'emails.*' => 'nullable|email|max:191',
+        ]);
+
         try {
             $input = $request->only(['name', 'landmark', 'city', 'state', 'country',
                 'zip_code', 'invoice_scheme_id',
                 'invoice_layout_id', 'mobile', 'alternate_number', 'email', 'website', 'custom_field1', 'custom_field2', 'custom_field3', 'custom_field4', 'location_id', 'selling_price_group_id', 'default_payment_accounts', 'featured_products', 'sale_invoice_layout_id', 'sale_invoice_scheme_id' ]);
+
+            $emails = $this->getLocationEmails($request);
+            $input['email'] = $emails[0] ?? null;
+            $input['emails'] = ! empty($emails) ? json_encode($emails) : null;
 
             $business_id = $request->session()->get('user.business_id');
 
@@ -294,6 +314,22 @@ class BusinessLocationController extends Controller
         }
 
         return $output;
+    }
+
+    /** Keep the legacy email column populated with the first address. */
+    private function getLocationEmails(Request $request)
+    {
+        $emails = $request->input('emails', []);
+        if (! is_array($emails) || empty($emails)) {
+            $emails = [$request->input('email')];
+        }
+
+        return collect($emails)
+            ->map(function ($email) { return trim((string) $email); })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**

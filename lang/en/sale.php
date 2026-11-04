@@ -3,6 +3,7 @@
 return [
     'delivery_challan_no' => 'Delivery Challan No',
     'purchase_order_no' => 'Purchase Order No',
+    'requisition_number' => 'Requisition Number',
     'purchase_order_date' => 'Purchase Order Date',
 
     /*

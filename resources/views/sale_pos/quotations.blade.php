@@ -61,6 +61,7 @@
                     <tr>
                         <th>@lang('messages.date')</th>
                         <th>@lang('purchase.ref_no')</th>
+                        <th>@lang('sale.requisition_number')</th>
                         <th>@lang('sale.customer_name')</th>
                         <th>@lang('lang_v1.contact_no')</th>
                         <th>@lang('sale.location')</th>
@@ -117,13 +118,14 @@ $(document).ready( function(){
             }
         },
         columnDefs: [ {
-            "targets": 7,
+            "targets": 8,
             "orderable": false,
             "searchable": false
         } ],
         columns: [
             { data: 'transaction_date', name: 'transaction_date'  },
             { data: 'invoice_no', name: 'invoice_no'},
+            { data: 'requisition_number', name: 'transactions.requisition_number'},
             { data: 'conatct_name', name: 'conatct_name'},
             { data: 'mobile', name: 'contacts.mobile'},
             { data: 'business_location', name: 'bl.name'},

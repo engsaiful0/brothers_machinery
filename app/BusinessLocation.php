@@ -21,6 +21,7 @@ class BusinessLocation extends Model
      */
     protected $casts = [
         'featured_products' => 'array',
+        'emails' => 'array',
     ];
 
     /**
