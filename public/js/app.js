@@ -1847,11 +1847,18 @@ $(document).ready(function() {
         ajax: '/customer-group',
         columnDefs: [
             {
-                targets: 2,
+                targets: [7, 8],
                 orderable: false,
                 searchable: false,
             },
         ],
+    });
+
+    $('div.customer_groups_modal').on('shown.bs.modal', function() {
+        $(this).find('select.select2').select2({
+            dropdownParent: $(this),
+            width: '100%',
+        });
     });
 
     $(document).on('click', 'button.edit_customer_group_button', function() {

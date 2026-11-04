@@ -38,6 +38,11 @@
                         <thead>
                             <tr>
                                 <th>@lang('lang_v1.customer_group_name')</th>
+                                <th>Assign Person</th>
+                                <th>Contact Person</th>
+                                <th>Designation</th>
+                                <th>Mobile</th>
+                                <th>Email</th>
                                 <th>@lang('lang_v1.calculation_percentage')</th>
                                 <th>@lang('lang_v1.selling_price_group')</th>
                                 <th class="not-export">@lang('messages.action')</th>

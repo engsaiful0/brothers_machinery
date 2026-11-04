@@ -13,6 +13,7 @@ use App\Http\Controllers\CashRegisterController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CombinedPurchaseReturnController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CrmController;
 use App\Http\Controllers\CustomerGroupController;
 use App\Http\Controllers\DashboardConfiguratorController;
 use App\Http\Controllers\DiscountController;
@@ -99,6 +100,25 @@ Route::middleware(['setData'])->group(function () {
 
 //Routes for authenticated users only
 Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu', 'CheckUserLogin'])->group(function () {
+    Route::prefix('crm')->name('crm.')->controller(CrmController::class)->group(function () {
+        Route::get('businesses', 'businesses')->name('businesses');
+        Route::get('plans', 'plans')->name('plans');
+        Route::get('plans/create', 'createPlan')->name('plans.create');
+        Route::post('plans', 'storePlan')->name('plans.store');
+        Route::get('plans/{id}', 'showPlan')->name('plans.show');
+        Route::get('plans/{id}/edit', 'editPlan')->name('plans.edit');
+        Route::put('plans/{id}', 'updatePlan')->name('plans.update');
+        Route::delete('plans/{id}', 'deletePlan')->name('plans.delete');
+        Route::get('visits', 'visits')->name('visits');
+        Route::get('visits/create', 'createVisit')->name('visits.create');
+        Route::post('visits', 'storeVisit')->name('visits.store');
+        Route::get('visits/{id}', 'showVisit')->name('visits.show');
+        Route::get('visits/{id}/edit', 'editVisit')->name('visits.edit');
+        Route::put('visits/{id}', 'updateVisit')->name('visits.update');
+        Route::delete('visits/{id}', 'deleteVisit')->name('visits.delete');
+        Route::get('documents/{id}', 'downloadDocument')->name('documents.download');
+        Route::get('reports/{type}', 'report')->where('type','plan|visit|plan-vs-visit|dashboard')->name('reports');
+    });
     Route::get('pos/payment/{id}', [SellPosController::class, 'edit'])->name('edit-pos-payment');
     Route::get('service-staff-availability', [SellPosController::class, 'showServiceStaffAvailibility']);
     Route::get('pause-resume-service-staff-timer/{user_id}', [SellPosController::class, 'pauseResumeServiceStaffTimer']);

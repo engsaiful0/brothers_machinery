@@ -1,0 +1,16 @@
+@extends('layouts.app')
+@section('title', isset($record) && $record ? 'Edit Plan' : 'Create Plan')
+@section('content')
+<section class="content-header"><h1>@yield('title')</h1></section><section class="content"><div class="box box-primary"><div class="box-body"><form method="POST" action="{{ isset($record) && $record ? route('crm.plans.update',$record->id) : route('crm.plans.store') }}">@csrf @if(isset($record) && $record) @method('PUT') @endif
+<div class="row">
+<div class="col-md-6 form-group"><label>Assign Person</label><select name="assigned_user_id" class="form-control select2" required>@foreach($users as $id=>$name)<option value="{{$id}}" @selected(old('assigned_user_id',$record->assigned_user_id??'')==$id)>{{$name}}</option>@endforeach</select></div>
+<div class="col-md-6 form-group"><label>Group</label><select name="group_id" id="group_id" class="form-control select2" required><option value="">Select Group</option>@foreach($groups as $id=>$name)<option value="{{$id}}" @selected(old('group_id',$record->group_id??'')==$id)>{{$name}}</option>@endforeach</select></div>
+<div class="col-md-6 form-group"><label>Business</label><select name="contact_id" id="contact_id" class="form-control select2" required><option value="">Select Business</option>@foreach($businesses as $id=>$name)<option value="{{$id}}" @selected(old('contact_id',$record->contact_id??'')==$id)>{{$name}}</option>@endforeach</select></div>
+<div class="col-md-3 form-group"><label>Monthly Potential</label><input type="number" step="0.0001" min="0" name="monthly_potential" class="form-control" required value="{{old('monthly_potential',$record->monthly_potential??'0')}}"></div>
+<div class="col-md-3 form-group"><label>Monthly Sales Target</label><input type="number" step="0.0001" min="0" name="monthly_sales_target" class="form-control" required value="{{old('monthly_sales_target',$record->monthly_sales_target??'0')}}"></div>
+<div class="col-md-6 form-group"><label>Month</label><select name="month" class="form-control" required>@foreach($months as $id=>$month)<option value="{{$id}}" @selected(old('month',$record->month??now()->month)==$id)>{{$month}}</option>@endforeach</select></div>
+<div class="col-md-6 form-group"><label>Year</label><select name="year" class="form-control" required>@foreach($years as $year)<option value="{{$year}}" @selected(old('year',$record->year??now()->year)==$year)>{{$year}}</option>@endforeach</select></div>
+<div class="col-md-12 form-group"><label>Remarks</label><textarea name="remarks" class="form-control" rows="3">{{old('remarks',$record->remarks??'')}}</textarea></div>
+</div>@if($errors->any())<div class="alert alert-danger">{{ $errors->first() }}</div>@endif<button class="btn btn-primary">Save</button> <a href="{{route('crm.plans')}}" class="btn btn-default">Cancel</a></form></div></div></section>
+@endsection
+@section('javascript')<script>$(function(){if($.fn.select2){$('.select2').select2();}$('#group_id').on('change',function(){var s=$('#contact_id').empty().append(new Option('Loading…',''));if(!this.value){s.empty().append(new Option('Select Business',''));return;}$.get('{{route('crm.businesses')}}',{group_id:this.value},function(items){s.empty().append(new Option('Select Business',''));$.each(items,function(id,name){s.append(new Option(name,id));});s.trigger('change');});});});</script>@endsection

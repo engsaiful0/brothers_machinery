@@ -1801,6 +1801,7 @@
           </div>
         @endif
         
+        @include('role.partials.crm_permissions')
         @include('role.partials.module_permissions')
         </div><!-- /#perm-manager -->
         <div class="row">

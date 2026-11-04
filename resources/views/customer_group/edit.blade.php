@@ -14,6 +14,26 @@
         {!! Form::text('name', $customer_group->name, ['class' => 'form-control', 'required', 'placeholder' => __( 'lang_v1.customer_group_name' )]); !!}
       </div>
       <div class="form-group">
+        {!! Form::label('assigned_to', 'Assign Person:') !!}
+        {!! Form::select('assigned_to[]', $users, $customer_group->assigned_to_users, ['class' => 'form-control select2', 'multiple' => true, 'style' => 'width:100%']); !!}
+      </div>
+      <div class="form-group">
+        {!! Form::label('contact_person', 'Contact Person:') !!}
+        {!! Form::text('contact_person', $customer_group->contact_person, ['class' => 'form-control', 'maxlength' => 255]); !!}
+      </div>
+      <div class="form-group">
+        {!! Form::label('designation', 'Designation:') !!}
+        {!! Form::text('designation', $customer_group->designation, ['class' => 'form-control', 'maxlength' => 255]); !!}
+      </div>
+      <div class="form-group">
+        {!! Form::label('mobile', 'Mobile:') !!}
+        {!! Form::text('mobile', $customer_group->mobile, ['class' => 'form-control', 'maxlength' => 30]); !!}
+      </div>
+      <div class="form-group">
+        {!! Form::label('email', 'Email:') !!}
+        {!! Form::email('email', $customer_group->email, ['class' => 'form-control', 'maxlength' => 255]); !!}
+      </div>
+      <div class="form-group">
             {!! Form::label('price_calculation_type', __( 'lang_v1.price_calculation_type' ) . ':') !!}
             {!! Form::select('price_calculation_type',['percentage' => __('lang_v1.percentage'), 'selling_price_group' => __('lang_v1.selling_price_group')], $customer_group->price_calculation_type, ['class' => 'form-control']); !!}
       </div>

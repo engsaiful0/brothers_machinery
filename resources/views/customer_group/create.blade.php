@@ -15,6 +15,27 @@
       </div>
 
       <div class="form-group">
+        {!! Form::label('assigned_to', 'Assign Person:') !!}
+        {!! Form::select('assigned_to[]', $users, null, ['class' => 'form-control select2', 'multiple' => true, 'style' => 'width:100%']); !!}
+      </div>
+      <div class="form-group">
+        {!! Form::label('contact_person', 'Contact Person:') !!}
+        {!! Form::text('contact_person', null, ['class' => 'form-control', 'maxlength' => 255]); !!}
+      </div>
+      <div class="form-group">
+        {!! Form::label('designation', 'Designation:') !!}
+        {!! Form::text('designation', null, ['class' => 'form-control', 'maxlength' => 255]); !!}
+      </div>
+      <div class="form-group">
+        {!! Form::label('mobile', 'Mobile:') !!}
+        {!! Form::text('mobile', null, ['class' => 'form-control', 'maxlength' => 30]); !!}
+      </div>
+      <div class="form-group">
+        {!! Form::label('email', 'Email:') !!}
+        {!! Form::email('email', null, ['class' => 'form-control', 'maxlength' => 255]); !!}
+      </div>
+
+      <div class="form-group">
             {!! Form::label('price_calculation_type', __( 'lang_v1.price_calculation_type' ) . ':') !!}
             {!! Form::select('price_calculation_type',['percentage' => __('lang_v1.percentage'), 'selling_price_group' => __('lang_v1.selling_price_group')], 'percentage', ['class' => 'form-control']); !!}
       </div>

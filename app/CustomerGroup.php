@@ -8,6 +8,7 @@ class CustomerGroup extends Model
 {
     protected $casts = [
         'deleted_at' => 'datetime',
+        'assigned_to_users' => 'array',
     ];
 
     /**
