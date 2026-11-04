@@ -1656,6 +1656,12 @@ class ProductUtil extends Util
             //Search with like condition
             if ($search_type == 'like') {
                 $query->where(function ($query) use ($search_term, $search_fields) {
+                    $country_codes = [];
+                    foreach (CountryUtil::countries() as $code => $country_name) {
+                        if (stripos($country_name, $search_term) !== false) {
+                            $country_codes[] = $code;
+                        }
+                    }
                     if (in_array('name', $search_fields)) {
                         $query->where('products.name', 'like', '%'.$search_term.'%');
                     }
@@ -1683,6 +1689,10 @@ class ProductUtil extends Util
                     }
                     if (in_array('product_custom_field4', $search_fields)) {
                         $query->orWhere('product_custom_field4', 'like', '%'.$search_term.'%');
+                    }
+                    $query->orWhere('products.country_of_origin', 'like', '%'.$search_term.'%');
+                    if (! empty($country_codes)) {
+                        $query->orWhereIn('products.country_of_origin', $country_codes);
                     }
                 });
             }
@@ -1721,6 +1731,7 @@ class ProductUtil extends Util
         $query->select(
                 'products.id as product_id',
                 'products.name',
+                'products.country_of_origin',
                 'products.type',
                 'products.enable_stock',
                 'variations.id as variation_id',
@@ -1746,6 +1757,12 @@ class ProductUtil extends Util
         // 🔐 Escape `name`, `variation`, `sub_sku`
         $data->transform(function ($item) {
             $item->name = e($item->name);
+            $item->country_name = null;
+            $item->country_label = null;
+            if (! empty($item->country_of_origin)) {
+                $item->country_name = CountryUtil::name($item->country_of_origin);
+                $item->country_label = $item->country_name.' ('.$item->country_of_origin.')';
+            }
             $item->variation = e($item->variation);
             $item->sub_sku = e($item->sub_sku);
             return $item;

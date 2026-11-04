@@ -358,7 +358,7 @@ $(document).ready(function() {
                 }
 
             if (item.enable_stock == 1 && item.qty_available <= 0 && !is_overselling_allowed && !for_so && !is_draft) {
-                var string = '<li class="ui-state-disabled">' + item.name;
+                var string = '<li class="ui-state-disabled">' + item.name + (item.country_label ? ' – ' + item.country_label : '');
                 if (item.type == 'variable') {
                     string += '-' + item.variation;
                 }
@@ -375,7 +375,7 @@ $(document).ready(function() {
                     ' (Out of stock) </li>';
                 return $(string).appendTo(ul);
             } else {
-                var string = '<div>' + item.name;
+                var string = '<div>' + item.name + (item.country_label ? ' – ' + item.country_label : '');
                 if (item.type == 'variable') {
                     string += '-' + item.variation;
                 }

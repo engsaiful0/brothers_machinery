@@ -71,7 +71,7 @@ $(document).ready(function() {
             })
             .autocomplete('instance')._renderItem = function(ul, item) {
             if (item.qty_available <= 0) {
-                var string = '<li class="ui-state-disabled">' + item.name;
+                var string = '<li class="ui-state-disabled">' + item.name + (item.country_label ? ' – ' + item.country_label : '');
                 if (item.type == 'variable') {
                     string += '-' + item.variation;
                 }
@@ -80,7 +80,7 @@ $(document).ready(function() {
             } else if (item.enable_stock != 1) {
                 return ul;
             } else {
-                var string = '<div>' + item.name;
+                var string = '<div>' + item.name + (item.country_label ? ' – ' + item.country_label : '');
                 if (item.type == 'variable') {
                     string += '-' + item.variation;
                 }

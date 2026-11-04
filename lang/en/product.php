@@ -17,6 +17,7 @@ return [
     'add_new_product' => 'Add new product',
     'add_product_for_labels' => 'Add products to generate Labels',
     'product_type' => 'Product Type',
+    'country_of_origin' => 'Made In',
     'category' => 'Category',
     'sub_category' => 'Sub category',
     'unit' => 'Unit',

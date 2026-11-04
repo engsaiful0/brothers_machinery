@@ -15,6 +15,7 @@ use App\SellingPriceGroup;
 use App\TaxRate;
 use App\Unit;
 use App\Utils\ModuleUtil;
+use App\Utils\CountryUtil;
 use App\Utils\ProductUtil;
 use App\Variation;
 use App\VariationGroupPrice;
@@ -113,6 +114,7 @@ class ProductController extends Controller
                 'products.id',
                 'products.name as product',
                 'products.part_number',
+                'products.country_of_origin',
                 'products.type',
                 'c1.name as category',
                 'c2.name as sub_category',
@@ -259,6 +261,11 @@ class ProductController extends Controller
                 )
                 ->editColumn('product', function ($row) use ($is_woocommerce) {
                     $product = $row->is_inactive == 1 ? e($row->product).' <span class="label bg-gray">'.__('lang_v1.inactive').'</span>' : e($row->product);
+
+                    if (! empty($row->country_of_origin)) {
+                        $country = CountryUtil::name($row->country_of_origin).' ('.$row->country_of_origin.')';
+                        $product .= '<br><small>'.e($country).'</small>';
+                    }
 
                     $product = $row->not_for_selling == 1 ? $product.' <span class="label bg-gray">'.__('lang_v1.not_for_selling').
                         '</span>' : $product;
@@ -417,12 +424,19 @@ class ProductController extends Controller
 
         $common_settings = session()->get('business.common_settings');
         $warranties = Warranty::forDropdown($business_id);
+        $countries = CountryUtil::countries();
+        asort($countries);
+        $country_options = ['' => __('messages.please_select')];
+        foreach ($countries as $code => $name) {
+            $country_options[$code] = $name.' ('.$code.')';
+        }
+        $countries = $country_options;
 
         //product screen view from module
         $pos_module_data = $this->moduleUtil->getModuleData('get_product_screen_top_view');
 
         return view('product.create')
-            ->with(compact('categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'tax_attributes', 'barcode_default', 'business_locations', 'duplicate_product', 'sub_categories', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data'));
+            ->with(compact('categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'tax_attributes', 'barcode_default', 'business_locations', 'duplicate_product', 'sub_categories', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data', 'countries'));
     }
 
     private function product_types()
@@ -446,8 +460,9 @@ class ProductController extends Controller
             abort(403, 'Unauthorized action.');
         }
         try {
+            $request->validate(['country_of_origin' => ['nullable', 'string', 'size:2', 'in:'.implode(',', array_keys(CountryUtil::countries()))]]);
             $business_id = $request->session()->get('user.business_id');
-            $form_fields = ['name', 'part_number', 'brand_id', 'unit_id', 'category_id', 'tax', 'type', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_description', 'sub_unit_ids', 'preparation_time_in_minutes', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_custom_field5', 'product_custom_field6', 'product_custom_field7', 'product_custom_field8', 'product_custom_field9', 'product_custom_field10', 'product_custom_field11', 'product_custom_field12', 'product_custom_field13', 'product_custom_field14', 'product_custom_field15', 'product_custom_field16', 'product_custom_field17', 'product_custom_field18', 'product_custom_field19', 'product_custom_field20',];
+            $form_fields = ['name', 'part_number', 'country_of_origin', 'brand_id', 'unit_id', 'category_id', 'tax', 'type', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_description', 'sub_unit_ids', 'preparation_time_in_minutes', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_custom_field5', 'product_custom_field6', 'product_custom_field7', 'product_custom_field8', 'product_custom_field9', 'product_custom_field10', 'product_custom_field11', 'product_custom_field12', 'product_custom_field13', 'product_custom_field14', 'product_custom_field15', 'product_custom_field16', 'product_custom_field17', 'product_custom_field18', 'product_custom_field19', 'product_custom_field20',];
 
             $module_form_fields = $this->moduleUtil->getModuleFormField('product_form_fields');
             if (! empty($module_form_fields)) {
@@ -654,6 +669,13 @@ class ProductController extends Controller
         $product_types = $this->product_types();
         $common_settings = session()->get('business.common_settings');
         $warranties = Warranty::forDropdown($business_id);
+        $countries = CountryUtil::countries();
+        asort($countries);
+        $country_options = ['' => __('messages.please_select')];
+        foreach ($countries as $code => $name) {
+            $country_options[$code] = $name.' ('.$code.')';
+        }
+        $countries = $country_options;
 
         //product screen view from module
         $pos_module_data = $this->moduleUtil->getModuleData('get_product_screen_top_view');
@@ -661,7 +683,7 @@ class ProductController extends Controller
         $alert_quantity = ! is_null($product->alert_quantity) ? $this->productUtil->num_f($product->alert_quantity, false, null, true) : null;
 
         return view('product.edit')
-                ->with(compact('categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data', 'alert_quantity'));
+                ->with(compact('categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data', 'alert_quantity', 'countries'));
     }
 
     /**
@@ -678,8 +700,9 @@ class ProductController extends Controller
         }
 
         try {
+            $request->validate(['country_of_origin' => ['nullable', 'string', 'size:2', 'in:'.implode(',', array_keys(CountryUtil::countries()))]]);
             $business_id = $request->session()->get('user.business_id');
-            $product_details = $request->only(['name', 'part_number', 'brand_id', 'unit_id', 'category_id', 'tax', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_description', 'sub_unit_ids', 'preparation_time_in_minutes', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_custom_field5', 'product_custom_field6', 'product_custom_field7', 'product_custom_field8', 'product_custom_field9', 'product_custom_field10', 'product_custom_field11', 'product_custom_field12', 'product_custom_field13', 'product_custom_field14', 'product_custom_field15', 'product_custom_field16', 'product_custom_field17', 'product_custom_field18', 'product_custom_field19', 'product_custom_field20',]);
+            $product_details = $request->only(['name', 'part_number', 'country_of_origin', 'brand_id', 'unit_id', 'category_id', 'tax', 'barcode_type', 'sku', 'alert_quantity', 'tax_type', 'weight', 'product_description', 'sub_unit_ids', 'preparation_time_in_minutes', 'product_custom_field1', 'product_custom_field2', 'product_custom_field3', 'product_custom_field4', 'product_custom_field5', 'product_custom_field6', 'product_custom_field7', 'product_custom_field8', 'product_custom_field9', 'product_custom_field10', 'product_custom_field11', 'product_custom_field12', 'product_custom_field13', 'product_custom_field14', 'product_custom_field15', 'product_custom_field16', 'product_custom_field17', 'product_custom_field18', 'product_custom_field19', 'product_custom_field20',]);
 
             DB::beginTransaction();
 
@@ -697,6 +720,7 @@ class ProductController extends Controller
 
             $product->name = $product_details['name'];
             $product->part_number = $product_details['part_number'] ?? null;
+            $product->country_of_origin = $product_details['country_of_origin'] ?? null;
             $product->brand_id = $product_details['brand_id'];
             $product->unit_id = $product_details['unit_id'];
             $product->category_id = $product_details['category_id'];
@@ -1375,10 +1399,18 @@ class ProductController extends Controller
                     'products.enable_stock',
                     'products.sku',
                     'products.id as id',
-                    DB::raw('CONCAT(products.name, " - ", products.sku) as text')
+                    DB::raw('CONCAT(products.name, " - ", products.sku) as text'),
+                    'products.country_of_origin'
                 )
                     ->orderBy('products.name')
                     ->get();
+
+            $products->transform(function ($product) {
+                if (! empty($product->country_of_origin)) {
+                    $product->text .= ' - '.CountryUtil::name($product->country_of_origin).' ('.$product->country_of_origin.')';
+                }
+                return $product;
+            });
 
             return json_encode($products);
         }

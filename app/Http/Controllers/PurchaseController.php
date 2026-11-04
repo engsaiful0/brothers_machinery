@@ -15,6 +15,7 @@ use App\User;
 use App\Utils\BusinessUtil;
 use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;
+use App\Utils\CountryUtil;
 use App\Utils\TransactionUtil;
 use App\Variation;
 use Excel;
@@ -954,6 +955,16 @@ class PurchaseController extends Controller
                     $query->where('products.name', 'like', '%'.$term.'%');
                     $query->orWhere('sku', 'like', '%'.$term.'%');
                     $query->orWhere('sub_sku', 'like', '%'.$term.'%');
+                    $query->orWhere('products.country_of_origin', 'like', '%'.$term.'%');
+                    $country_codes = [];
+                    foreach (CountryUtil::countries() as $code => $country_name) {
+                        if (stripos($country_name, $term) !== false) {
+                            $country_codes[] = $code;
+                        }
+                    }
+                    if (! empty($country_codes)) {
+                        $query->orWhereIn('products.country_of_origin', $country_codes);
+                    }
                 })
                 ->active()
                 ->where('business_id', $business_id)
@@ -965,7 +976,8 @@ class PurchaseController extends Controller
                     // 'products.sku as sku',
                     'variations.id as variation_id',
                     'variations.name as variation',
-                    'variations.sub_sku as sub_sku'
+                    'variations.sub_sku as sub_sku',
+                    'products.country_of_origin'
                 )
                 ->groupBy('variation_id');
 
@@ -982,6 +994,7 @@ class PurchaseController extends Controller
                 $products_array[$product->product_id]['name'] = $product->name;
                 $products_array[$product->product_id]['sku'] = $product->sub_sku;
                 $products_array[$product->product_id]['type'] = $product->type;
+                $products_array[$product->product_id]['country_of_origin'] = $product->country_of_origin;
                 $products_array[$product->product_id]['variations'][]
                 = [
                     'variation_id' => $product->variation_id,
@@ -995,16 +1008,20 @@ class PurchaseController extends Controller
             $no_of_records = $products->count();
             if (! empty($products_array)) {
                 foreach ($products_array as $key => $value) {
+                    $origin = '';
+                    if (! empty($value['country_of_origin'])) {
+                        $origin = ' - '.CountryUtil::name($value['country_of_origin']).' ('.$value['country_of_origin'].')';
+                    }
                     if ($no_of_records > 1 && $value['type'] != 'single' && ! $only_variations) {
                         $result[] = ['id' => $i,
-                            'text' => $value['name'].' - '.$value['sku'],
+                            'text' => $value['name'].$origin.' - '.$value['sku'],
                             'variation_id' => 0,
                             'product_id' => $key,
                         ];
                     }
                     $name = $value['name'];
                     foreach ($value['variations'] as $variation) {
-                        $text = $name;
+                        $text = $name.$origin;
                         if ($value['type'] == 'variable') {
                             $text = $text.' ('.$variation['variation_name'].')';
                         }

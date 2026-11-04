@@ -42,6 +42,13 @@
 
             <div class="col-sm-4">
               <div class="form-group">
+                {!! Form::label('country_of_origin', __('product.country_of_origin') . ':') !!}
+                {!! Form::select('country_of_origin', $countries, $product->country_of_origin, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width:100%']); !!}
+              </div>
+            </div>
+
+            <div class="col-sm-4">
+              <div class="form-group">
                 {!! Form::label('sku', __('product.sku')  . ':*') !!} @show_tooltip(__('tooltip.sku'))
                 {!! Form::text('sku', $product->sku, ['class' => 'form-control',
                 'placeholder' => __('product.sku'), 'required']); !!}

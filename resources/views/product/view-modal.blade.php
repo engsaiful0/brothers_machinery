@@ -7,9 +7,15 @@
 	    <div class="modal-body">
       		<div class="row">
       			<div class="col-sm-9">
-	      			<div class="col-sm-4 invoice-col">
-	      				<b>@lang('product.sku'):</b>
+				      <div class="col-sm-4 invoice-col">
+		      			<b>@lang('product.sku'):</b>
 						{{$product->sku }}<br>
+                        <b>@lang('product.country_of_origin'):</b>
+                        @if(!empty($product->country_of_origin))
+                            {{ \App\Utils\CountryUtil::name($product->country_of_origin) }} ({{ $product->country_of_origin }})
+                        @else
+                            --
+                        @endif<br>
 						<b>@lang('product.brand'): </b>
 						{{$product->brand->name ?? '--' }}<br>
 						<b>@lang('product.unit'): </b>
