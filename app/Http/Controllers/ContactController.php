@@ -559,6 +559,7 @@ class ContactController extends Controller
         }
 
         $customer_groups = CustomerGroup::forDropdown($business_id);
+        $machine_brands = \App\Brands::forDropdown($business_id);
         $selected_type = request()->type;
 
         $module_form_parts = $this->moduleUtil->getModuleData('contact_form_part');
@@ -567,7 +568,7 @@ class ContactController extends Controller
         $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
 
         return view('contact.create')
-            ->with(compact('types', 'customer_groups', 'selected_type', 'module_form_parts', 'users'));
+            ->with(compact('types', 'customer_groups', 'selected_type', 'module_form_parts', 'users', 'machine_brands'));
     }
 
     /**
@@ -631,8 +632,14 @@ class ContactController extends Controller
             $input['credit_limit'] = $request->input('credit_limit') != '' ? $this->commonUtil->num_uf($request->input('credit_limit')) : null;
             $input['opening_balance'] = $this->commonUtil->num_uf($request->input('opening_balance'));
 
+            $this->validateCustomerProfile($request, $business_id);
+
             DB::beginTransaction();
             $output = $this->contactUtil->createNewContact($input);
+
+            if (in_array($input['type'] ?? '', ['customer', 'both']) && !empty($output['data'])) {
+                $this->saveCustomerProfile($output['data'], $request);
+            }
 
             event(new ContactCreatedOrModified($input, 'added'));
 
@@ -641,6 +648,9 @@ class ContactController extends Controller
             $this->contactUtil->activityLog($output['data'], 'added');
 
             DB::commit();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
@@ -667,6 +677,9 @@ class ContactController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $contact = $this->contactUtil->getContactInfo($business_id, $id);
+        $customer_group = ! empty($contact->customer_group_id)
+            ? CustomerGroup::where('business_id', $business_id)->find($contact->customer_group_id)
+            : null;
 
         $is_selected_contacts = User::isSelectedContacts(auth()->user()->id);
         $user_contacts = [];
@@ -705,7 +718,7 @@ class ContactController extends Controller
            ->get();
 
         return view('contact.show')
-             ->with(compact('contact', 'reward_enabled', 'contact_dropdown', 'business_locations', 'view_type', 'contact_view_tabs', 'activities'));
+             ->with(compact('contact', 'customer_group', 'reward_enabled', 'contact_dropdown', 'business_locations', 'view_type', 'contact_view_tabs', 'activities'));
     }
 
     /**
@@ -740,6 +753,7 @@ class ContactController extends Controller
             }
 
             $customer_groups = CustomerGroup::forDropdown($business_id);
+            $machine_brands = \App\Brands::forDropdown($business_id);
 
             $ob_transaction = Transaction::where('contact_id', $id)
                                             ->where('type', 'opening_balance')
@@ -760,7 +774,7 @@ class ContactController extends Controller
             $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
 
             return view('contact.edit')
-                ->with(compact('contact', 'types', 'customer_groups', 'opening_balance', 'users'));
+                ->with(compact('contact', 'types', 'customer_groups', 'opening_balance', 'users', 'machine_brands'));
         }
     }
 
@@ -816,6 +830,11 @@ class ContactController extends Controller
                 $input['credit_limit'] = $request->input('credit_limit') != '' ? $this->commonUtil->num_uf($request->input('credit_limit')) : null;
 
                 $business_id = $request->session()->get('user.business_id');
+                if (in_array($input['type'] ?? '', ['customer', 'both'], true) && ! $request->has('is_export')) {
+                    $input['is_export'] = Contact::where('business_id', $business_id)->where('id', $id)->value('is_export') ?? 0;
+                }
+
+                $this->validateCustomerProfile($request, $business_id);
 
                 $input['opening_balance'] = $this->commonUtil->num_uf($request->input('opening_balance'));
 
@@ -823,12 +842,21 @@ class ContactController extends Controller
                     return $this->moduleUtil->expiredResponse();
                 }
 
+                DB::beginTransaction();
                 $output = $this->contactUtil->updateContact($input, $id, $business_id);
+                if (!empty($output['data']) && in_array($input['type'] ?? '', ['customer', 'both'])) {
+                    $this->saveCustomerProfile($output['data'], $request);
+                }
 
                 event(new ContactCreatedOrModified($output['data'], 'updated'));
 
                 $this->contactUtil->activityLog($output['data'], 'edited');
+                DB::commit();
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                DB::rollBack();
+                throw $e;
             } catch (\Exception $e) {
+                DB::rollBack();
                 \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
                 $output = ['success' => false,
@@ -874,7 +902,12 @@ class ContactController extends Controller
                         User::where('crm_contact_id', $contact->id)
                             ->update(['allow_login' => 0]);
 
-                        $contact->delete();
+                        DB::transaction(function () use ($contact) {
+                            $contact->customerContactPersons()->delete();
+                            DB::table('customer_machine_types')->where('contact_id', $contact->id)->delete();
+                            DB::table('customer_machine_brands')->where('contact_id', $contact->id)->delete();
+                            $contact->delete();
+                        });
 
                         event(new ContactCreatedOrModified($contact, 'deleted'));
                     }
@@ -896,6 +929,61 @@ class ContactController extends Controller
 
             return $output;
         }
+    }
+
+    /** Validate and persist customer-only profile fields and relations. */
+    protected function validateCustomerProfile(Request $request, $business_id)
+    {
+        if (! in_array($request->input('type'), ['customer', 'both'], true)) {
+            return;
+        }
+
+        $brandIds = \App\Brands::where('business_id', $business_id)->pluck('id')->all();
+        $request->validate([
+            'monthly_business_potential' => 'nullable|numeric|min:0',
+            'head_office_address' => 'nullable|string',
+            'factory_address' => 'nullable|string',
+            'machine_quantity' => 'nullable|integer|min:0',
+            'machine_details' => 'nullable|string',
+            'contact_persons' => 'nullable|array',
+            'contact_persons.*.name' => 'nullable|string|required_with:contact_persons.*.designation,contact_persons.*.mobile,contact_persons.*.email|max:191',
+            'contact_persons.*.designation' => 'nullable|string|max:191',
+            'contact_persons.*.mobile' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+() .-]{6,30}$/'],
+            'contact_persons.*.email' => 'nullable|email|max:191',
+            'machine_types' => 'nullable|array',
+            'machine_types.*' => 'required|in:Compressor,Dryer,Line Filter',
+            'machine_brands' => 'nullable|array',
+            'machine_brands.*' => ['required', 'integer', \Illuminate\Validation\Rule::in($brandIds)],
+        ]);
+    }
+
+    protected function saveCustomerProfile(Contact $contact, Request $request)
+    {
+        $contact->monthly_business_potential = $request->input('monthly_business_potential');
+        $contact->head_office_address = $request->input('head_office_address');
+        $contact->factory_address = $request->input('factory_address');
+        $contact->machine_quantity = $request->input('machine_quantity');
+        $contact->machine_details = $request->input('machine_details');
+        $contact->save();
+
+        $contact->customerContactPersons()->delete();
+        foreach ($request->input('contact_persons', []) as $person) {
+            if (trim($person['name'] ?? '') === '') {
+                continue;
+            }
+            $contact->customerContactPersons()->create([
+                'name' => trim($person['name']),
+                'designation' => $person['designation'] ?? null,
+                'mobile' => $person['mobile'] ?? null,
+                'email' => $person['email'] ?? null,
+            ]);
+        }
+
+        DB::table('customer_machine_types')->where('contact_id', $contact->id)->delete();
+        foreach (array_unique($request->input('machine_types', [])) as $machineType) {
+            DB::table('customer_machine_types')->insert(['contact_id' => $contact->id, 'machine_type' => $machineType]);
+        }
+        $contact->machineBrands()->sync($request->input('machine_brands', []));
     }
 
     /**

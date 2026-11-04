@@ -406,6 +406,7 @@ $(document).ready(function() {
         var columns = [
             { data: 'action', searchable: false, orderable: false },
             { data: 'contact_id', name: 'contact_id' },
+            { data: 'customer_group', name: 'cg.name' },
             { data: 'supplier_business_name', name: 'supplier_business_name' },
             { data: 'name', name: 'name' },
             { data: 'email', name: 'email' },
@@ -420,21 +421,10 @@ $(document).ready(function() {
         if ($('#rp_col').length) {
             columns.push({ data: 'total_rp', name: 'total_rp' });
         }
-        Array.prototype.push.apply(columns, [{ data: 'customer_group', name: 'cg.name' },
-            { data: 'address', name: 'address', orderable: false },
+        Array.prototype.push.apply(columns, [{ data: 'address', name: 'address', orderable: false },
             { data: 'mobile', name: 'mobile' },
             { data: 'due', searchable: false, orderable: false },
             { data: 'return_due', searchable: false, orderable: false },
-            { data: 'custom_field1', name: 'custom_field1'},
-            { data: 'custom_field2', name: 'custom_field2'},
-            { data: 'custom_field3', name: 'custom_field3'},
-            { data: 'custom_field4', name: 'custom_field4'},
-            { data: 'custom_field5', name: 'custom_field5'},
-            { data: 'custom_field6', name: 'custom_field6'},
-            { data: 'custom_field7', name: 'custom_field7'},
-            { data: 'custom_field8', name: 'custom_field8'},
-            { data: 'custom_field9', name: 'custom_field9'},
-            { data: 'custom_field10', name: 'custom_field10'},
             ]);
     }
     
@@ -523,6 +513,16 @@ $(document).ready(function() {
 
     //On display of add contact modal
     $('.contact_modal').on('shown.bs.modal', function(e) {
+        var syncContactCustomFieldVisibility = function() {
+            var selectedType = $('.contact_modal select#contact_type').val();
+            var hideCustomFields = ['customer', 'both'].indexOf(selectedType) !== -1;
+            $('.contact_modal .contact-custom-fields').css('display', hideCustomFields ? 'none' : 'contents');
+        };
+        $('.contact_modal select#contact_type')
+            .off('change.contactCustomFields')
+            .on('change.contactCustomFields', syncContactCustomFieldVisibility);
+        syncContactCustomFieldVisibility();
+
         $('input[type=radio][name="contact_type_radio"]').on('change', function() {
             if (this.value == 'individual') {
                 $('div.individual').show();
@@ -2884,6 +2884,19 @@ function submitContactForm(form) {
             } else {
                 toastr.error(result.msg);
             }
+        },
+        error: function(xhr) {
+            $(form).find('button[type="submit"]').removeAttr('disable disabled').prop('disabled', false);
+            var response = xhr.responseJSON || {};
+            var messages = [];
+            if (response.errors) {
+                $.each(response.errors, function(field, errors) {
+                    if (errors && errors.length) {
+                        messages.push(errors[0]);
+                    }
+                });
+            }
+            toastr.error(messages.length ? messages.join('<br>') : (response.message || LANG.something_went_wrong));
         },
     });
 }

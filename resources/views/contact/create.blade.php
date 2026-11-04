@@ -400,6 +400,7 @@
           <div class="col-md-12">
             <hr/>
           </div>
+          <div class="contact-custom-fields" style="display: {{ in_array($type, ['customer', 'both']) ? 'none' : 'contents' }};">
           @php
             $custom_labels = json_decode(session('business.custom_labels'), true);
             $contact_custom_field1 = !empty($custom_labels['contact']['custom_field_1']) ? $custom_labels['contact']['custom_field_1'] : __('lang_v1.contact_custom_field1');
@@ -483,6 +484,7 @@
                     'placeholder' => $contact_custom_field10]); !!}
             </div>
           </div>
+          </div>
           <div class="col-md-12 shipping_addr_div"><hr></div>
           <div class="col-md-8 col-md-offset-2 shipping_addr_div mb-10" >
               <strong>{{__('lang_v1.shipping_address')}}</strong><br>
@@ -490,6 +492,7 @@
                     'placeholder' => __('lang_v1.search_address'), 'id' => 'shipping_address']); !!}
             <div class="mb-10" id="map"></div>
           </div>
+          <div class="contact-custom-fields" style="display: {{ in_array($type, ['customer', 'both']) ? 'none' : 'contents' }};">
           @php
                 $shipping_custom_label_1 = !empty($custom_labels['shipping']['custom_field_1']) ? $custom_labels['shipping']['custom_field_1'] : '';
 
@@ -562,6 +565,8 @@
                     </div>
                 </div>
             @endif
+          </div>
+          <div class="contact-custom-fields" style="display: {{ in_array($type, ['customer', 'both']) ? 'none' : 'contents' }};">
             @if(!empty($common_settings['is_enabled_export']))
                 <div class="col-md-12 mb-12">
                     <div class="form-check">
@@ -581,8 +586,10 @@
                     </div>
                 @endfor
             @endif
+          </div>
             </div>
         </div>
+        @include('contact.partials.customer_profile_fields')
         @include('layouts.partials.module_form_part')
     </div>
     

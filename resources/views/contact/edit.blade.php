@@ -396,6 +396,7 @@
       <div class="col-md-12">
         <hr/>
       </div>
+      <div class="contact-custom-fields" style="display: {{ in_array($contact->type, ['customer', 'both']) ? 'none' : 'contents' }};">
       @php
         $custom_labels = json_decode(session('business.custom_labels'), true);
         $contact_custom_field1 = !empty($custom_labels['contact']['custom_field_1']) ? $custom_labels['contact']['custom_field_1'] : __('lang_v1.contact_custom_field1');
@@ -479,6 +480,7 @@
                 'placeholder' => $contact_custom_field10]); !!}
         </div>
       </div>
+      </div>
       <div class="clearfix"></div>
       <div class="col-md-12 shipping_addr_div"><hr></div>
       <div class="col-md-8 col-md-offset-2 shipping_addr_div mb-10" >
@@ -488,6 +490,7 @@
         <div class="mb-10" id="map"></div>
       </div>
       {!! Form::hidden('position', $contact->position, ['id' => 'position']); !!}
+        <div class="contact-custom-fields" style="display: {{ in_array($contact->type, ['customer', 'both']) ? 'none' : 'contents' }};">
         @php
             $shipping_custom_label_1 = !empty($custom_labels['shipping']['custom_field_1']) ? $custom_labels['shipping']['custom_field_1'] : '';
 
@@ -560,6 +563,8 @@
                 </div>
             </div>
         @endif
+        </div>
+        <div class="contact-custom-fields" style="display: {{ in_array($contact->type, ['customer', 'both']) ? 'none' : 'contents' }};">
         @php
           $common_settings = session()->get('business.common_settings');
         @endphp
@@ -582,7 +587,9 @@
                 </div>
             @endfor
         @endif
+        </div>
     </div>
+        @include('contact.partials.customer_profile_fields')
 </div>
     </div>
 

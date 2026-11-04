@@ -45,3 +45,8 @@
         </div>
     </div>
 </div>
+@if(in_array($contact->type, ['customer', 'both']))
+    <div class="row">
+        @include('contact.partials.customer_profile_details')
+    </div>
+@endif

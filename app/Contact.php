@@ -36,6 +36,22 @@ class Contact extends Authenticatable
         return $this->belongsTo(\App\Business::class);
     }
 
+    public function customerContactPersons()
+    {
+        return $this->hasMany(CustomerContactPerson::class, 'contact_id');
+    }
+
+    public function machineBrands()
+    {
+        return $this->belongsToMany(Brands::class, 'customer_machine_brands', 'contact_id', 'brand_id');
+    }
+
+    public function getMachineTypeValuesAttribute()
+    {
+        return \Illuminate\Support\Facades\DB::table('customer_machine_types')
+            ->where('contact_id', $this->id)->pluck('machine_type')->all();
+    }
+
     public function scopeActive($query)
     {
         return $query->where('contacts.contact_status', 'active');
