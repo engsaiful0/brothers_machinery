@@ -276,6 +276,9 @@
                     if (! empty($line['units'])) {
                         $qty_display .= ' ' . strtoupper($line['units']);
                     }
+                    $product_name = html_entity_decode(strip_tags($line['name'] ?? ''), ENT_QUOTES, 'UTF-8');
+                    $product_name = preg_replace('/\bBD\s*-\s*\d+\b/i', '', $product_name);
+                    $product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name));
                     $brand_name = trim(strip_tags($line['brand'] ?? ''));
                     $product_description = html_entity_decode(strip_tags($line['product_description'] ?? ''), ENT_QUOTES, 'UTF-8');
                     // Product descriptions may repeat the country-prefixed item number (for example, "BD - 090").
@@ -287,7 +290,7 @@
                 <tr>
                     <td class="col-sl">{{ $sl }}</td>
                     <td class="col-desc">
-                        <div class="brothers-item-name">{{ $line['name'] }}</div>
+                        <div class="brothers-item-name">{{ $product_name }}</div>
                         @if ($brand_name !== '')
                             <div class="brothers-item-model">Brand Name: {{ $brand_name }}</div>
                         @endif
