@@ -83,7 +83,7 @@ $(document).ready(function() {
     });
 
     //get customer
-    $('select#customer_id').select2({
+    if (!$('select#customer_id').data('group-filtered')) $('select#customer_id').select2({
         ajax: {
             url: '/contacts/customers',
             dataType: 'json',

@@ -242,6 +242,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/sells/quotations', [SellController::class, 'getQuotations']);
     Route::get('/sells/draft-dt', [SellController::class, 'getDraftDatables']);
     Route::resource('sells', SellController::class)->except(['show']);
+    Route::get('/sales/customer-groups/{group}/customers', [SellController::class, 'customersByGroup']);
+    Route::get('/sales/customers/{customer}/contact-persons', [SellController::class, 'contactPersonsByCustomer']);
 
     Route::get('/import-sales', [ImportSalesController::class, 'index']);
     Route::post('/import-sales/preview', [ImportSalesController::class, 'preview']);

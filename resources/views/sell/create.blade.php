@@ -129,6 +129,12 @@
 					</div>
 				@endif
 				<div class="clearfix"></div>
+				<div class="col-md-4">
+					<div class="form-group">
+						{!! Form::label('customer_group_id', __('lang_v1.customer_group') . ':') !!}
+						{!! Form::select('customer_group_id', $customer_groups, null, ['class' => 'form-control', 'id' => 'customer_group_id', 'placeholder' => __('messages.please_select')]) !!}
+					</div>
+				</div>
 				<div class="@if(!empty($commission_agent)) col-sm-3 @else col-sm-4 @endif">
 					<div class="form-group">
 						{!! Form::label('contact_id', __('contact.customer') . ':*') !!}
@@ -147,7 +153,7 @@
 							value="{{ $walk_in_customer['selling_price_group_id'] ?? ''}}" >
 							@endif
 							{!! Form::select('contact_id', 
-								[], null, ['class' => 'form-control mousetrap', 'id' => 'customer_id', 'placeholder' => 'Enter Customer name / phone', 'required']); !!}
+								[], null, ['class' => 'form-control', 'id' => 'customer_id', 'data-group-filtered' => '1', 'placeholder' => __('contact.customer'), 'required']); !!}
 							<span class="input-group-btn">
 								<button type="button" class="btn btn-default bg-white btn-flat add_new_customer" data-name=""><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
 							</span>
@@ -171,6 +177,11 @@
 						{{$walk_in_customer['shipping_address'] ?? ''}}
 					</div>					
 					</small>
+				</div>
+				<div class="col-md-4">
+					<div class="form-group"><label for="contact_person_id">Contact Person:</label><select class="form-control" name="contact_person_id" id="contact_person_id"><option value="">Select contact person</option></select></div>
+					<div class="form-group"><label for="contact_person_email">Email:</label><input class="form-control" id="contact_person_email" name="contact_person_email" type="email" readonly></div>
+					<div class="form-group"><label for="contact_person_mobile">Mobile Number:</label><input class="form-control" id="contact_person_mobile" name="contact_person_mobile" readonly></div>
 				</div>
 
 				<div class="col-md-3">
@@ -923,6 +934,20 @@
 @stop
 
 @section('javascript')
+	<script>
+	$(function () {
+		const group = $('#customer_group_id'), customer = $('#customer_id'), person = $('#contact_person_id');
+		function clearPerson() { person.empty().append(new Option('Select contact person', '')); $('#contact_person_email,#contact_person_mobile').val(''); }
+		group.on('change', function () {
+			customer.empty().append(new Option('Select customer', '')).trigger('change'); clearPerson();
+			if (!this.value) return;
+			$.getJSON('/sales/customer-groups/' + this.value + '/customers', function (rows) { rows.forEach(row => customer.append(new Option(row.name + (row.supplier_business_name ? ' (' + row.supplier_business_name + ')' : ''), row.id))); });
+		});
+		customer.on('change', function () { clearPerson(); if (!this.value) return; $.getJSON('/sales/customers/' + this.value + '/contact-persons', function (rows) { rows.forEach(row => person.append(new Option(row.name, row.id))); }); });
+		person.on('change', function () { const row = this.selectedOptions[0]; $('#contact_person_email').val(row ? $(row).data('email') || '' : ''); });
+		person.on('change', function () { if (!this.value) return; $.getJSON('/sales/customers/' + customer.val() + '/contact-persons', function (rows) { const row = rows.find(item => String(item.id) === String(person.val())); $('#contact_person_email').val(row ? row.email : ''); $('#contact_person_mobile').val(row ? row.mobile : ''); }); });
+	});
+	</script>
 	<script src="{{ asset('js/pos.js?v=' . $asset_v) }}"></script>
 	<script src="{{ asset('js/product.js?v=' . $asset_v) }}"></script>
 	<script src="{{ asset('js/opening_stock.js?v=' . $asset_v) }}"></script>

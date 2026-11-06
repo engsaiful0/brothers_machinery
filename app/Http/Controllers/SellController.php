@@ -32,6 +32,24 @@ use Yajra\DataTables\Facades\DataTables;
 
 class SellController extends Controller
 {
+    public function customersByGroup($group)
+    {
+        $business_id = request()->session()->get('user.business_id');
+        abort_unless(CustomerGroup::where('business_id', $business_id)->whereKey($group)->exists(), 404);
+
+        return Contact::where('business_id', $business_id)
+            ->where('customer_group_id', $group)->whereIn('type', ['customer', 'both'])
+            ->orderBy('name')->get(['id', 'name', 'supplier_business_name']);
+    }
+
+    public function contactPersonsByCustomer($customer)
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $contact = Contact::where('business_id', $business_id)->whereIn('type', ['customer', 'both'])->findOrFail($customer);
+
+        return $contact->customerContactPersons()->orderBy('name')->get(['id', 'name', 'email', 'mobile']);
+    }
+
     /**
      * All Utils instance.
      */
