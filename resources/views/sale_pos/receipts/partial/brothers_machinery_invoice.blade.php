@@ -26,6 +26,7 @@
     $currency_symbols = array_filter(['৳', $receipt_details->currency_symbol ?? '']);
     $gross_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->subtotal ?? '0.00')));
     $discount_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->discount ?? '0.00')));
+    $vat_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->vat ?? '0.00')));
     $net_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->total ?? '0.00')));
     $net_unformatted = $receipt_details->total_unformatted ?? 0;
 
@@ -321,11 +322,21 @@
                 <td colspan="3" class="brothers-totals-label">DISCOUNT:</td>
                 <td class="brothers-totals-value">{{ $discount_total }}</td>
             </tr>
+            @if(!empty($receipt_details->vat))
+                <tr class="brothers-totals-row">
+                    <td colspan="2" class="brothers-totals-spacer"></td>
+                    <td colspan="3" class="brothers-totals-label">{{ $receipt_details->vat_label }}:</td>
+                    <td class="brothers-totals-value">{{ $vat_total }}</td>
+                </tr>
+            @endif
             <tr class="brothers-totals-row">
                 <td colspan="2" class="brothers-totals-spacer"></td>
                 <td colspan="3" class="brothers-totals-label">NET TOTAL:</td>
                 <td class="brothers-totals-value">{{ $net_total }}</td>
             </tr>
+            @if(!empty($receipt_details->additional_notes))
+                <tr class="brothers-totals-row"><td colspan="6" style="white-space:pre-line"><strong>Sell Note:</strong><br>{{ $receipt_details->additional_notes }}</td></tr>
+            @endif
             <tr class="brothers-in-words">
                 <td colspan="6">IN WORDS: {{ $amount_in_words }}</td>
             </tr>

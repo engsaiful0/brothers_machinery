@@ -210,15 +210,6 @@
                 <td style="width:40%; vertical-align:top;">
                     <!-- Left side: notes, payment reference, etc. -->
                     <div style="font-size: 12px;">
-                        <div>
-                            <strong >Sell Note</strong><br>
-							@if(!empty($receipt_details->additional_notes))
-								<div class="print-red">
-									{!! $receipt_details->additional_notes !!}
-								</div>
-							@endif
-                        </div>
-                        
                         <div style="margin-top: 15px;">
                             <strong>PAYMENT REFERENCE:</strong>
                             <span >
@@ -311,7 +302,10 @@
                                     </td>
                                     <td style="font-weight: bold; direction: rtl; text-align: right;">ضريبة الطلب:</td>
                                 </tr>
-								<tr class="bg-net-amount">
+				@if(!empty($receipt_details->vat))
+				<tr><td style="font-weight:bold;text-align:right">{{ $receipt_details->vat_label }}</td><td class="print-red" style="text-align:center">{{ $receipt_details->vat }}</td><td></td></tr>
+				@endif
+				<tr class="bg-net-amount">
                                     <td style=" font-weight: bold; text-align: right;">
                                         NET AMOUNT
                                     </td>
@@ -323,8 +317,9 @@
                                     </td>
                                 </tr>
                                 
-                                <tr>
-                                    <td style=" font-weight: bold; text-align: right;">Paid Amount:</td>
+				@if(!empty($receipt_details->additional_notes))<tr><td colspan="3" style="white-space:pre-line"><strong>@lang('sale.sell_note'):</strong><br>{{ $receipt_details->additional_notes }}</td></tr>@endif
+				<tr>
+					<td style=" font-weight: bold; text-align: right;">Paid Amount:</td>
                                     <td class="print-red" style=" text-align: center;">
                                         @if(!empty($receipt_details->total_paid))
                                             {{$receipt_details->total_paid}}

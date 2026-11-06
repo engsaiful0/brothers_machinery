@@ -536,10 +536,27 @@
 			            </div>
 			        </div>
 			    </div>
-			    <div class="col-md-4 col-md-offset-4  @if($sale_type == 'sales_order') hide @endif">
+			<div class="col-md-4 col-md-offset-4  @if($sale_type == 'sales_order') hide @endif">
 			    	<b>@lang( 'sale.order_tax' ):</b>(+) 
 					<span class="display_currency" id="order_tax">0</span>
-			    </div>				
+			    </div>
+			    <div class="clearfix"></div>
+			    <div class="col-md-4">
+			        <div class="form-group">
+			            {!! Form::label('vat_type', 'VAT Type:') !!}
+			            {!! Form::select('vat_type', ['flat' => 'Flat', 'percentage' => 'Percentage (%)'], !empty($edit) ? ($transaction->vat_type ?? '') : '', ['class' => 'form-control', 'placeholder' => __('messages.please_select'), 'id' => 'vat_type']) !!}
+			        </div>
+			    </div>
+			    <div class="col-md-4">
+			        <div class="form-group">
+			            {!! Form::label('vat_rate', 'VAT Amount / Rate:') !!}
+			            {!! Form::text('vat_rate', !empty($edit) ? @num_format($transaction->vat_rate ?? 0) : @num_format(0), ['class' => 'form-control input_number', 'id' => 'vat_rate', 'min' => 0]) !!}
+			        </div>
+			    </div>
+			    <div class="col-md-4">
+			        <br><b>Calculated VAT:</b> (+) <span class="display_currency" id="vat_amount">{{ !empty($edit) ? ($transaction->vat_amount ?? 0) : 0 }}</span>
+			        <input type="hidden" name="vat_amount" id="vat_amount_input" value="{{ !empty($edit) ? ($transaction->vat_amount ?? 0) : 0 }}">
+			    </div>
 				
 			    <div class="col-md-12">
 			    	<div class="form-group">
@@ -957,7 +974,7 @@
 		person.on('change', function () { if (!this.value) return; $.getJSON(contactPersonsUrl + '/' + encodeURIComponent(customer.val()) + '/contact-persons', function (rows) { const row = rows.find(item => String(item.id) === String(person.val())); $('#contact_person_email').val(row ? row.email : ''); $('#contact_person_mobile').val(row ? row.mobile : ''); }); });
 	});
 	</script>
-	<script src="{{ asset('js/pos.js?v=' . $asset_v . '&group_filter=6') }}"></script>
+	<script src="{{ asset('js/pos.js?v=' . $asset_v . '&group_filter=7') }}"></script>
 	<script src="{{ asset('js/product.js?v=' . $asset_v) }}"></script>
 	<script src="{{ asset('js/opening_stock.js?v=' . $asset_v) }}"></script>
 

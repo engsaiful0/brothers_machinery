@@ -746,6 +746,7 @@
 					</tr>
 				@endif
 				
+				@include('sale_pos.receipts.partials.vat_summary_rows')
 				<!-- Total -->
 				<tr>
 					<th style="background-color: #357ca5 !important; color: white !important" class="font-23 padding-10">
@@ -755,6 +756,7 @@
 						{{$receipt_details->total}}
 					</td>
 				</tr>
+				@include('sale_pos.receipts.partials.sell_note_summary_row')
 				@if(!empty($receipt_details->total_in_words))
 				<tr>
 					<td colspan="2" class="text-right">
@@ -785,15 +787,6 @@
         @endif
     @endif
 </div>
-
-@if(!empty($receipt_details->additional_notes))
-	<div class="row">
-		<div class="col-xs-12">
-			<br>
-			<p>{!! nl2br($receipt_details->additional_notes) !!}</p>
-		</div>
-	</div>
-@endif
 
 	<div class="row ">
 		@if(!empty($receipt_details->footer_text))

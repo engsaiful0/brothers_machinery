@@ -1221,6 +1221,9 @@ $(document).ready(function() {
         input#rp_redeemed_amount').change(function() {
         pos_total_row();
     });
+    $('select#vat_type, input#vat_rate').on('change keyup', function() {
+        pos_total_row();
+    });
     $('select#tax_rate_id').change(function() {
         var tax_rate = $(this)
             .find(':selected')
@@ -2361,7 +2364,8 @@ function calculate_billing_details(price_total) {
         $('#packing_charge_text').text(__currency_trans_from_en(packing_charge, false));
     }
 
-    var total_payable = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense;
+    var vat_amount = pos_vat_amount(price_total - discount);
+    var total_payable = price_total + order_tax + vat_amount - discount + shipping_charges + packing_charge + additional_expense;
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
     var round_off_data = __round(total_payable, rounding_multiple);
@@ -2421,6 +2425,16 @@ function pos_order_tax(price_total, discount) {
     $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
 
     return order_tax;
+}
+
+function pos_vat_amount(taxable_amount) {
+    var type = $('#vat_type').val();
+    var value = __read_number($('#vat_rate')) || 0;
+    var amount = type === 'flat' ? value : (type === 'percentage' ? taxable_amount * value / 100 : 0);
+    if (!isFinite(amount) || amount < 0) amount = 0;
+    __write_number($('input#vat_amount_input'), amount);
+    $('span#vat_amount').text(__currency_trans_from_en(amount, false));
+    return amount;
 }
 
 function calculate_balance_due() {

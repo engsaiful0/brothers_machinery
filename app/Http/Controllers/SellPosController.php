@@ -364,7 +364,12 @@ class SellPosController extends Controller
             'purchase_order_no' => 'nullable|string|max:191',
             'purchase_order_date' => 'nullable|date_format:Y-m-d',
             'requisition_number' => 'nullable|string|max:191',
+            'vat_type' => 'nullable|in:flat,percentage',
+            'vat_rate' => 'required_with:vat_type|numeric|min:0|max:999999999999',
         ]);
+        if ($request->input('vat_type') === 'percentage') {
+            $request->validate(['vat_rate' => 'required|numeric|min:0|max:100']);
+        }
         $this->validateSaleCustomerSelection($request);
 
         try {
@@ -421,6 +426,14 @@ class SellPosController extends Controller
                     'discount_amount' => $input['discount_amount'],
                 ];
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
+                $vat_rate = $this->transactionUtil->num_uf($input['vat_rate'] ?? 0);
+                $vat_base = max(0, $invoice_total['total_before_tax'] - $invoice_total['discount']);
+                $vat_amount = ($input['vat_type'] ?? null) === 'flat' ? $vat_rate :
+                    ((($input['vat_type'] ?? null) === 'percentage') ? round($vat_base * $vat_rate / 100, 4) : 0);
+                $submitted_vat = $this->transactionUtil->num_uf($input['vat_amount'] ?? 0);
+                $input['vat_amount'] = $vat_amount;
+                $input['vat_rate'] = $vat_rate;
+                $input['final_total'] = max(0, $this->transactionUtil->num_uf($input['final_total'] ?? 0) - $submitted_vat + $vat_amount);
 
                 DB::beginTransaction();
 
@@ -1178,7 +1191,12 @@ class SellPosController extends Controller
             'purchase_order_no' => 'nullable|string|max:191',
             'purchase_order_date' => 'nullable|date_format:Y-m-d',
             'requisition_number' => 'nullable|string|max:191',
+            'vat_type' => 'nullable|in:flat,percentage',
+            'vat_rate' => 'required_with:vat_type|numeric|min:0|max:999999999999',
         ]);
+        if ($request->input('vat_type') === 'percentage') {
+            $request->validate(['vat_rate' => 'required|numeric|min:0|max:100']);
+        }
         $this->validateSaleCustomerSelection($request);
 
         try {
@@ -1259,6 +1277,14 @@ class SellPosController extends Controller
                     'discount_amount' => $input['discount_amount'],
                 ];
                 $invoice_total = $this->productUtil->calculateInvoiceTotal($input['products'], $input['tax_rate_id'], $discount);
+                $vat_rate = $this->transactionUtil->num_uf($input['vat_rate'] ?? 0);
+                $vat_base = max(0, $invoice_total['total_before_tax'] - $invoice_total['discount']);
+                $vat_amount = ($input['vat_type'] ?? null) === 'flat' ? $vat_rate :
+                    ((($input['vat_type'] ?? null) === 'percentage') ? round($vat_base * $vat_rate / 100, 4) : 0);
+                $submitted_vat = $this->transactionUtil->num_uf($input['vat_amount'] ?? 0);
+                $input['vat_amount'] = $vat_amount;
+                $input['vat_rate'] = $vat_rate;
+                $input['final_total'] = max(0, $this->transactionUtil->num_uf($input['final_total'] ?? 0) - $submitted_vat + $vat_amount);
 
                 if (!empty($request->input('transaction_date'))) {
                     $input['transaction_date'] = $this->productUtil->uf_date($request->input('transaction_date'), true);

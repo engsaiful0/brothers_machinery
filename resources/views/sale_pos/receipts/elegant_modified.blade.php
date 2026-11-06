@@ -336,6 +336,9 @@
 						</tr>
 					@endif
 				@endif
+				@if(!empty($receipt_details->vat))
+					<tr class="color-555"><td>{{ $receipt_details->vat_label }}</td><td class="text-right">(+) {{ $receipt_details->vat }}</td></tr>
+				@endif
 				
 				<!-- Total -->
 				<tr>
@@ -346,16 +349,12 @@
 						{{$receipt_details->total}}
 					</td>
 				</tr>
+				@if(!empty($receipt_details->additional_notes))<tr><td colspan="2" style="white-space:pre-line"><strong>@lang('sale.sell_note'):</strong><br>{{ $receipt_details->additional_notes }}</td></tr>@endif
 			</tbody>
         </table>
 	</div>
 </div>
 
-<div class="row color-555">
-	<div class="col-xs-6">
-		{{$receipt_details->additional_notes}}
-	</div>
-</div>
 {{-- Barcode --}}
 @if($receipt_details->show_barcode)
 <br>

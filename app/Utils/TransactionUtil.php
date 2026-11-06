@@ -81,6 +81,9 @@ class TransactionUtil extends Util
             'discount_type' => ! empty($input['discount_type']) ? $input['discount_type'] : null,
             'discount_amount' => $uf_data ? $this->num_uf($input['discount_amount']) : $input['discount_amount'],
             'tax_amount' => $invoice_total['tax'],
+            'vat_type' => $input['vat_type'] ?? null,
+            'vat_rate' => $uf_data ? $this->num_uf($input['vat_rate'] ?? 0) : ($input['vat_rate'] ?? 0),
+            'vat_amount' => $uf_data ? $this->num_uf($input['vat_amount'] ?? 0) : ($input['vat_amount'] ?? 0),
             'final_total' => $final_total,
             'additional_notes' => ! empty($input['sale_note']) ? $input['sale_note'] : null,
             'staff_note' => ! empty($input['staff_note']) ? $input['staff_note'] : null,
@@ -207,6 +210,9 @@ class TransactionUtil extends Util
             'discount_type' => $input['discount_type'],
             'discount_amount' => $uf_data ? $this->num_uf($input['discount_amount']) : $input['discount_amount'],
             'tax_amount' => $invoice_total['tax'],
+            'vat_type' => $input['vat_type'] ?? null,
+            'vat_rate' => $uf_data ? $this->num_uf($input['vat_rate'] ?? 0) : ($input['vat_rate'] ?? 0),
+            'vat_amount' => $uf_data ? $this->num_uf($input['vat_amount'] ?? 0) : ($input['vat_amount'] ?? 0),
             'final_total' => $final_total,
             'document' => isset($input['document']) ? $input['document'] : $transaction->document,
             'source' => isset($input['source']) ? $input['source'] : $transaction->source,
@@ -1477,6 +1483,10 @@ class TransactionUtil extends Util
         }
         $output['tax_label'] .= ':';
         $output['tax'] = ($transaction->tax_amount != 0) ? $this->num_f($transaction->tax_amount, $show_currency, $business_details) : 0;
+        $output['vat_label'] = $transaction->vat_type === 'percentage'
+            ? 'VAT ('.$this->num_f($transaction->vat_rate, false, $business_details).'%)'
+            : 'VAT (Flat)';
+        $output['vat'] = ($transaction->vat_amount > 0) ? $this->num_f($transaction->vat_amount, $show_currency, $business_details) : 0;
 
         if ($transaction->tax_amount != 0 && $tax->is_tax_group) {
             $transaction_group_tax_details = $this->groupTaxDetails($tax, $transaction->tax_amount);

@@ -573,6 +573,9 @@
 					</p>
 				</div>
 			@endif
+			@if(!empty($receipt_details->vat))
+				<div class="flex-box"><p class="width-50 text-left">{{ $receipt_details->vat_label }}</p><p class="width-50 text-right">(+) {{ $receipt_details->vat }}</p></div>
+			@endif
 
 			@if( $receipt_details->round_off_amount > 0)
 				<div class="flex-box">
@@ -593,6 +596,7 @@
 					<strong>{{$receipt_details->total}}</strong>
 				</p>
 			</div>
+			@if(!empty($receipt_details->additional_notes))<div class="flex-box"><p class="width-100" style="white-space:pre-line"><strong>@lang('sale.sell_note'):</strong><br>{{ $receipt_details->additional_notes }}</p></div>@endif
 			@if(!empty($receipt_details->total_in_words))
 				<p colspan="2" class="text-right mb-0">
 					<small>
@@ -669,12 +673,6 @@
 	            		@endforeach
 	            	</table>
 	            @endif
-            @endif
-
-            @if(!empty($receipt_details->additional_notes))
-	            <p class="centered" >
-	            	{!! nl2br($receipt_details->additional_notes) !!}
-	            </p>
             @endif
 
             {{-- Barcode --}}
