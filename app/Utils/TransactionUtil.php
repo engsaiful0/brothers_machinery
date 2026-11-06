@@ -1297,9 +1297,11 @@ class TransactionUtil extends Util
         }
 
         $output['delivery_challan_no'] = $transaction->delivery_challan_no;
-        $delivery_person = $transaction->delivery_person_user;
+        $delivery_person = ! empty($transaction->delivery_person)
+            ? \App\User::find($transaction->delivery_person)
+            : null;
         $output['delivery_person'] = $delivery_person
-            ? trim(implode(' ', array_filter([$delivery_person->surname, $delivery_person->first_name, $delivery_person->last_name])))
+            ? ($delivery_person->user_full_name ?: trim(implode(' ', array_filter([$delivery_person->surname, $delivery_person->first_name, $delivery_person->last_name]))))
             : '';
         $output['purchase_order_no'] = $transaction->purchase_order_no;
         $output['purchase_order_date'] = ! empty($transaction->purchase_order_date)

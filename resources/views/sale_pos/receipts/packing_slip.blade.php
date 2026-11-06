@@ -64,7 +64,7 @@
     .packing-slip-product-name { font-weight: bold; }
     .packing-slip-product-detail { margin-top: 2px; font-size: 12px; }
     .packing-slip-invoice-no { font-size: 12px; }
-    .packing-slip-signature { padding-top: 56px; margin-bottom: 20px !important; page-break-inside: avoid; }
+    .packing-slip-signature { padding-top: 86px; margin-bottom: 20px !important; page-break-inside: avoid; }
     .packing-slip-signature b { display: inline-block; padding-top: 8px; border-top: 1px solid #555; min-width: 180px; }
     .packing-slip .center-block { display: block; max-width: 100%; margin: 0 auto; }
     .packing-slip-footer { margin-top: 20px !important; padding-top: 12px; border-top: 1px solid #ddd; }
@@ -253,7 +253,7 @@
 		<b class="pull-left">@lang('lang_v1.authorized_signatory')</b>
 	</div>
 	<div class="col-md-6 invoice-col width-50 text-right">
-		@if(!empty($receipt_details->delivery_person))<b>Delivery Person: {{ $receipt_details->delivery_person }}</b>@endif
+		<b>Delivery Person: {{ $receipt_details->delivery_person ?: '--' }}</b>
 	</div>
 </div>
 
