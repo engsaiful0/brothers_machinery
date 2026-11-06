@@ -639,6 +639,7 @@ class ContactController extends Controller
 
             if (in_array($input['type'] ?? '', ['customer', 'both']) && !empty($output['data'])) {
                 $this->saveCustomerProfile($output['data'], $request);
+                $output['data']->setAttribute('contact_persons', $output['data']->customerContactPersons()->get(['id', 'name', 'email', 'mobile']));
             }
 
             event(new ContactCreatedOrModified($input, 'added'));

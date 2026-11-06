@@ -25,6 +25,9 @@
     </div>
 
     <div class="modal-body">
+        @if(isset($quick_add))
+          <div class="alert alert-danger quick-contact-errors" style="display:none;"><ul class="mb-0"></ul></div>
+        @endif
         <div class="row">            
             <div class="col-md-4 contact_type_div">
                 <div class="form-group">

@@ -135,7 +135,7 @@
 						{!! Form::select('customer_group_id', $customer_groups, null, ['class' => 'form-control', 'id' => 'customer_group_id', 'placeholder' => __('messages.please_select')]) !!}
 					</div>
 				</div>
-				<div class="@if(!empty($commission_agent)) col-sm-3 @else col-sm-4 @endif">
+				<div class="col-md-4 col-sm-6">
 					<div class="form-group">
 						{!! Form::label('contact_id', __('contact.customer') . ':*') !!}
 						<div class="input-group">
@@ -160,29 +160,28 @@
 						</div>
 						<small class="text-danger hide contact_due_text"><strong>@lang('account.customer_due'):</strong> <span></span></small>
 					</div>
-					<small>
-					<strong>
-						@lang('lang_v1.billing_address'):
-					</strong>
-					<div id="billing_address_div">
-						{!! $walk_in_customer['contact_address'] ?? '' !!}
-					</div>
-					<br>
-					<strong>
-						@lang('lang_v1.shipping_address'):
-					</strong>
-					<div id="shipping_address_div">
-						{{$walk_in_customer['supplier_business_name'] ?? ''}},<br>
-						{{$walk_in_customer['name'] ?? ''}},<br>
-						{{$walk_in_customer['shipping_address'] ?? ''}}
-					</div>					
-					</small>
 				</div>
 				<div class="col-md-4">
-					<div class="form-group"><label for="contact_person_id">Contact Person:</label><select class="form-control" name="contact_person_id" id="contact_person_id"><option value="">Select contact person</option></select></div>
+					<div class="form-group">
+						<label for="contact_person_id">Contact Person:</label>
+						<select class="form-control" name="contact_person_id" id="contact_person_id"><option value="">Select contact person</option></select>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+				<div class="col-md-4">
+					<div class="form-group">
+						<label>Customer Addresses:</label>
+						<div><strong>@lang('lang_v1.billing_address'):</strong><div id="billing_address_div">{!! $walk_in_customer['contact_address'] ?? '' !!}</div></div>
+						<div class="m-t-8"><strong>@lang('lang_v1.shipping_address'):</strong><div id="shipping_address_div">{{$walk_in_customer['supplier_business_name'] ?? ''}},<br>{{$walk_in_customer['name'] ?? ''}},<br>{{$walk_in_customer['shipping_address'] ?? ''}}</div></div>
+					</div>
+				</div>
+				<div class="col-md-4">
 					<div class="form-group"><label for="contact_person_email">Email:</label><input class="form-control" id="contact_person_email" name="contact_person_email" type="email"></div>
+				</div>
+				<div class="col-md-4">
 					<div class="form-group"><label for="contact_person_mobile">Mobile Number:</label><input class="form-control" id="contact_person_mobile" name="contact_person_mobile"></div>
 				</div>
+				<div class="clearfix"></div>
 
 				<div class="col-md-3">
 		          <div class="form-group">
@@ -913,7 +912,7 @@
 </section>
 
 <div class="modal fade contact_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
-	@include('contact.create', ['quick_add' => true])
+	@include('contact.create', ['quick_add' => true, 'selected_type' => 'customer'])
 </div>
 <!-- /.content -->
 <div class="modal fade register_details_modal" tabindex="-1" role="dialog" 
@@ -940,17 +939,25 @@
 		const customersUrl = @json(url('/sales/customer-groups'));
 		const contactPersonsUrl = @json(url('/sales/customers'));
 		customer.select2({width: '100%', placeholder: @json(__('contact.customer')), allowClear: true, minimumResultsForSearch: 0});
+		window.loadSalesGroupCustomers = function (groupId, selectedCustomerId) {
+			customer.empty().append(new Option('', ''));
+			if (!groupId) { customer.trigger('change'); return $.Deferred().resolve().promise(); }
+			return $.getJSON(customersUrl + '/' + encodeURIComponent(groupId) + '/customers').done(function (rows) {
+				rows.forEach(row => customer.append(new Option(row.name + (row.supplier_business_name ? ' (' + row.supplier_business_name + ')' : ''), row.id)));
+				if (selectedCustomerId) customer.val(String(selectedCustomerId));
+				customer.trigger('change');
+			});
+		};
 		function clearPerson() { person.empty().append(new Option('Select contact person', '')); $('#contact_person_email,#contact_person_mobile').val(''); }
 		group.on('change', function () {
-			customer.empty().append(new Option('', '')).trigger('change'); clearPerson();
-			if (!this.value) return;
-			$.getJSON(customersUrl + '/' + encodeURIComponent(this.value) + '/customers', function (rows) { rows.forEach(row => customer.append(new Option(row.name + (row.supplier_business_name ? ' (' + row.supplier_business_name + ')' : ''), row.id))); });
+			clearPerson();
+			window.loadSalesGroupCustomers(this.value);
 		});
 		customer.on('change', function () { clearPerson(); if (!this.value) return; $.getJSON(contactPersonsUrl + '/' + encodeURIComponent(this.value) + '/contact-persons', function (rows) { rows.forEach(row => person.append(new Option(row.name, row.id))); }); });
 		person.on('change', function () { if (!this.value) return; $.getJSON(contactPersonsUrl + '/' + encodeURIComponent(customer.val()) + '/contact-persons', function (rows) { const row = rows.find(item => String(item.id) === String(person.val())); $('#contact_person_email').val(row ? row.email : ''); $('#contact_person_mobile').val(row ? row.mobile : ''); }); });
 	});
 	</script>
-	<script src="{{ asset('js/pos.js?v=' . $asset_v . '&group_filter=1') }}"></script>
+	<script src="{{ asset('js/pos.js?v=' . $asset_v . '&group_filter=6') }}"></script>
 	<script src="{{ asset('js/product.js?v=' . $asset_v) }}"></script>
 	<script src="{{ asset('js/opening_stock.js?v=' . $asset_v) }}"></script>
 

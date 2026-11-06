@@ -21,7 +21,14 @@
 						<div class="checkbox">
 							<label>
 				              	{!! Form::checkbox('search_fields[]', 'sku', true, ['class' => 'input-icheck search_fields']); !!} @lang('product.sku')
-				            </label>
+			            </label>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="checkbox">
+							<label>
+				              	{!! Form::checkbox('search_fields[]', 'part_number', true, ['class' => 'input-icheck search_fields']); !!} @lang('product.part_number')
+			            </label>
 						</div>
 					</div>
 					@if(request()->session()->get('business.enable_lot_number') == 1)

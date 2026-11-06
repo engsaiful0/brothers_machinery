@@ -31,7 +31,7 @@
                 <div class="col-md-3"><div class="form-group"><label>Designation</label><input class="form-control" name="contact_persons[{{ $index }}][designation]" value="{{ old("contact_persons.$index.designation", $person->designation) }}" maxlength="191"></div></div>
                 <div class="col-md-2"><div class="form-group"><label>Mobile Number</label><input class="form-control" name="contact_persons[{{ $index }}][mobile]" value="{{ old("contact_persons.$index.mobile", $person->mobile) }}" maxlength="30"></div></div>
                 <div class="col-md-3"><div class="form-group"><label>Email Address</label><input type="email" class="form-control" name="contact_persons[{{ $index }}][email]" value="{{ old("contact_persons.$index.email", $person->email) }}" maxlength="191"></div></div>
-                <div class="col-md-1"><label>&nbsp;</label><button type="button" class="btn btn-danger btn-block remove-customer-person">Remove</button></div>
+                <div class="col-md-1"><label>&nbsp;</label><button type="button" class="btn btn-danger btn-block remove-customer-person" aria-label="Remove contact person" title="Remove contact person"><i class="fa fa-times" aria-hidden="true"></i></button></div>
             </div>
         @endforeach
     </div>
@@ -58,6 +58,7 @@
 (function ($) {
     var personIndex = {{ max(0, $people->count() - 1) + 1 }};
     $(document).off('click.customerProfileAdd', '#add-customer-person').on('click.customerProfileAdd', '#add-customer-person', function () {
+        if ($(this).closest('#quick_add_contact').length) return;
         var index = personIndex++;
         var row = '<div class="row customer-contact-person" style="border-bottom:1px solid #eee; margin-bottom:10px;">' +
             '<div class="col-md-3"><div class="form-group"><label>Name</label><input class="form-control" name="contact_persons['+index+'][name]" maxlength="191"></div></div>'+
@@ -68,6 +69,7 @@
         $('#customer-contact-persons').append(row);
     });
     $(document).off('click.customerProfileRemove', '.remove-customer-person').on('click.customerProfileRemove', '.remove-customer-person', function () {
+        if ($(this).closest('#quick_add_contact').length) return;
         if ($('#customer-contact-persons .customer-contact-person').length > 1) $(this).closest('.customer-contact-person').remove();
         else $(this).closest('.customer-contact-person').find('input').val('');
     });

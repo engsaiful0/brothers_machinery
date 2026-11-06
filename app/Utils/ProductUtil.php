@@ -1670,6 +1670,10 @@ class ProductUtil extends Util
                         $query->orWhere('sku', 'like', '%'.$search_term.'%');
                     }
 
+                    if (in_array('part_number', $search_fields)) {
+                        $query->orWhere('products.part_number', 'like', '%'.$search_term.'%');
+                    }
+
                     if (in_array('sub_sku', $search_fields)) {
                         $query->orWhere('sub_sku', 'like', '%'.$search_term.'%');
                     }
@@ -1708,6 +1712,10 @@ class ProductUtil extends Util
                         $query->orWhere('sku', $search_term);
                     }
 
+                    if (in_array('part_number', $search_fields)) {
+                        $query->orWhere('products.part_number', $search_term);
+                    }
+
                     if (in_array('sub_sku', $search_fields)) {
                         $query->orWhere('sub_sku', $search_term);
                     }
@@ -1731,6 +1739,7 @@ class ProductUtil extends Util
         $query->select(
                 'products.id as product_id',
                 'products.name',
+                'products.part_number',
                 'products.country_of_origin',
                 'products.type',
                 'products.enable_stock',

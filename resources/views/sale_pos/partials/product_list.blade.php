@@ -27,6 +27,9 @@
 			<small class="text-muted">
 				({{$product->sub_sku}})
 			</small><br>
+			@if(!empty($product->part_number))
+				<small class="text-muted">Part Number: {{ $product->part_number }}</small><br>
+			@endif
 			<small class="text-muted" style="font-size: 10px;">
 				@if($product->enable_stock)
 				{{ @num_format($product->qty_available) }} {{$product->unit}} @lang('lang_v1.in_stock')

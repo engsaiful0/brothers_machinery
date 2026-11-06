@@ -638,6 +638,8 @@ class SellController extends Controller
             $types['both'] = __('lang_v1.both_supplier_customer');
         }
         $customer_groups = CustomerGroup::forDropdown($business_id);
+        $machine_brands = \App\Brands::forDropdown($business_id);
+        $module_form_parts = $this->moduleUtil->getModuleData('contact_form_part');
 
         $payment_line = $this->dummyPaymentLine;
         $payment_types = $this->transactionUtil->payment_types(null, true, $business_id);
@@ -707,6 +709,8 @@ class SellController extends Controller
                 'commission_agent',
                 'types',
                 'customer_groups',
+                'machine_brands',
+                'module_form_parts',
                 'payment_line',
                 'payment_types',
                 'price_groups',

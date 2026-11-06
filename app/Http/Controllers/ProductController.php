@@ -1282,6 +1282,7 @@ class ProductController extends Controller
             $product_types = request()->get('product_types', []);
 
             $search_fields = request()->get('search_fields', ['name', 'sku']);
+            $search_fields[] = 'part_number';
             if (in_array('sku', $search_fields)) {
                 $search_fields[] = 'sub_sku';
             }
