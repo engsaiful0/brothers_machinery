@@ -1119,6 +1119,12 @@ class TransactionUtil extends Util
         $output['customer_contact_person_name'] = $customer_contact_person->name ?? '';
         $output['customer_email'] = $transaction->contact_person_email ?: ($customer_contact_person->email ?? '');
         $output['customer_mobile'] = $transaction->contact_person_mobile ?: ($customer_contact_person->mobile ?? '');
+        $output['packing_customer_name'] = ! empty($customer->name) ? $customer->name : ($customer->supplier_business_name ?? '');
+        $output['packing_customer_group_name'] = ! empty($transaction->customer_group_id)
+            ? \App\CustomerGroup::where('business_id', $transaction->business_id)->where('id', $transaction->customer_group_id)->value('name')
+            : '';
+        $output['packing_contact_mobile'] = $transaction->contact_person_mobile ?: ($customer_contact_person->mobile ?? $customer->mobile ?? '');
+        $output['packing_contact_email'] = $transaction->contact_person_email ?: ($customer_contact_person->email ?? $customer->email ?? '');
 
         $output['contact_id'] = $customer->contact_id;
         $output['contact_name'] = $customer->name;

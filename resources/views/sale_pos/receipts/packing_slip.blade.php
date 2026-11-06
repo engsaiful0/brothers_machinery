@@ -162,32 +162,11 @@
 
 <div class="row invoice-info color-555 packing-slip-parties">
 	<div class="col-md-6 invoice-col width-50 word-wrap">
-		@if(!empty($receipt_details->customer_label))
-			<b>{{ $receipt_details->customer_label }}</b><br/>
-		@endif
-
-		<!-- customer info -->
-		@if(!empty($receipt_details->customer_name))
-			{{ $receipt_details->customer_name }}<br>
-		@endif
-		@if(!empty($receipt_details->customer_info))
-			{!! $receipt_details->customer_info !!}
-		@endif
-		@if(!empty($receipt_details->client_id_label))
-			<br/>
-			<strong>{{ $receipt_details->client_id_label }}</strong> {{ $receipt_details->client_id }}
-		@endif
-		@if(!empty($receipt_details->customer_tax_label))
-			<br/>
-			<strong>{{ $receipt_details->customer_tax_label }}</strong> {{ $receipt_details->customer_tax_number }}
-		@endif
-		@if(!empty($receipt_details->customer_custom_fields))
-			<br/>{!! $receipt_details->customer_custom_fields !!}
-		@endif
-		@if(!empty($receipt_details->sales_person_label))
-			<br/>
-			<strong>{{ $receipt_details->sales_person_label }}</strong> {{ $receipt_details->sales_person }}
-		@endif
+		<strong>Group Name:</strong> {{ $receipt_details->packing_customer_group_name ?: '--' }}<br>
+		<strong>Customer Name:</strong> {{ $receipt_details->packing_customer_name ?: '--' }}<br>
+		<strong>Contact Person:</strong> {{ $receipt_details->customer_contact_person_name ?: '--' }}<br>
+		<strong>Mobile:</strong> {{ $receipt_details->packing_contact_mobile ?: '--' }}<br>
+		<strong>Email:</strong> {{ $receipt_details->packing_contact_email ?: '--' }}
 	</div>
 	<div class="col-md-6 invoice-col width-50 word-wrap">
 		<strong>@lang('lang_v1.shipping_address'):</strong><br>
