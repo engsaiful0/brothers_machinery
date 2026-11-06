@@ -85,6 +85,12 @@
           {{ $sell->contact->supplier_business_name }}<br>
         @endif
         <b>{{ __('sale.customer_name') }}:</b> {{ $sell->contact->name }}<br>
+        @if(!empty($customer_group_name))<b>@lang('lang_v1.customer_group'):</b> {{ $customer_group_name }}<br>@endif
+        @if(!empty($sell->contact_person_id))
+          <b>Contact Person:</b> {{ $sell->contact_person->name ?? '' }}<br>
+          <b>Email:</b> {{ $sell->contact_person_email ?? '' }}<br>
+          <b>Mobile Number:</b> {{ $sell->contact_person_mobile ?? '' }}<br>
+        @endif
         <b>{{ __('business.address') }}:</b><br>
         @if(!empty($sell->billing_address()))
           {{$sell->billing_address()}}

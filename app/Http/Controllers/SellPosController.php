@@ -33,6 +33,7 @@ use App\Business;
 use App\BusinessLocation;
 use App\Category;
 use App\Contact;
+use App\CustomerContactPerson;
 use App\CustomerGroup;
 use App\InvoiceLayout;
 use App\InvoiceScheme;
@@ -108,6 +109,33 @@ class SellPosController extends Controller
 
         $this->dummyPaymentLine = ['method' => 'cash', 'amount' => 0, 'note' => '', 'card_transaction_number' => '', 'card_number' => '', 'card_type' => '', 'card_holder_name' => '', 'card_month' => '', 'card_year' => '', 'card_security' => '', 'cheque_number' => '', 'bank_account_number' => '',
             'is_return' => 0, 'transaction_no' => ''];
+    }
+
+    private function validateSaleCustomerSelection(Request $request)
+    {
+        $request->validate([
+            'customer_group_id' => 'nullable|integer|exists:customer_groups,id',
+            'contact_person_id' => 'nullable|integer|exists:customer_contact_persons,id',
+            'contact_person_email' => 'nullable|email|max:191',
+            'contact_person_mobile' => 'nullable|string|max:30',
+        ]);
+
+        $business_id = $request->session()->get('user.business_id');
+        $customer = Contact::where('business_id', $business_id)
+            ->whereIn('type', ['customer', 'both'])->findOrFail($request->input('contact_id'));
+
+        if ($request->filled('customer_group_id')) {
+            $group_exists = CustomerGroup::where('business_id', $business_id)
+                ->whereKey($request->input('customer_group_id'))->exists();
+            if (!$group_exists || (int) $customer->customer_group_id !== (int) $request->input('customer_group_id')) {
+                abort(422, 'The selected customer does not belong to the selected customer group.');
+            }
+        }
+
+        if ($request->filled('contact_person_id') && !CustomerContactPerson::where('contact_id', $customer->id)
+            ->whereKey($request->input('contact_person_id'))->exists()) {
+            abort(422, 'The selected contact person does not belong to the selected customer.');
+        }
     }
 
     /**
@@ -337,6 +365,7 @@ class SellPosController extends Controller
             'purchase_order_date' => 'nullable|date_format:Y-m-d',
             'requisition_number' => 'nullable|string|max:191',
         ]);
+        $this->validateSaleCustomerSelection($request);
 
         try {
             $input = $request->except('_token');
@@ -1150,6 +1179,7 @@ class SellPosController extends Controller
             'purchase_order_date' => 'nullable|date_format:Y-m-d',
             'requisition_number' => 'nullable|string|max:191',
         ]);
+        $this->validateSaleCustomerSelection($request);
 
         try {
             $input = $request->except('_token');

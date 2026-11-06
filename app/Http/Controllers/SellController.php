@@ -755,7 +755,7 @@ class SellController extends Controller
                             ->pluck('name', 'id');
         $query = Transaction::where('business_id', $business_id)
                     ->where('id', $id)
-                    ->with(['contact', 'delivery_person_user', 'sell_lines' => function ($q) {
+                    ->with(['contact', 'contact_person', 'delivery_person_user', 'sell_lines' => function ($q) {
                         $q->whereNull('parent_sell_line_id');
                     }, 'sell_lines.product', 'sell_lines.product.unit', 'sell_lines.product.second_unit', 'sell_lines.variations', 'sell_lines.variations.product_variation', 'payment_lines', 'sell_lines.modifiers', 'sell_lines.lot_details', 'tax', 'sell_lines.sub_unit', 'table', 'service_staff', 'sell_lines.service_staff', 'types_of_service', 'sell_lines.warranties', 'media']);
 
@@ -764,6 +764,8 @@ class SellController extends Controller
         }
 
         $sell = $query->firstOrFail();
+        $customer_group_name = CustomerGroup::where('business_id', $business_id)
+            ->whereKey($sell->customer_group_id)->value('name');
 
         $activities = Activity::forSubject($sell)
            ->with(['causer', 'subject'])
@@ -816,6 +818,7 @@ class SellController extends Controller
             ->with(compact(
                 'taxes',
                 'sell',
+                'customer_group_name',
                 'payment_types',
                 'order_taxes',
                 'pos_settings',

@@ -51,6 +51,11 @@ class Transaction extends Model
         return $this->belongsTo(\App\Contact::class, 'contact_id');
     }
 
+    public function contact_person()
+    {
+        return $this->belongsTo(\App\CustomerContactPerson::class, 'contact_person_id');
+    }
+
     public function delivery_person_user()
     {
         return $this->belongsTo(\App\User::class, 'delivery_person');
