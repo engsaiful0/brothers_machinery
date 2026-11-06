@@ -1115,6 +1115,11 @@ class TransactionUtil extends Util
         //Customer show_customer
         $customer = Contact::find($transaction->contact_id);
 
+        $customer_contact_person = $transaction->contact_person;
+        $output['customer_contact_person_name'] = $customer_contact_person->name ?? '';
+        $output['customer_email'] = $transaction->contact_person_email ?: ($customer_contact_person->email ?? '');
+        $output['customer_mobile'] = $transaction->contact_person_mobile ?: ($customer_contact_person->mobile ?? '');
+
         $output['contact_id'] = $customer->contact_id;
         $output['contact_name'] = $customer->name;
         $output['customer_info'] = '';
@@ -2127,7 +2132,7 @@ class TransactionUtil extends Util
                 //Field for 1st column
                 'name' => $product->name,
                 'part_number' => ! empty($product->part_number) ? $product->part_number : '',
-                'product_description' => ! empty($show_product_description) ? $product->product_description : null,
+                'product_description' => (! empty($show_product_description) || in_array($il->design, ['brothers-machinery', 'classic'], true)) ? $product->product_description : null,
                 'variation' => (empty($variation->name) || $variation->name == 'DUMMY') ? '' : $variation->name,
                 'product_variation' => (empty($product_variation->name) || $product_variation->name == 'DUMMY') ? '' : $product_variation->name,
                 //Field for 2nd column

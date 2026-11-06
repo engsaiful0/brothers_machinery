@@ -1,15 +1,13 @@
 @php
     $invoice_number = trim($receipt_details->invoice_no ?? '');
     $invoice_number = preg_replace('/^invoice\s*no\.?\s*/i', '', $invoice_number);
-    $bill_no = 'BILL#' . ltrim($invoice_number, '# ');
+    $bill_no = 'INVOICE NO. ' . ltrim($invoice_number, '# ');
 
     $bill_date = ! empty($receipt_details->transaction_date)
         ? \Carbon\Carbon::parse($receipt_details->transaction_date)->format('d.m.Y')
         : ($receipt_details->invoice_date ?? '');
 
-    $customer_company = ! empty($receipt_details->customer_supplier_business_name)
-        ? $receipt_details->customer_supplier_business_name
-        : ($receipt_details->customer_name ?? $receipt_details->contact_name ?? '');
+    $customer_company = $receipt_details->customer_name ?? $receipt_details->contact_name ?? '';
 
     $po_ref = trim($receipt_details->purchase_order_no ?? $receipt_details->brothers_po_ref ?? ($receipt_details->sell_custom_field_1_value ?? ''));
     $po_date = trim($receipt_details->purchase_order_date ?? '');
@@ -32,12 +30,12 @@
 
     $util = app(\App\Utils\Util::class);
     if (! empty($receipt_details->total_in_words)) {
-        $amount_in_words = 'BDT ' . strtoupper(str_ireplace(['lakh', 'lakhs'], 'LAC', $receipt_details->total_in_words)) . ' ONLY.';
+        $amount_in_words = strtoupper(str_ireplace(['lakh', 'lakhs'], 'LAC', $receipt_details->total_in_words)) . ' ONLY.';
     } else {
         $words_raw = strtoupper(trim($util->numToWord($net_unformatted, null, 'indian')));
         $words_raw = preg_replace('/\s+/', ' ', $words_raw);
         $words_raw = str_ireplace(['lakh', 'lakhs'], 'LAC', $words_raw);
-        $amount_in_words = 'BDT ' . $words_raw . ' ONLY.';
+        $amount_in_words = $words_raw . ' ONLY.';
     }
 
     $signature_name = trim($receipt_details->sales_person ?? $receipt_details->signature_user_name ?? $receipt_details->added_by ?? '');
@@ -143,12 +141,7 @@
     }
 
     .brothers-lines-table .col-desc {
-        width: 34%;
-    }
-
-    .brothers-lines-table .col-part {
-        width: 16%;
-        text-align: center;
+        width: 50%;
     }
 
     .brothers-lines-table .col-qty {
@@ -201,6 +194,12 @@
         font-weight: bold;
     }
 
+    .brothers-sell-note {
+        border: 0 !important;
+        margin-top: 8px;
+        white-space: pre-line;
+    }
+
     .brothers-signature {
         margin-top: 28px;
         font-size: 12pt;
@@ -245,12 +244,18 @@
         </tr>
         <tr>
             <td class="brothers-meta-left">
-                Delivery Challan No: {{ $challan_no }}
+                @if(!empty($receipt_details->customer_contact_person_name))Contact Person: {{ $receipt_details->customer_contact_person_name }}@endif
             </td>
             <td class="brothers-meta-right">
                 Date: {{ $second_date !== '' ? $second_date : $bill_date }}
             </td>
         </tr>
+        @if(!empty($receipt_details->customer_email) || !empty($receipt_details->customer_mobile))
+            <tr>
+                <td class="brothers-meta-left">@if(!empty($receipt_details->customer_email))Email: {{ $receipt_details->customer_email }}@endif</td>
+                <td class="brothers-meta-right">@if(!empty($receipt_details->customer_mobile))Mobile: {{ $receipt_details->customer_mobile }}@endif</td>
+            </tr>
+        @endif
     </table>
 
     <table class="brothers-lines-table">
@@ -258,7 +263,6 @@
             <tr>
                 <th class="col-sl">S/L</th>
                 <th class="col-desc">Description</th>
-                <th class="col-part">Part No.</th>
                 <th class="col-qty">Qty.</th>
                 <th class="col-rate">Rate</th>
                 <th class="col-value">Value</th>
@@ -272,76 +276,67 @@
                     if (! empty($line['units'])) {
                         $qty_display .= ' ' . strtoupper($line['units']);
                     }
-                    $model_line = '';
-                    if (! empty($line['sell_line_note'])) {
-                        $model_line = strip_tags($line['sell_line_note']);
-                        if (stripos($model_line, 'model:') !== 0) {
-                            $model_line = 'Model: ' . $model_line;
-                        }
-                    } elseif (! empty($line['brand'])) {
-                        $model_line = 'Model: ' . $line['brand'];
-                    } elseif (! empty($line['product_description'])) {
-                        $model_line = strip_tags($line['product_description']);
-                        if (stripos($model_line, 'model:') !== 0) {
-                            $model_line = 'Model: ' . $model_line;
-                        }
-                    }
-                    $part_no = $line['part_number'] ?? '';
-                    if ($part_no === '' && ! empty($line['sub_sku'])) {
-                        $part_no = $line['sub_sku'];
-                    }
+                    $brand_name = trim(strip_tags($line['brand'] ?? ''));
+                    $product_description = html_entity_decode(strip_tags($line['product_description'] ?? ''), ENT_QUOTES, 'UTF-8');
+                    // Product descriptions may repeat the country-prefixed item number (for example, "BD - 090").
+                    $product_description = preg_replace('/\bBD\s*-\s*\d+\b/i', ' ', $product_description);
+                    $product_description = preg_replace('/\s{2,}/u', ' ', $product_description);
+                    $product_description = trim($product_description, " \t\n\r\0\x0B,;:-");
                     $rate = $line['unit_price_before_discount'] ?? ($line['unit_price_exc_tax'] ?? '');
                 @endphp
                 <tr>
                     <td class="col-sl">{{ $sl }}</td>
                     <td class="col-desc">
                         <div class="brothers-item-name">{{ $line['name'] }}</div>
-                        @if ($model_line !== '')
-                            <div class="brothers-item-model">{{ $model_line }}</div>
+                        @if ($brand_name !== '')
+                            <div class="brothers-item-model">Brand Name: {{ $brand_name }}</div>
+                        @endif
+                        @if ($product_description !== '')
+                            <div class="brothers-item-model">{{ $product_description }}</div>
                         @endif
                     </td>
-                    <td class="col-part">{{ $part_no }}</td>
                     <td class="col-qty">{{ $qty_display }}</td>
                     <td class="col-rate">{{ $rate }}</td>
                     <td class="col-value">{{ $line['line_total'] }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6">&nbsp;</td>
+                    <td colspan="5">&nbsp;</td>
                 </tr>
             @endforelse
         </tbody>
         <tfoot>
             <tr class="brothers-totals-row">
                 <td colspan="2" class="brothers-totals-spacer"></td>
-                <td colspan="3" class="brothers-totals-label">TOTAL AMOUNT:</td>
+                <td colspan="2" class="brothers-totals-label">TOTAL AMOUNT:</td>
                 <td class="brothers-totals-value">{{ $gross_total }}</td>
             </tr>
             <tr class="brothers-totals-row">
                 <td colspan="2" class="brothers-totals-spacer"></td>
-                <td colspan="3" class="brothers-totals-label">DISCOUNT:</td>
+                <td colspan="2" class="brothers-totals-label">DISCOUNT:</td>
                 <td class="brothers-totals-value">{{ $discount_total }}</td>
             </tr>
             @if(!empty($receipt_details->vat))
                 <tr class="brothers-totals-row">
                     <td colspan="2" class="brothers-totals-spacer"></td>
-                    <td colspan="3" class="brothers-totals-label">{{ $receipt_details->vat_label }}:</td>
+                    <td colspan="2" class="brothers-totals-label">{{ $receipt_details->vat_label }}:</td>
                     <td class="brothers-totals-value">{{ $vat_total }}</td>
                 </tr>
             @endif
             <tr class="brothers-totals-row">
                 <td colspan="2" class="brothers-totals-spacer"></td>
-                <td colspan="3" class="brothers-totals-label">NET TOTAL:</td>
+                <td colspan="2" class="brothers-totals-label">NET TOTAL:</td>
                 <td class="brothers-totals-value">{{ $net_total }}</td>
             </tr>
-            @if(!empty($receipt_details->additional_notes))
-                <tr class="brothers-totals-row"><td colspan="6" style="white-space:pre-line"><strong>Sell Note:</strong><br>{{ $receipt_details->additional_notes }}</td></tr>
-            @endif
             <tr class="brothers-in-words">
-                <td colspan="6">IN WORDS: {{ $amount_in_words }}</td>
+                <td colspan="5">IN WORDS: {{ $amount_in_words }}</td>
             </tr>
         </tfoot>
     </table>
+
+    @if(!empty($receipt_details->additional_notes))
+        <div class="brothers-sell-note"><strong>Sell Note:</strong><br>{{ $receipt_details->additional_notes }}</div>
+    @endif
 
     <div class="brothers-signature">
         @if (! empty($receipt_details->footer_text))
