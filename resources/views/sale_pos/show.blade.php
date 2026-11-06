@@ -315,6 +315,13 @@
                 @endif
               </td>
             </tr>
+            @if(!empty($sell->vat_amount))
+            <tr>
+              <th>VAT @if($sell->vat_type === 'percentage')({{ rtrim(rtrim(number_format((float) $sell->vat_rate, 2, '.', ''), '0'), '.') }}%)@elseif($sell->vat_type === 'flat')(Flat)@endif:</th>
+              <td><b>(+)</b></td>
+              <td><span class="display_currency pull-right" data-currency_symbol="true">{{ $sell->vat_amount }}</span></td>
+            </tr>
+            @endif
             @if(!empty($line_taxes))
             <tr>
               <th>{{ __('lang_v1.line_taxes') }}:</th>

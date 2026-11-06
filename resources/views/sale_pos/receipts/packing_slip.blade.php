@@ -55,11 +55,15 @@
     .packing-slip-items th { background: #f1f3f5 !important; color: #222 !important; font-weight: bold; }
     .packing-slip-items thead { display: table-header-group; }
     .packing-slip-items tr { page-break-inside: avoid; }
-    .packing-slip-items .packing-slip-number { width: 7%; text-align: center; }
-    .packing-slip-items .packing-slip-product { width: 73%; text-align: left; }
-    .packing-slip-items .packing-slip-quantity { width: 20%; text-align: right; }
-    .packing-slip-items .packing-slip-modifier td { color: #555; font-size: 12px; }
-    .packing-slip-items .packing-slip-modifier td:nth-child(2) { padding-left: 24px; }
+    .packing-slip-items .packing-slip-number { width: 5%; text-align: center; }
+    .packing-slip-items .packing-slip-name { width: 22%; text-align: left; }
+    .packing-slip-items .packing-slip-brand { width: 13%; text-align: left; }
+    .packing-slip-items .packing-slip-part { width: 14%; text-align: left; }
+    .packing-slip-items .packing-slip-description { width: 30%; text-align: left; }
+    .packing-slip-items .packing-slip-quantity { width: 16%; text-align: right; }
+    .packing-slip-product-name { font-weight: bold; }
+    .packing-slip-product-detail { margin-top: 2px; font-size: 12px; }
+    .packing-slip-invoice-no { font-size: 12px; }
     .packing-slip-signature { padding-top: 56px; margin-bottom: 20px !important; page-break-inside: avoid; }
     .packing-slip-signature b { display: inline-block; padding-top: 8px; border-top: 1px solid #555; min-width: 180px; }
     .packing-slip .center-block { display: block; max-width: 100%; margin: 0 auto; }
@@ -138,11 +142,10 @@
 	<div class="col-md-6 invoice-col width-50 packing-slip-reference">
 
 		<p class="text-right font-30">
-			@if(!empty($receipt_details->invoice_no_prefix))
-				<span class="pull-left">{!! $receipt_details->invoice_no_prefix !!}</span>
-			@endif
-
-			{{$receipt_details->invoice_no}}
+			<strong>Salan No:</strong> {{ $receipt_details->delivery_challan_no ?: '--' }}
+		</p>
+		<p class="text-right packing-slip-invoice-no">
+			<strong>@lang('sale.invoice_no'):</strong> {{$receipt_details->invoice_no}}
 		</p>
 		<!-- Date-->
 		@if(!empty($receipt_details->date_label))
@@ -217,58 +220,49 @@
 			<thead>
                 <tr>
                     <th scope="col" class="packing-slip-number">#</th>
-                    <th scope="col" class="packing-slip-product">{{$receipt_details->table_product_label}}</th>
+                    <th scope="col" class="packing-slip-name">Product Name</th>
+                    <th scope="col" class="packing-slip-brand">Brand</th>
+                    <th scope="col" class="packing-slip-part">Part Number</th>
+                    <th scope="col" class="packing-slip-description">Description</th>
                     <th scope="col" class="packing-slip-quantity">{{$receipt_details->table_qty_label}}</th>
                 </tr>
 			</thead>
 			<tbody>
 				@foreach($receipt_details->lines as $line)
+					@php
+						$product_name = html_entity_decode(strip_tags($line['name'] ?? ''), ENT_QUOTES, 'UTF-8');
+						$part_number = $line['part_number'] ?? '';
+						if ($part_number === '') $part_number = $line['sub_sku'] ?? '';
+						$product_name = preg_replace('/\bBD\s*-\s*\d+\b/i', '', $product_name);
+						$product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name));
+						$product_description = html_entity_decode(strip_tags($line['product_description'] ?? ''), ENT_QUOTES, 'UTF-8');
+						$product_description = preg_replace('/\bBD\s*-\s*\d+\b/i', '', $product_description);
+						$product_description = trim(preg_replace('/\s{2,}/u', ' ', $product_description));
+					@endphp
 					<tr>
 						<td class="text-center">
 							{{$loop->iteration}}
 						</td>
+						<td><div class="packing-slip-product-name">{{ $product_name }}@if(!empty($line['product_variation']) && $line['product_variation'] != 'DUMMY') ({{ $line['product_variation'] }})@endif @if(!empty($line['variation']) && $line['variation'] != 'DUMMY') {{ $line['variation'] }}@endif</div></td>
+						<td>{{ $line['brand'] ?? '' }}</td>
+						<td>{{ $part_number }}</td>
 						<td>
-                            {{$line['name']}} {{$line['product_variation']}} {{$line['variation']}} 
-                            @if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif
-                            @if(!empty($line['product_custom_fields'])), {{$line['product_custom_fields']}} @endif
-                            @if(!empty($line['sell_line_note']))({!!$line['sell_line_note']!!}) @endif
-                            @if(!empty($line['lot_number']))<br> {{$line['lot_number_label']}}:  {{$line['lot_number']}} @endif 
-                            @if(!empty($line['product_expiry'])), {{$line['product_expiry_label']}}:  {{$line['product_expiry']}} @endif 
-                        </td>
+                            {{ trim($product_description, " \t\n\r,;:-") }}
+                            @if(!empty($line['product_custom_fields']))<div class="packing-slip-product-detail">{{ $line['product_custom_fields'] }}</div>@endif
+                            @if(!empty($line['sell_line_note']))<div class="packing-slip-product-detail">{{ strip_tags($line['sell_line_note']) }}</div>@endif
+                            @if(!empty($line['lot_number']))<div class="packing-slip-product-detail">{{ $line['lot_number_label'] }}: {{ $line['lot_number'] }}</div>@endif
+                            @if(!empty($line['product_expiry']))<div class="packing-slip-product-detail">{{ $line['product_expiry_label'] }}: {{ $line['product_expiry'] }}</div>@endif
+                            @if(!empty($line['modifiers']))
+                                @foreach($line['modifiers'] as $modifier)
+                                    <div class="packing-slip-product-detail">{{ $modifier['name'] }} {{ $modifier['variation'] ?? '' }} ({{ $modifier['quantity'] }} {{ $modifier['units'] ?? '' }})</div>
+                                @endforeach
+                            @endif
+						</td>
 						<td class="text-right">
 							{{$line['quantity']}} {{$line['units']}}
 						</td>
 					</tr>
-					@if(!empty($line['modifiers']))
-						@foreach($line['modifiers'] as $modifier)
-							<tr class="packing-slip-modifier">
-								<td class="text-center">
-									&nbsp;
-								</td>
-								<td>
-		                            {{$modifier['name']}} {{$modifier['variation']}} 
-		                            @if(!empty($modifier['sub_sku'])), {{$modifier['sub_sku']}} @endif 
-		                            @if(!empty($modifier['sell_line_note']))({!!$modifier['sell_line_note']!!}) @endif 
-		                        </td>
-								<td class="text-right">
-									{{$modifier['quantity']}} {{$modifier['units']}}
-								</td>
-							</tr>
-						@endforeach
-					@endif
 				@endforeach
-
-				@php
-					$lines = count($receipt_details->lines);
-				@endphp
-
-				@for ($i = $lines; $i < 7; $i++)
-    				<tr>
-    					<td>&nbsp;</td>
-    					<td>&nbsp;</td>
-    					<td>&nbsp;</td>
-    				</tr>
-				@endfor
 
 			</tbody>
 		</table>
@@ -278,6 +272,9 @@
 <div class="row invoice-info color-555 packing-slip-signature">
 	<div class="col-md-6 invoice-col width-50">
 		<b class="pull-left">@lang('lang_v1.authorized_signatory')</b>
+	</div>
+	<div class="col-md-6 invoice-col width-50 text-right">
+		@if(!empty($receipt_details->delivery_person))<b>Delivery Person: {{ $receipt_details->delivery_person }}</b>@endif
 	</div>
 </div>
 

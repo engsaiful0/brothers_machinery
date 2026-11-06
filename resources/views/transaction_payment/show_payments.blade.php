@@ -134,6 +134,10 @@
                         <b>@lang('sale.invoice_no'):</b> #{{ $transaction->invoice_no }}<br/>
                         <b>@lang('messages.date'):</b> {{ @format_date($transaction->transaction_date) }}<br/>
                         <b>@lang('purchase.payment_status'):</b> {{ __('lang_v1.' . $transaction->payment_status) }}<br>
+                        @if(in_array($transaction->type, ['sell', 'sell_return']) && !empty($transaction->vat_amount))
+                            <b>VAT @if($transaction->vat_type === 'percentage')({{ rtrim(rtrim(number_format((float) $transaction->vat_rate, 2, '.', ''), '0'), '.') }}%)@elseif($transaction->vat_type === 'flat')(Flat)@endif:</b>
+                            <span class="display_currency" data-currency_symbol="true">{{ $transaction->vat_amount }}</span><br>
+                        @endif
                     </div>
                 </div>
             @endif

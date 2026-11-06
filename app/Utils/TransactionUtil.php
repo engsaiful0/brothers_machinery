@@ -984,7 +984,7 @@ class TransactionUtil extends Util
      * @param  string  $receipt_printer_type
      * @return array
      */
-    public function getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type)
+    public function getReceiptDetails($transaction_id, $location_id, $invoice_layout, $business_details, $location_details, $receipt_printer_type, $force_product_details = false)
     {
         $il = $invoice_layout;
 
@@ -1291,6 +1291,10 @@ class TransactionUtil extends Util
         }
 
         $output['delivery_challan_no'] = $transaction->delivery_challan_no;
+        $delivery_person = $transaction->delivery_person_user;
+        $output['delivery_person'] = $delivery_person
+            ? trim(implode(' ', array_filter([$delivery_person->surname, $delivery_person->first_name, $delivery_person->last_name])))
+            : '';
         $output['purchase_order_no'] = $transaction->purchase_order_no;
         $output['purchase_order_date'] = ! empty($transaction->purchase_order_date)
             ? $this->format_date($transaction->purchase_order_date, false, $business_details) : null;
@@ -2132,7 +2136,7 @@ class TransactionUtil extends Util
                 //Field for 1st column
                 'name' => $product->name,
                 'part_number' => ! empty($product->part_number) ? $product->part_number : '',
-                'product_description' => (! empty($show_product_description) || in_array($il->design, ['brothers-machinery', 'classic'], true)) ? $product->product_description : null,
+                'product_description' => ($force_product_details || ! empty($show_product_description) || in_array($il->design, ['brothers-machinery', 'classic'], true)) ? $product->product_description : null,
                 'variation' => (empty($variation->name) || $variation->name == 'DUMMY') ? '' : $variation->name,
                 'product_variation' => (empty($product_variation->name) || $product_variation->name == 'DUMMY') ? '' : $product_variation->name,
                 //Field for 2nd column
@@ -2222,10 +2226,10 @@ class TransactionUtil extends Util
 
             $line_array['total_line_discount'] = $this->num_f($line_array['line_discount_uf'] * $line_array['quantity_uf'], false, $business_details);
 
-            if ($il->show_brand == 1 || in_array($il->design, ['brothers-machinery', 'classic'], true)) {
+            if ($force_product_details || $il->show_brand == 1 || in_array($il->design, ['brothers-machinery', 'classic'], true)) {
                 $line_array['brand'] = ! empty($brand->name) ? $brand->name : '';
             }
-            if ($il->show_sku == 1 || in_array($il->design, ['brothers-machinery', 'classic'], true)) {
+            if ($force_product_details || $il->show_sku == 1 || in_array($il->design, ['brothers-machinery', 'classic'], true)) {
                 $line_array['sub_sku'] = ! empty($variation->sub_sku) ? $variation->sub_sku : '';
             }
             if ($il->show_image == 1) {
