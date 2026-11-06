@@ -83,7 +83,7 @@ $(document).ready(function() {
     });
 
     //get customer
-    if (!$('select#customer_id').data('group-filtered')) $('select#customer_id').select2({
+    if ($('select#customer_id').attr('data-group-filtered') !== '1') $('select#customer_id').select2({
         ajax: {
             url: '/contacts/customers',
             dataType: 'json',
@@ -2543,6 +2543,7 @@ function reset_pos_form(){
 }
 
 function set_default_customer() {
+    if ($('select#customer_id').attr('data-group-filtered') === '1') return;
     var default_customer_id = $('#default_customer_id').val();
     var default_customer_name = $('#default_customer_name').val();
     var default_customer_balance = $('#default_customer_balance').val();

@@ -937,18 +937,20 @@
 	<script>
 	$(function () {
 		const group = $('#customer_group_id'), customer = $('#customer_id'), person = $('#contact_person_id');
+		const customersUrl = @json(url('/sales/customer-groups'));
+		const contactPersonsUrl = @json(url('/sales/customers'));
 		function clearPerson() { person.empty().append(new Option('Select contact person', '')); $('#contact_person_email,#contact_person_mobile').val(''); }
 		group.on('change', function () {
 			customer.empty().append(new Option('Select customer', '')).trigger('change'); clearPerson();
 			if (!this.value) return;
-			$.getJSON('/sales/customer-groups/' + this.value + '/customers', function (rows) { rows.forEach(row => customer.append(new Option(row.name + (row.supplier_business_name ? ' (' + row.supplier_business_name + ')' : ''), row.id))); });
+			$.getJSON(customersUrl + '/' + encodeURIComponent(this.value) + '/customers', function (rows) { rows.forEach(row => customer.append(new Option(row.name + (row.supplier_business_name ? ' (' + row.supplier_business_name + ')' : ''), row.id))); });
 		});
-		customer.on('change', function () { clearPerson(); if (!this.value) return; $.getJSON('/sales/customers/' + this.value + '/contact-persons', function (rows) { rows.forEach(row => person.append(new Option(row.name, row.id))); }); });
+		customer.on('change', function () { clearPerson(); if (!this.value) return; $.getJSON(contactPersonsUrl + '/' + encodeURIComponent(this.value) + '/contact-persons', function (rows) { rows.forEach(row => person.append(new Option(row.name, row.id))); }); });
 		person.on('change', function () { const row = this.selectedOptions[0]; $('#contact_person_email').val(row ? $(row).data('email') || '' : ''); });
 		person.on('change', function () { if (!this.value) return; $.getJSON('/sales/customers/' + customer.val() + '/contact-persons', function (rows) { const row = rows.find(item => String(item.id) === String(person.val())); $('#contact_person_email').val(row ? row.email : ''); $('#contact_person_mobile').val(row ? row.mobile : ''); }); });
 	});
 	</script>
-	<script src="{{ asset('js/pos.js?v=' . $asset_v) }}"></script>
+	<script src="{{ asset('js/pos.js?v=' . $asset_v . '&group_filter=1') }}"></script>
 	<script src="{{ asset('js/product.js?v=' . $asset_v) }}"></script>
 	<script src="{{ asset('js/opening_stock.js?v=' . $asset_v) }}"></script>
 
