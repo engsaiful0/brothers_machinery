@@ -1335,6 +1335,10 @@ class SellController extends Controller
                                     <a href="#" class="print-invoice" data-href="'.route('sell.printInvoice', [$row->id]).'"><i class="fas fa-print" aria-hidden="true"></i>'.__('messages.print').'</a>
                                 </li>';
 
+                        $html .= '<li>
+                                    <a href="'.route('quotation.print', [$row->id]).'" target="_blank"><i class="fas fa-print" aria-hidden="true"></i> Print Quotation</a>
+                                </li>';
+
                         if (config('constants.enable_download_pdf')) {
                             $sub_status = $row->sub_status == 'proforma' ? 'proforma' : '';
                             $html .= '<li>

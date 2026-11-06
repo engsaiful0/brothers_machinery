@@ -439,6 +439,32 @@ class BusinessController extends Controller
             $business_id = request()->session()->get('user.business_id');
             $business = Business::where('id', $business_id)->first();
 
+            // Quotation print branding is stored in existing business common_settings.
+            $request->validate([
+                'common_settings.quotation_company_name' => 'nullable|string|max:255',
+                'common_settings.quotation_address' => 'nullable|string|max:1000',
+                'common_settings.quotation_mobile' => 'nullable|string|max:100',
+                'common_settings.quotation_email' => 'nullable|email|max:255',
+                'common_settings.quotation_website' => 'nullable|string|max:255',
+            ]);
+            $common_settings = $business->common_settings ?: [];
+            foreach (['bd_logo', 'atlas_logo', 'footer_image'] as $image_key) {
+                $input_key = 'quotation_'.$image_key.'_file';
+                if ($request->hasFile($input_key)) {
+                    $request->validate([$input_key => 'image|mimes:jpg,jpeg,png,gif,webp|max:5120']);
+                    $image_name = $this->businessUtil->uploadFile($request, $input_key, 'quotation_branding', 'image');
+                    if (!empty($image_name)) {
+                        $common_settings['quotation_'.$image_key] = $image_name;
+                    }
+                } elseif ($request->boolean('remove_quotation_'.$image_key)) {
+                    unset($common_settings['quotation_'.$image_key]);
+                }
+            }
+            foreach (['company_name', 'address', 'mobile', 'email', 'website'] as $text_key) {
+                $common_settings['quotation_'.$text_key] = $request->input('common_settings.quotation_'.$text_key);
+            }
+            $business_details['common_settings'] = $common_settings;
+
             //Update business settings
             if (! empty($business_details['logo'])) {
                 $business->logo = $business_details['logo'];
@@ -475,8 +501,6 @@ class BusinessController extends Controller
             $business_details['pos_settings'] = json_encode($pos_settings);
 
             $business_details['custom_labels'] = json_encode($business_details['custom_labels']);
-
-            $business_details['common_settings'] = ! empty($request->input('common_settings')) ? $request->input('common_settings') : [];
 
             //Enabled modules
             $enabled_modules = $request->input('enabled_modules');

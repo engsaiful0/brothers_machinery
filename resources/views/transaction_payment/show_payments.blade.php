@@ -113,17 +113,24 @@
                     <div class="col-sm-4 invoice-col">
                         @lang('contact.customer'):
                         <address>
-                            <strong>{{ $transaction->contact->name }}</strong>
+                            <strong>{{ optional($transaction->contact)->name ?: '--' }}</strong>
 
-                            {!! $transaction->contact->contact_address !!}
-                            @if(!empty($transaction->contact->tax_number))
+                            {!! optional($transaction->contact)->contact_address !!}
+                            @if(!empty(optional($transaction->contact)->tax_number))
                                 <br>@lang('contact.tax_no'): {{$transaction->contact->tax_number}}
                             @endif
-                            @if(!empty($transaction->contact->mobile))
+                            @if(!empty(optional($transaction->contact)->mobile))
                                 <br>@lang('contact.mobile'): {{$transaction->contact->mobile}}
                             @endif
-                            @if(!empty($transaction->contact->email))
+                            @if(!empty(optional($transaction->contact)->email))
                                 <br>@lang('business.email'): {{$transaction->contact->email}}
+                            @endif
+                            @if(in_array($transaction->type, ['sell', 'sell_return']))
+                                <br><b>Group Name:</b>
+                                {{ !empty($transaction->customer_group_id) ? (\App\CustomerGroup::where('business_id', $transaction->business_id)->where('id', $transaction->customer_group_id)->value('name') ?: '--') : '--' }}
+                                <br><b>Contact Person:</b> {{ optional($transaction->contact_person)->name ?: '--' }}
+                                <br><b>Mobile:</b> {{ $transaction->contact_person_mobile ?: (optional($transaction->contact_person)->mobile ?: '--') }}
+                                <br><b>Email:</b> {{ $transaction->contact_person_email ?: (optional($transaction->contact_person)->email ?: '--') }}
                             @endif
                         </address>
                     </div>
@@ -134,7 +141,7 @@
                         <b>@lang('sale.invoice_no'):</b> #{{ $transaction->invoice_no }}<br/>
                         <b>@lang('messages.date'):</b> {{ @format_date($transaction->transaction_date) }}<br/>
                         <b>@lang('purchase.payment_status'):</b> {{ __('lang_v1.' . $transaction->payment_status) }}<br>
-                        @if(in_array($transaction->type, ['sell', 'sell_return']) && !empty($transaction->vat_amount))
+                        @if(in_array($transaction->type, ['sell', 'sell_return']))
                             <b>VAT @if($transaction->vat_type === 'percentage')({{ rtrim(rtrim(number_format((float) $transaction->vat_rate, 2, '.', ''), '0'), '.') }}%)@elseif($transaction->vat_type === 'flat')(Flat)@endif:</b>
                             <span class="display_currency" data-currency_symbol="true">{{ $transaction->vat_amount }}</span><br>
                         @endif

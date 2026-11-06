@@ -2885,13 +2885,22 @@ class SellPosController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $sub_status = !empty(request()->input('sub_status')) ? request()->input('sub_status') : '';
+        $transaction = Transaction::where('business_id', $business_id)
+            ->where('id', $id)
+            ->where('is_quotation', 1)
+            ->with(['contact', 'contact_person', 'sell_lines.product', 'sell_lines.variations'])
+            ->firstOrFail();
         $receipt_contents = $this->transactionUtil->getPdfContentsForGivenTransaction($business_id, $id);
         $receipt_details = $receipt_contents['receipt_details'];
         $location_details = $receipt_contents['location_details'];
+        $customer_group_name = !empty($transaction->customer_group_id)
+            ? \App\CustomerGroup::where('business_id', $business_id)->where('id', $transaction->customer_group_id)->value('name')
+            : null;
 
         //Generate pdf
-        $body = view('sale_pos.receipts.download_quotation_pdf')
-            ->with(compact('receipt_details', 'location_details', 'sub_status'))
+        $branding = $this->quotationPrintBranding($business_id, $location_details);
+        $body = view('sale_pos.receipts.quotation_print')
+            ->with(compact('receipt_details', 'location_details', 'sub_status', 'transaction', 'branding', 'customer_group_name'))
             ->render();
         $pdf_name = (!empty($sub_status) && $sub_status == 'proforma') ? __('lang_v1.proforma_invoice') : 'QUOTATION';
         $mpdf = new \Mpdf\Mpdf(['tempDir' => public_path('uploads/temp'),
@@ -2911,6 +2920,58 @@ class SellPosController extends Controller
         $mpdf->SetTitle($pdf_name . '-' . $receipt_details->invoice_no . '.pdf');
         $mpdf->WriteHTML($body);
         $mpdf->Output($pdf_name . '-' . $receipt_details->invoice_no . '.pdf', 'I');
+    }
+
+    /** Render the standalone quotation layout for browser printing. */
+    public function printQuotation($id)
+    {
+        $sub_status = '';
+        $business_id = request()->session()->get('user.business_id');
+        $transaction = Transaction::where('business_id', $business_id)
+            ->where('id', $id)
+            ->where('is_quotation', 1)
+            ->with(['contact', 'contact_person', 'sell_lines.product', 'sell_lines.variations'])
+            ->firstOrFail();
+
+        $receipt_contents = $this->transactionUtil->getPdfContentsForGivenTransaction($business_id, $id);
+        $receipt_details = $receipt_contents['receipt_details'];
+        $location_details = $receipt_contents['location_details'];
+        $branding = $this->quotationPrintBranding($business_id, $location_details);
+        $customer_group_name = !empty($transaction->customer_group_id)
+            ? \App\CustomerGroup::where('business_id', $business_id)->where('id', $transaction->customer_group_id)->value('name')
+            : null;
+
+        return view('sale_pos.receipts.quotation_print', compact(
+            'receipt_details', 'location_details', 'sub_status', 'transaction', 'branding', 'customer_group_name'
+        ))->with('browser_print', true);
+    }
+
+    private function quotationPrintBranding($business_id, $location_details)
+    {
+        $business = \App\Business::findOrFail($business_id);
+        $settings = $business->common_settings ?: [];
+        $fileUrl = function ($key) use ($settings) {
+            $file = $settings['quotation_'.$key] ?? null;
+            return $file && file_exists(public_path('uploads/quotation_branding/'.$file))
+                ? asset('uploads/quotation_branding/'.$file)
+                : null;
+        };
+
+        return [
+            'primary_logo' => !empty($business->logo) && file_exists(public_path('uploads/business_logos/'.$business->logo))
+                ? asset('uploads/business_logos/'.$business->logo) : null,
+            'bd_logo' => $fileUrl('bd_logo'),
+            'atlas_logo' => $fileUrl('atlas_logo'),
+            'footer_image' => $fileUrl('footer_image'),
+            'company_name' => $settings['quotation_company_name'] ?? $business->name,
+            'address' => $settings['quotation_address'] ?? implode(', ', array_filter([
+                $location_details->landmark, $location_details->city, $location_details->state,
+                $location_details->zip_code, $location_details->country,
+            ])),
+            'mobile' => $settings['quotation_mobile'] ?? $location_details->mobile,
+            'email' => $settings['quotation_email'] ?? optional($business->owner)->email,
+            'website' => $settings['quotation_website'] ?? $location_details->website,
+        ];
     }
 
     /**
