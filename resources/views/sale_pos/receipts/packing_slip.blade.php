@@ -12,9 +12,7 @@
             $packing_slip_seen_names[] = $normalized_name;
         }
     }
-    $packing_slip_display_names = array_values(array_filter($packing_slip_unique_names, function ($name) {
-        return strcasecmp($name, 'Brothers Machinery') !== 0;
-    }));
+    $packing_slip_display_names = $packing_slip_unique_names;
     $packing_slip_display_name = implode(', ', $packing_slip_display_names);
     $packing_slip_address = trim((string) ($receipt_details->address ?? ''));
     foreach ($packing_slip_unique_names as $name) {
@@ -170,7 +168,7 @@
 
 	<td class="packing-slip-reference color-555">
 		<p class="salan_info">
-			<strong>Salan No:</strong> {{ $receipt_details->delivery_challan_no ?: '--' }}
+			<strong>Challan No:</strong> {{ $receipt_details->delivery_challan_no ?: '--' }}
 			@if(!empty($receipt_details->date_label))
 				<br><strong>{{ $receipt_details->date_label }}</strong> {{ $receipt_details->invoice_date }}
 			@endif

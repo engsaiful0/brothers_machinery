@@ -58,7 +58,7 @@
 <div class="row">
 	<div class="col-md-4 col-sm-6">
 		<div class="form-group">
-			{!! Form::label('delivery_challan_no', 'Salan No:') !!}
+			{!! Form::label('delivery_challan_no', 'Challan No:') !!}
 			{!! Form::text('delivery_challan_no', old('delivery_challan_no', !empty($transaction) ? $transaction->delivery_challan_no : null), ['class' => 'form-control', 'maxlength' => 191, 'placeholder' => 'Auto-generated on save (optional)']) !!}
 		</div>
 	</div>
