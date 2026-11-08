@@ -12,13 +12,16 @@
             $packing_slip_seen_names[] = $normalized_name;
         }
     }
-    $packing_slip_display_name = implode(', ', $packing_slip_unique_names);
+    $packing_slip_display_names = array_values(array_filter($packing_slip_unique_names, function ($name) {
+        return strcasecmp($name, 'Brothers Machinery') !== 0;
+    }));
+    $packing_slip_display_name = implode(', ', $packing_slip_display_names);
     $packing_slip_address = trim((string) ($receipt_details->address ?? ''));
     foreach ($packing_slip_unique_names as $name) {
-        $packing_slip_address = preg_replace('/^\s*'.preg_quote($name, '/').'\s*,\s*/i', '', $packing_slip_address, 1);
+        $packing_slip_address = preg_replace('/^\s*'.preg_quote($name, '/').'\b(?:\s*[,;:|–—-]\s*|\s*<br\s*\/?\s*>\s*)?/i', '', $packing_slip_address, 1);
     }
     $packing_shipping_address = trim((string) ($receipt_details->shipping_address ?? ''));
-    $packing_shipping_address = preg_replace('/^(?:\s*Brothers Machinery\s*,\s*)+/i', '', $packing_shipping_address);
+    $packing_shipping_address = preg_replace('/^\s*Brothers Machinery\b(?:\s*[,;:|–—-]\s*|\s*<br\s*\/?\s*>\s*)?/i', '', $packing_shipping_address);
 @endphp
 <style>
     .packing-slip {
@@ -135,7 +138,7 @@
 		@endif
 
 		<!-- Shop & Location Name  -->
-		@if(!empty($packing_slip_display_name))
+		@if(!empty($packing_slip_display_name) || !empty($packing_slip_address) || !empty($receipt_details->contact) || !empty($receipt_details->website) || !empty($receipt_details->tax_info1) || !empty($receipt_details->tax_info2) || !empty($receipt_details->location_custom_fields))
 			<p>
 				<span class="packing-slip-business-name">{{$packing_slip_display_name}}</span>
 				@if(!empty($packing_slip_address))

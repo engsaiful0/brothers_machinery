@@ -1,3 +1,8 @@
+@php
+	$delivery_note_business_name = trim((string) ($receipt_details->display_name ?? ''));
+	$delivery_note_address = trim((string) ($receipt_details->address ?? ''));
+	$delivery_note_address = preg_replace('/^\s*Brothers Machinery\b(?:\s*[,;:|\-]\s*|\s*<br\s*\/?\s*>\s*)?/i', '', $delivery_note_address);
+@endphp
 <table style="width:100%;">
 	<thead>
 		<tr>
@@ -27,11 +32,11 @@
 		@endif
 
 		<!-- Shop & Location Name  -->
-		@if(!empty($receipt_details->display_name))
+		@if(!empty($delivery_note_business_name) || !empty($delivery_note_address) || !empty($receipt_details->contact) || !empty($receipt_details->website) || !empty($receipt_details->tax_info1) || !empty($receipt_details->tax_info2) || !empty($receipt_details->location_custom_fields))
 			<p><span style="font-size:24px; font-weight:900; color:black;">
-				{{$receipt_details->display_name}}</span>
-				@if(!empty($receipt_details->address))
-					<br/>{!! $receipt_details->address !!}
+				{{$delivery_note_business_name}}</span>
+				@if(!empty($delivery_note_address))
+					<br/>{!! $delivery_note_address !!}
 				@endif
 
 				@if(!empty($receipt_details->contact))
@@ -80,13 +85,11 @@
 		
 	</div>
 	<div class="col-md-6 invoice-col width-50 word-wrap">
-		@if(!empty($receipt_details->customer_label))
-			<b>{{ $receipt_details->customer_label }}</b><br/>
-		@endif
-
-		@if(!empty($receipt_details->customer_info))
-			{!! $receipt_details->customer_info !!}
-		@endif
+		<strong>Group Name:</strong> {{ $receipt_details->packing_customer_group_name ?: '--' }}<br/>
+		<strong>Customer Name:</strong> {{ $receipt_details->packing_customer_name ?: ($receipt_details->customer_name ?? '--') }}<br/>
+		<strong>Contact Person:</strong> {{ $receipt_details->customer_contact_person_name ?: '--' }}<br/>
+		<strong>Mobile:</strong> {{ $receipt_details->packing_contact_mobile ?: ($receipt_details->customer_mobile ?? '--') }}<br/>
+		<strong>Email:</strong> {{ $receipt_details->packing_contact_email ?: ($receipt_details->customer_email ?? '--') }}
 		@if(!empty($receipt_details->client_id_label))
 			<br/>
 			<strong>{{ $receipt_details->client_id_label }}</strong> {{ $receipt_details->client_id }}
