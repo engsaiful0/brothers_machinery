@@ -81,25 +81,19 @@
         @endif
       </div>
       <div class="@if(!empty($export_custom_fields)) col-sm-3 @else col-sm-4 @endif">
+        <b>@lang('lang_v1.customer_group'):</b> {{ $customer_group_name ?? '--' }}<br>
+        <b>{{ __('sale.customer_name') }}:</b> {{ optional($sell->contact)->name ?? '--' }}<br>
+        <b>Contact Person:</b> {{ optional($sell->contact_person)->name ?? '--' }}<br>
+        <b>{{ __('contact.mobile') }}:</b> {{ $sell->contact_person_mobile ?: (optional($sell->contact_person)->mobile ?: (optional($sell->contact)->mobile ?? '--')) }}<br>
+        <b>{{ __('business.email') }}:</b> {{ $sell->contact_person_email ?: (optional($sell->contact_person)->email ?: (optional($sell->contact)->email ?? '--')) }}<br>
         @if(!empty($sell->contact->supplier_business_name))
-          {{ $sell->contact->supplier_business_name }}<br>
-        @endif
-        <b>{{ __('sale.customer_name') }}:</b> {{ $sell->contact->name }}<br>
-        @if(!empty($customer_group_name))<b>@lang('lang_v1.customer_group'):</b> {{ $customer_group_name }}<br>@endif
-        @if(!empty($sell->contact_person_id))
-          <b>Contact Person:</b> {{ $sell->contact_person->name ?? '' }}<br>
-          <b>Email:</b> {{ $sell->contact_person_email ?? '' }}<br>
-          <b>Mobile Number:</b> {{ $sell->contact_person_mobile ?? '' }}<br>
+          <b>Business:</b> {{ $sell->contact->supplier_business_name }}<br>
         @endif
         <b>{{ __('business.address') }}:</b><br>
         @if(!empty($sell->billing_address()))
           {{$sell->billing_address()}}
         @else
           {!! $sell->contact->contact_address !!}
-          @if($sell->contact->mobile)
-          <br>
-              {{__('contact.mobile')}}: {{ $sell->contact->mobile }}
-          @endif
           @if($sell->contact->alternate_number)
           <br>
               {{__('contact.alternate_contact_number')}}: {{ $sell->contact->alternate_number }}
@@ -107,10 +101,6 @@
           @if($sell->contact->landline)
             <br>
               {{__('contact.landline')}}: {{ $sell->contact->landline }}
-          @endif
-          @if($sell->contact->email)
-            <br>
-              {{__('business.email')}}: {{ $sell->contact->email }}
           @endif
         @endif
         
