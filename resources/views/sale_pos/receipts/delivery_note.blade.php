@@ -170,31 +170,27 @@
 		<table class="table table-bordered table-no-top-cell-border">
 			<thead>
 				<tr style="background-color: #357ca5 !important; color: white !important; font-size: 20px !important" class="table-no-side-cell-border table-no-top-cell-border text-center">
-					<td style="background-color: #357ca5 !important; color: white !important; width: 5% !important">#</td>
-					
-					<td style="background-color: #357ca5 !important; color: white !important; width: 65% !important">
-						{{$receipt_details->table_product_label}}
+					<td style="background-color: #357ca5 !important; color: white !important; width: 75% !important">
+						Product
 					</td>
-					
-					<td style="background-color: #357ca5 !important; color: white !important; width: 30% !important;">
-						{{$receipt_details->table_qty_label}}
+					<td style="background-color: #357ca5 !important; color: white !important; width: 25% !important;">
+						Quantity
 					</td>
 				</tr>
 			</thead>
 			<tbody>
 				@foreach($receipt_details->lines as $line)
+					@php
+						$product_name = trim(($line['name'] ?? '').' '.($line['product_variation'] ?? '').' '.($line['variation'] ?? ''));
+						$product_name = preg_replace('/\bBD\s*-\s*\d+\s*[A-Z]?\b/i', '', $product_name);
+						$product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name), " \t\n\r,;:-");
+					@endphp
 					<tr>
-						<td class="text-center">
-							{{$loop->iteration}}
+						<td style="word-break: break-word;">
+							<strong>{{ $product_name }}</strong>
+							@if(!empty($line['brand']))<br>Brand Name: {{ $line['brand'] }}@endif
+							@if(!empty($line['product_description']))<br>Product Description: {{ strip_tags($line['product_description']) }}@endif
 						</td>
-						<td style="word-break: break-all;">
-                            {{$line['name']}} {{$line['product_variation']}} {{$line['variation']}} 
-                            @if(!empty($line['sub_sku'])), {{$line['sub_sku']}} @endif @if(!empty($line['brand'])), {{$line['brand']}} @endif
-                            @if(!empty($line['product_custom_fields'])), {{$line['product_custom_fields']}} @endif
-                            @if(!empty($line['sell_line_note']))({!!$line['sell_line_note']!!}) @endif
-                            @if(!empty($line['lot_number']))<br> {{$line['lot_number_label']}}:  {{$line['lot_number']}} @endif 
-                            @if(!empty($line['product_expiry'])), {{$line['product_expiry_label']}}:  {{$line['product_expiry']}} @endif 
-                        </td>
 						<td class="text-right">
 							{{$line['quantity']}} {{$line['units']}}
 						</td>
@@ -202,14 +198,9 @@
 					@if(!empty($line['modifiers']))
 						@foreach($line['modifiers'] as $modifier)
 							<tr>
-								<td class="text-center">
-									&nbsp;
-								</td>
 								<td>
-		                            {{$modifier['name']}} {{$modifier['variation']}} 
-		                            @if(!empty($modifier['sub_sku'])), {{$modifier['sub_sku']}} @endif 
-		                            @if(!empty($modifier['sell_line_note']))({!!$modifier['sell_line_note']!!}) @endif 
-		                        </td>
+			                    {{ trim(preg_replace('/\s{2,}/u', ' ', preg_replace('/\bBD\s*-\s*\d+\s*[A-Z]?\b/i', '', trim(($modifier['name'] ?? '').' '.($modifier['variation'] ?? ''))))) }}
+				                </td>
 								<td class="text-right">
 									{{$modifier['quantity']}} {{$modifier['units']}}
 								</td>
@@ -224,7 +215,6 @@
 
 				@for ($i = $lines; $i < 1; $i++)
     				<tr>
-    					<td>&nbsp;</td>
     					<td>&nbsp;</td>
     					<td>&nbsp;</td>
     				</tr>
