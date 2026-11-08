@@ -17,6 +17,8 @@
     foreach ($packing_slip_unique_names as $name) {
         $packing_slip_address = preg_replace('/^\s*'.preg_quote($name, '/').'\s*,\s*/i', '', $packing_slip_address, 1);
     }
+    $packing_shipping_address = trim((string) ($receipt_details->shipping_address ?? ''));
+    $packing_shipping_address = preg_replace('/^(?:\s*Brothers Machinery\s*,\s*)+/i', '', $packing_shipping_address);
 @endphp
 <style>
     .packing-slip {
@@ -55,14 +57,19 @@
     .packing-slip-business { margin-bottom: 18px !important; }
     .packing-slip-business img { max-height: 80px; max-width: 100%; width: auto; margin-bottom: 8px; }
     .packing-slip-business-name { font-size: 20px; font-weight: bold; color: #222; }
-    .packing-slip-reference p { padding-bottom: 8px; border-bottom: 1px solid #ddd; }
+    .packing-slip-reference p { padding-bottom: 8px; border: 0; }
     .packing-slip-parties {
-        padding: 16px 0;
         margin-bottom: 20px !important;
-        border-top: 1px solid #ddd;
-        border-bottom: 1px solid #ddd;
+        border: 0;
         page-break-inside: avoid;
     }
+    .packing-slip-parties td { padding-top: 16px; }
+    .packing-slip-info-table { width: 100%; border: 0; border-collapse: collapse; table-layout: fixed; }
+    .packing-slip-info-table td { width: 50%; border: 0; padding: 0 16px 0 0; vertical-align: top; }
+    .packing-slip-info-table td + td { padding: 0 0 0 16px; }
+    .packing-slip-reference { text-align: left; }
+    .salan_info { margin: 0 0 8px; padding: 0; font-size: 18px; font-weight: normal; line-height: 1.5; }
+    .salan_info strong { font-weight: bold; }
     .packing-slip-items { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0; }
     .packing-slip-items th, .packing-slip-items td {
         padding: 10px 12px;
@@ -83,7 +90,7 @@
     .packing-slip-items .packing-slip-quantity { width: 16%; text-align: right; }
     .packing-slip-product-name { font-weight: bold; }
     .packing-slip-product-detail { margin-top: 2px; font-size: 12px; }
-    .packing-slip-invoice-no, .packing-slip-date { font-size: 18px; }
+    .packing-slip-reference-table { font-size: 18px; }
     .packing-slip-signature { padding-top: 86px; margin-bottom: 20px !important; page-break-inside: avoid; }
     .packing-slip-signature b { display: inline-block; padding-top: 8px; border-top: 1px solid #555; min-width: 180px; }
     .packing-slip .center-block { display: block; max-width: 100%; margin: 0 auto; }
@@ -118,10 +125,9 @@
 			<td>
 
 <!-- business information here -->
-<div class="row invoice-info packing-slip-business">
-
-	<div class="col-md-6 invoice-col width-50 color-555">
-		
+	<table class="packing-slip-info-table packing-slip-business">
+	<tr>
+	<td class="color-555">
 		<!-- Logo -->
 		@if(!empty($receipt_details->logo))
 			<img src="{{$receipt_details->logo}}" class="img">
@@ -144,11 +150,11 @@
 					<br/>{{ $receipt_details->website }}
 				@endif
 
-				@if(!empty($receipt_details->tax_info1))
+				@if(!empty($receipt_details->tax_info1) && stripos((string) ($receipt_details->tax_label1 ?? ''), 'vat') === false)
 					<br/>{{ $receipt_details->tax_label1 }} {{ $receipt_details->tax_info1 }}
 				@endif
 
-				@if(!empty($receipt_details->tax_info2))
+				@if(!empty($receipt_details->tax_info2) && stripos((string) ($receipt_details->tax_label2 ?? ''), 'vat') === false)
 					<br/>{{ $receipt_details->tax_label2 }} {{ $receipt_details->tax_info2 }}
 				@endif
 
@@ -157,40 +163,32 @@
 				@endif
 			</p>
 		@endif
-	</div>
+	</td>
 
-	<div class="col-md-6 invoice-col width-50 packing-slip-reference">
-
-		<p class="text-right font-30">
+	<td class="packing-slip-reference color-555">
+		<p class="salan_info">
 			<strong>Salan No:</strong> {{ $receipt_details->delivery_challan_no ?: '--' }}
+			@if(!empty($receipt_details->date_label))
+				<br><strong>{{ $receipt_details->date_label }}</strong> {{ $receipt_details->invoice_date }}
+			@endif
+			<br><strong>@lang('sale.invoice_no'):</strong> {{ $receipt_details->invoice_no }}
 		</p>
-		<p class="text-right packing-slip-invoice-no">
-			<strong>@lang('sale.invoice_no'):</strong> {{$receipt_details->invoice_no}}
-		</p>
-		<!-- Date-->
-		@if(!empty($receipt_details->date_label))
-			<p class="text-right font-23 color-555 packing-slip-date">
-				<span class="pull-left">
-					{{$receipt_details->date_label}}
-				</span>
+	</td>
+	</tr>
+	</table>
 
-				{{$receipt_details->invoice_date}}
-			</p>
-		@endif
-	</div>
-</div>
-
-<div class="row invoice-info color-555 packing-slip-parties">
-	<div class="col-md-6 invoice-col width-50 word-wrap">
+	<table class="packing-slip-info-table color-555 packing-slip-parties">
+	<tr>
+	<td class="word-wrap">
 		<strong>Group Name:</strong> {{ $receipt_details->packing_customer_group_name ?: '--' }}<br>
 		<strong>Customer Name:</strong> {{ $receipt_details->packing_customer_name ?: '--' }}<br>
 		<strong>Contact Person:</strong> {{ $receipt_details->customer_contact_person_name ?: '--' }}<br>
 		<strong>Mobile:</strong> {{ $receipt_details->packing_contact_mobile ?: '--' }}<br>
 		<strong>Email:</strong> {{ $receipt_details->packing_contact_email ?: '--' }}
-	</div>
-	<div class="col-md-6 invoice-col width-50 word-wrap">
+	</td>
+	<td class="word-wrap">
 		<strong>@lang('lang_v1.shipping_address'):</strong><br>
-		{!! $receipt_details->shipping_address !!}
+		{!! $packing_shipping_address !!}
 		@if(!empty($receipt_details->shipping_custom_field_1_label))
 			<br><strong>{!!$receipt_details->shipping_custom_field_1_label!!} :</strong> {!!$receipt_details->shipping_custom_field_1_value ?? ''!!}
 		@endif
@@ -210,8 +208,9 @@
 		@if(!empty($receipt_details->shipping_custom_field_5_label))
 			<br><strong>{!!$receipt_details->shipping_custom_field_2_label!!}:</strong> {!!$receipt_details->shipping_custom_field_5_value ?? ''!!}
 		@endif
-	</div>
-</div>
+	</td>
+	</tr>
+	</table>
 
 <div class="row color-555">
 	<div class="col-xs-12">
@@ -274,8 +273,9 @@
 	</div>
 	<div class="col-md-6 invoice-col width-50 text-right">
 		<b>Delivery Person: {{ $receipt_details->delivery_person ?: '--' }}</b>
-	</div>
-</div>
+	</td>
+	</tr>
+	</table>
 
 {{-- Barcode --}}
 @if($receipt_details->show_barcode)
