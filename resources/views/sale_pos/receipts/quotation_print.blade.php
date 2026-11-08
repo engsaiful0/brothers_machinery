@@ -21,11 +21,12 @@
         .info { margin: 10px 0 14px; }
         .info td { width: 50%; padding: 4px 7px; border: 0; }
         .info strong { color: #333; }
-        .items th, .items td { border: 1px solid #777; padding: 6px; vertical-align: top; }
-        .items th { background: #edf1f7; text-align: left; }
-        .number { text-align: right; white-space: nowrap; }
+        .items th, .items td { border: 1px solid #777; padding: 6px; vertical-align: top; text-align: left; }
+        .items th { background: #edf1f7; }
+        .number { white-space: nowrap; }
         .totals { width: 43%; margin: 10px 0 0 auto; }
         .totals td { padding: 4px 6px; }
+        .totals .number { text-align: right; }
         .grand-total { border-top: 2px solid #333; font-size: 14px; font-weight: bold; }
         .terms { margin-top: 12px; white-space: pre-line; }
         .footer-image { position: fixed; bottom: -16mm; left: 0; width: 100%; text-align: center; }
@@ -132,19 +133,21 @@
         $order_tax = (float) ($transaction->tax_amount ?? 0);
         $shipping = (float) ($transaction->shipping_charges ?? 0);
         $packing_charge = (float) ($transaction->packing_charge ?? 0);
+        $amount_in_words = $receipt_details->total_in_words ?: app(\App\Utils\Util::class)->numToWord($grand_total, null, 'indian');
         $vat_label = $transaction->vat_type === 'percentage'
-            ? 'VAT ('.rtrim(rtrim(number_format((float) $transaction->vat_rate, 2, '.', ''), '0'), '.').'%)'
-            : 'VAT (Flat)';
+            ? 'VAT on Total Amount ('.rtrim(rtrim(number_format((float) $transaction->vat_rate, 2, '.', ''), '0'), '.').'%)'
+            : 'VAT on Total Amount';
     @endphp
     <table class="totals">
-        <tr><td>Subtotal</td><td class="number">{{ $currency }}{{ number_format($subtotal, 2) }}</td></tr>
-        @if($discount > 0)<tr><td>Discount{{ $transaction->discount_type === 'percentage' ? ' ('.rtrim(rtrim(number_format($discount_value, 2, '.', ''), '0'), '.').'%)' : '' }}</td><td class="number">- {{ $currency }}{{ number_format($discount, 2) }}</td></tr>@endif
+        <tr><td>Sub Total</td><td class="number">{{ $currency }}{{ number_format($subtotal, 2) }}</td></tr>
+        <tr><td>Discount{{ $transaction->discount_type === 'percentage' && $discount > 0 ? ' ('.rtrim(rtrim(number_format($discount_value, 2, '.', ''), '0'), '.').'%)' : '' }}</td><td class="number">- {{ $currency }}{{ number_format($discount, 2) }}</td></tr>
+        @if(!empty($transaction->vat_type) || $vat > 0)<tr><td>{{ $vat_label }}</td><td class="number">{{ $currency }}{{ number_format($vat, 2) }}</td></tr>@endif
         @if($order_tax > 0)<tr><td>Order Tax ({{ optional($transaction->tax)->name ?: 'Tax' }})</td><td class="number">{{ $currency }}{{ number_format($order_tax, 2) }}</td></tr>@endif
-        @if(!empty($transaction->vat_type))<tr><td>{{ $vat_label }}</td><td class="number">{{ $currency }}{{ number_format($vat, 2) }}</td></tr>@endif
         @if($shipping > 0)<tr><td>Shipping</td><td class="number">{{ $currency }}{{ number_format($shipping, 2) }}</td></tr>@endif
         @if($packing_charge > 0)<tr><td>Packing Charge</td><td class="number">{{ $currency }}{{ number_format($packing_charge, 2) }}</td></tr>@endif
         <tr class="grand-total"><td>Grand Total</td><td class="number">{{ $currency }}{{ number_format($grand_total, 2) }}</td></tr>
     </table>
+    <div class="terms"><strong>In Words:</strong> {{ $amount_in_words }}</div>
 
     @if(!empty($transaction->payment_terms))<div class="terms"><strong>Payment Terms:</strong> {{ $transaction->payment_terms }}</div>@endif
     @if(!empty($transaction->shipping_details))<div class="terms"><strong>Shipping Details:</strong> {{ $transaction->shipping_details }}</div>@endif
