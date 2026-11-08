@@ -2956,6 +2956,13 @@ class SellPosController extends Controller
                 ? asset('uploads/quotation_branding/'.$file)
                 : null;
         };
+        $company_name = $settings['quotation_company_name'] ?? $business->name;
+        $address = $settings['quotation_address'] ?? implode(', ', array_filter([
+            $location_details->landmark, $location_details->city, $location_details->state,
+            $location_details->zip_code, $location_details->country,
+        ]));
+        // The company name is already printed on its own line above the address.
+        $address = preg_replace('/^\s*'.preg_quote($company_name, '/').'\s*,\s*/i', '', trim($address), 1);
 
         return [
             'primary_logo' => !empty($business->logo) && file_exists(public_path('uploads/business_logos/'.$business->logo))
@@ -2963,13 +2970,10 @@ class SellPosController extends Controller
             'bd_logo' => $fileUrl('bd_logo'),
             'atlas_logo' => $fileUrl('atlas_logo'),
             'footer_image' => $fileUrl('footer_image'),
-            'company_name' => $settings['quotation_company_name'] ?? $business->name,
-            'address' => $settings['quotation_address'] ?? implode(', ', array_filter([
-                $location_details->landmark, $location_details->city, $location_details->state,
-                $location_details->zip_code, $location_details->country,
-            ])),
+            'company_name' => $company_name,
+            'address' => $address,
             'mobile' => $settings['quotation_mobile'] ?? $location_details->mobile,
-            'email' => $settings['quotation_email'] ?? optional($business->owner)->email,
+            'email' => $location_details->email ?: ($settings['quotation_email'] ?? optional($business->owner)->email),
             'website' => $settings['quotation_website'] ?? $location_details->website,
         ];
     }
