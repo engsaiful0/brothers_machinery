@@ -331,6 +331,18 @@
                 <td colspan="2" class="brothers-totals-label">NET TOTAL:</td>
                 <td class="brothers-totals-value">{{ $net_total }}</td>
             </tr>
+            @if(isset($receipt_details->total_paid) || isset($receipt_details->total_due))
+                <tr class="brothers-totals-row">
+                    <td colspan="2" class="brothers-totals-spacer"></td>
+                    <td colspan="2" class="brothers-totals-label">PAID AMOUNT:</td>
+                    <td class="brothers-totals-value">{{ $receipt_details->total_paid ?? '0.00' }}</td>
+                </tr>
+                <tr class="brothers-totals-row">
+                    <td colspan="2" class="brothers-totals-spacer"></td>
+                    <td colspan="2" class="brothers-totals-label">DUE AMOUNT:</td>
+                    <td class="brothers-totals-value">{{ $receipt_details->total_due ?? '0.00' }}</td>
+                </tr>
+            @endif
             <tr class="brothers-in-words">
                 <td colspan="5">IN WORDS: {{ $amount_in_words }}</td>
             </tr>

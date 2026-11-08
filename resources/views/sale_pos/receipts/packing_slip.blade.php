@@ -1,3 +1,23 @@
+@php
+    $packing_slip_names = array_filter([
+        trim((string) ($receipt_details->business_name ?? '')),
+        trim((string) ($receipt_details->location_name ?? '')),
+    ]);
+    $packing_slip_unique_names = [];
+    $packing_slip_seen_names = [];
+    foreach ($packing_slip_names as $name) {
+        $normalized_name = mb_strtolower($name);
+        if (!in_array($normalized_name, $packing_slip_seen_names, true)) {
+            $packing_slip_unique_names[] = $name;
+            $packing_slip_seen_names[] = $normalized_name;
+        }
+    }
+    $packing_slip_display_name = implode(', ', $packing_slip_unique_names);
+    $packing_slip_address = trim((string) ($receipt_details->address ?? ''));
+    foreach ($packing_slip_unique_names as $name) {
+        $packing_slip_address = preg_replace('/^\s*'.preg_quote($name, '/').'\s*,\s*/i', '', $packing_slip_address, 1);
+    }
+@endphp
 <style>
     .packing-slip {
         max-width: 210mm;
@@ -63,7 +83,7 @@
     .packing-slip-items .packing-slip-quantity { width: 16%; text-align: right; }
     .packing-slip-product-name { font-weight: bold; }
     .packing-slip-product-detail { margin-top: 2px; font-size: 12px; }
-    .packing-slip-invoice-no { font-size: 12px; }
+    .packing-slip-invoice-no, .packing-slip-date { font-size: 18px; }
     .packing-slip-signature { padding-top: 86px; margin-bottom: 20px !important; page-break-inside: avoid; }
     .packing-slip-signature b { display: inline-block; padding-top: 8px; border-top: 1px solid #555; min-width: 180px; }
     .packing-slip .center-block { display: block; max-width: 100%; margin: 0 auto; }
@@ -109,11 +129,11 @@
 		@endif
 
 		<!-- Shop & Location Name  -->
-		@if(!empty($receipt_details->display_name))
+		@if(!empty($packing_slip_display_name))
 			<p>
-				<span class="packing-slip-business-name">{{$receipt_details->display_name}}</span>
-				@if(!empty($receipt_details->address))
-					<br/>{!! $receipt_details->address !!}
+				<span class="packing-slip-business-name">{{$packing_slip_display_name}}</span>
+				@if(!empty($packing_slip_address))
+					<br/>{!! $packing_slip_address !!}
 				@endif
 
 				@if(!empty($receipt_details->contact))
@@ -149,7 +169,7 @@
 		</p>
 		<!-- Date-->
 		@if(!empty($receipt_details->date_label))
-			<p class="text-right font-23 color-555">
+			<p class="text-right font-23 color-555 packing-slip-date">
 				<span class="pull-left">
 					{{$receipt_details->date_label}}
 				</span>
