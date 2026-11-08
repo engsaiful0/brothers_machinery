@@ -1331,9 +1331,11 @@ class SellController extends Controller
                             }
                         }
 
-                        $html .= '<li>
-                                    <a href="#" class="print-invoice" data-href="'.route('sell.printInvoice', [$row->id]).'"><i class="fas fa-print" aria-hidden="true"></i>'.__('messages.print').'</a>
-                                </li>';
+                        if ($row->sub_status != 'quotation') {
+                            $html .= '<li>
+                                        <a href="#" class="print-invoice" data-href="'.route('sell.printInvoice', [$row->id]).'"><i class="fas fa-print" aria-hidden="true"></i>'.__('messages.print').'</a>
+                                    </li>';
+                        }
 
                         $html .= '<li>
                                     <a href="'.route('quotation.print', [$row->id]).'" target="_blank"><i class="fas fa-print" aria-hidden="true"></i> Print Quotation</a>

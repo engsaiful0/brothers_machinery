@@ -19,7 +19,7 @@
         h2 { margin: 12px 0 8px; text-align: center; font-size: 18px; letter-spacing: 1px; }
         table { width: 100%; border-collapse: collapse; }
         .info { margin: 10px 0 14px; }
-        .info td { width: 50%; padding: 4px 7px; border: 1px solid #ccc; }
+        .info td { width: 50%; padding: 4px 7px; border: 0; }
         .info strong { color: #333; }
         .items th, .items td { border: 1px solid #777; padding: 6px; vertical-align: top; }
         .items th { background: #edf1f7; text-align: left; }
@@ -95,15 +95,21 @@
                 $line_discount = (float) $line->get_discount_amount() * $quantity;
                 $line_total = (float) ($line->unit_price_inc_tax ?? $line->unit_price ?? 0) * $quantity;
                 $brand_name = optional(optional($product)->brand)->name;
-                $description = optional($product)->product_description;
+                $product_name = preg_replace('/\bBD\s*-\s*\d+\s*[A-Z]?\b/i', '', optional($product)->name ?? '');
+                $product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name), " \t\n\r,;:-");
+                $variation_name = $variation && $variation->name !== 'DUMMY'
+                    ? preg_replace('/\bBD\s*-\s*\d+\s*[A-Z]?\b/i', '', $variation->name)
+                    : '';
+                $description = strip_tags(optional($product)->product_description ?? '');
+                $description = preg_replace('/\bBD\s*-\s*\d+\s*[A-Z]?\b/i', '', $description);
+                $description = trim(preg_replace('/\s{2,}/u', ' ', $description), " \t\n\r,;:-");
             @endphp
             @if(empty($line->parent_sell_line_id))
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>
-                        <strong>{{ optional($product)->name ?: '--' }}{{ $variation && $variation->name !== 'DUMMY' ? ' - '.$variation->name : '' }}</strong>
+                        <strong>{{ $product_name ?: '--' }}{{ $variation_name ? ' - '.trim($variation_name) : '' }}</strong>
                         @if($brand_name)<br>Brand: {{ $brand_name }}@endif
-                        @if($variation && $variation->sub_sku)<br>Part Number: {{ $variation->sub_sku }}@endif
                         @if($description)<br>{{ strip_tags($description) }}@endif
                     </td>
                     <td>{{ rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.') }} {{ optional(optional($product)->unit)->short_name }}</td>

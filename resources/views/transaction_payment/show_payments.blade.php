@@ -111,7 +111,34 @@
             @else
                 <div class="row invoice-info">
                     <div class="col-sm-4 invoice-col">
-                        @lang('contact.customer'):
+                        @if(in_array($transaction->type, ['sell', 'sell_return']))
+                            @php
+                                $customer = $transaction->contact;
+                                $customer_name = optional($customer)->name ?: '--';
+                                $contact_person_name = optional($transaction->contact_person)->name ?: '--';
+                                $business_name = optional($customer)->supplier_business_name ?: '--';
+                                $show_contact_person = $contact_person_name !== '--'
+                                    && mb_strtolower(trim($contact_person_name)) !== mb_strtolower(trim($customer_name));
+                                $show_business_name = $business_name !== '--'
+                                    && !in_array(mb_strtolower(trim($business_name)), [mb_strtolower(trim($customer_name)), mb_strtolower(trim($contact_person_name))], true);
+                                $customer_group_name = !empty($transaction->customer_group_id)
+                                    ? (\App\CustomerGroup::where('business_id', $transaction->business_id)->where('id', $transaction->customer_group_id)->value('name') ?: '--')
+                                    : '--';
+                            @endphp
+                            <address>
+                                <b>Group Name:</b> {{ $customer_group_name }}<br>
+                                <b>Customer Name:</b> {{ $customer_name }}<br>
+                                @if($show_contact_person)
+                                    <b>Contact Person:</b> {{ $contact_person_name }}<br>
+                                @endif
+                                <b>Email:</b> {{ $transaction->contact_person_email ?: (optional($transaction->contact_person)->email ?: (optional($customer)->email ?: '--')) }}<br>
+                                <b>Mobile:</b> {{ $transaction->contact_person_mobile ?: (optional($transaction->contact_person)->mobile ?: (optional($customer)->mobile ?: '--')) }}<br>
+                                @if($show_business_name)
+                                    <b>Business:</b> {{ $business_name }}
+                                @endif
+                            </address>
+                        @else
+                            @lang('contact.customer'):
                         <address>
                             <strong>{{ optional($transaction->contact)->name ?: '--' }}</strong>
 
@@ -125,14 +152,8 @@
                             @if(!empty(optional($transaction->contact)->email))
                                 <br>@lang('business.email'): {{$transaction->contact->email}}
                             @endif
-                            @if(in_array($transaction->type, ['sell', 'sell_return']))
-                                <br><b>Group Name:</b>
-                                {{ !empty($transaction->customer_group_id) ? (\App\CustomerGroup::where('business_id', $transaction->business_id)->where('id', $transaction->customer_group_id)->value('name') ?: '--') : '--' }}
-                                <br><b>Contact Person:</b> {{ optional($transaction->contact_person)->name ?: '--' }}
-                                <br><b>Mobile:</b> {{ $transaction->contact_person_mobile ?: (optional($transaction->contact_person)->mobile ?: '--') }}
-                                <br><b>Email:</b> {{ $transaction->contact_person_email ?: (optional($transaction->contact_person)->email ?: '--') }}
-                            @endif
                         </address>
+                        @endif
                     </div>
                     <div class="col-md-4 invoice-col">
                         @include('transaction_payment.payment_business_details')
