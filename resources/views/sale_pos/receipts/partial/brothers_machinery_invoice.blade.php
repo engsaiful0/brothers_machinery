@@ -8,6 +8,10 @@
         : ($receipt_details->invoice_date ?? '');
 
     $customer_company = $receipt_details->customer_name ?? $receipt_details->contact_name ?? '';
+    $customer_group = $receipt_details->packing_customer_group_name ?? '';
+    $customer_contact_person = $receipt_details->customer_contact_person_name ?? '';
+    $customer_mobile = $receipt_details->packing_contact_mobile ?? $receipt_details->customer_mobile ?? '';
+    $customer_email = $receipt_details->packing_contact_email ?? $receipt_details->customer_email ?? '';
 
     $po_ref = trim($receipt_details->purchase_order_no ?? $receipt_details->brothers_po_ref ?? ($receipt_details->sell_custom_field_1_value ?? ''));
     $po_date = trim($receipt_details->purchase_order_date ?? '');
@@ -224,7 +228,11 @@
     <table class="brothers-meta">
         <tr>
             <td class="brothers-meta-left">
-                <div class="brothers-customer-name">{{ $customer_company }}</div>
+                <div><strong>Group Name:</strong> {{ $customer_group ?: '--' }}</div>
+                <div class="brothers-customer-name"><strong>Customer Name:</strong> {{ $customer_company ?: '--' }}</div>
+                <div><strong>Contact Person:</strong> {{ $customer_contact_person ?: '--' }}</div>
+                <div><strong>Mobile:</strong> {{ $customer_mobile ?: '--' }}</div>
+                <div><strong>Email:</strong> {{ $customer_email ?: '--' }}</div>
                 @php
                     $customer_address_line = trim($receipt_details->customer_address_line ?? $receipt_details->customer_city ?? '');
                 @endphp
@@ -243,19 +251,11 @@
             </td>
         </tr>
         <tr>
-            <td class="brothers-meta-left">
-                @if(!empty($receipt_details->customer_contact_person_name))Contact Person: {{ $receipt_details->customer_contact_person_name }}@endif
-            </td>
+            <td class="brothers-meta-left"></td>
             <td class="brothers-meta-right">
                 Date: {{ $second_date !== '' ? $second_date : $bill_date }}
             </td>
         </tr>
-        @if(!empty($receipt_details->customer_email) || !empty($receipt_details->customer_mobile))
-            <tr>
-                <td class="brothers-meta-left">@if(!empty($receipt_details->customer_email))Email: {{ $receipt_details->customer_email }}@endif</td>
-                <td class="brothers-meta-right">@if(!empty($receipt_details->customer_mobile))Mobile: {{ $receipt_details->customer_mobile }}@endif</td>
-            </tr>
-        @endif
     </table>
 
     <table class="brothers-lines-table">
