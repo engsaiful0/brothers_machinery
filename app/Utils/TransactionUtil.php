@@ -32,6 +32,42 @@ use App\CashRegister;
 class TransactionUtil extends Util
 {
     /**
+     * Generate a sequential delivery challan number for a business location.
+     */
+    protected function generateDeliveryChallanNumber($business_id, $location_id)
+    {
+        return DB::transaction(function () use ($business_id, $location_id) {
+            DB::table('delivery_challan_sequences')->insertOrIgnore([
+                'business_id' => $business_id,
+                'location_id' => $location_id,
+                'last_number' => 0,
+            ]);
+
+            $sequence = DB::table('delivery_challan_sequences')
+                ->where('business_id', $business_id)
+                ->where('location_id', $location_id)
+                ->lockForUpdate()
+                ->first();
+
+            $next_number = (int) $sequence->last_number;
+            do {
+                $next_number++;
+                $challan_no = 'DN-'.str_pad((string) $next_number, 6, '0', STR_PAD_LEFT);
+            } while (Transaction::where('business_id', $business_id)
+                ->where('location_id', $location_id)
+                ->where('delivery_challan_no', $challan_no)
+                ->exists());
+
+            DB::table('delivery_challan_sequences')
+                ->where('business_id', $business_id)
+                ->where('location_id', $location_id)
+                ->update(['last_number' => $next_number]);
+
+            return $challan_no;
+        });
+    }
+
+    /**
      * Add Sell transaction
      *
      * @param  int  $business_id
@@ -45,6 +81,11 @@ class TransactionUtil extends Util
         $sale_type = ! empty($input['type']) ? $input['type'] : 'sell';
         $invoice_scheme_id = ! empty($input['invoice_scheme_id']) ? $input['invoice_scheme_id'] : null;
         $invoice_no = ! empty($input['invoice_no']) ? $input['invoice_no'] : $this->getInvoiceNumber($business_id, $input['status'], $input['location_id'], $invoice_scheme_id, $sale_type);
+
+        $delivery_challan_no = trim((string) ($input['delivery_challan_no'] ?? ''));
+        if ($delivery_challan_no === '' && $sale_type === 'sell' && empty($input['is_quotation'])) {
+            $delivery_challan_no = $this->generateDeliveryChallanNumber($business_id, $input['location_id']);
+        }
 
         $final_total = $uf_data ? $this->num_uf($input['final_total']) : $input['final_total'];
 
@@ -73,7 +114,7 @@ class TransactionUtil extends Util
             'source' => ! empty($input['source']) ? $input['source'] : null,
             'total_before_tax' => $invoice_total['total_before_tax'],
             'transaction_date' => $input['transaction_date'],
-            'delivery_challan_no' => $input['delivery_challan_no'] ?? null,
+            'delivery_challan_no' => $delivery_challan_no !== '' ? $delivery_challan_no : null,
             'purchase_order_no' => $input['purchase_order_no'] ?? null,
             'purchase_order_date' => $input['purchase_order_date'] ?? null,
             'requisition_number' => $input['requisition_number'] ?? null,
@@ -187,6 +228,11 @@ class TransactionUtil extends Util
         }
         $final_total = $uf_data ? $this->num_uf($input['final_total']) : $input['final_total'];
 
+        $delivery_challan_no = trim((string) ($input['delivery_challan_no'] ?? $transaction->delivery_challan_no ?? ''));
+        if ($delivery_challan_no === '' && $transaction->type === 'sell' && empty($transaction->is_quotation)) {
+            $delivery_challan_no = $this->generateDeliveryChallanNumber($business_id, $transaction->location_id);
+        }
+
         $pay_term_number = isset($input['pay_term_number']) ? $input['pay_term_number'] : null;
         $pay_term_type = isset($input['pay_term_type']) ? $input['pay_term_type'] : null;
 
@@ -200,6 +246,7 @@ class TransactionUtil extends Util
         $update_date = [
             'status' => $input['status'],
             'invoice_no' => ! empty($input['invoice_no']) ? $input['invoice_no'] : $invoice_no,
+            'delivery_challan_no' => $delivery_challan_no !== '' ? $delivery_challan_no : null,
             'contact_id' => $input['contact_id'],
             'customer_group_id' => $input['customer_group_id'],
             'contact_person_id' => ! empty($input['contact_person_id']) ? $input['contact_person_id'] : null,
@@ -280,7 +327,7 @@ class TransactionUtil extends Util
         ];
 
         // Other sale entry points may omit these fields; preserve their existing values.
-        foreach (['purchase_order_no', 'purchase_order_date', 'delivery_challan_no', 'requisition_number'] as $field) {
+        foreach (['purchase_order_no', 'purchase_order_date', 'requisition_number'] as $field) {
             if (array_key_exists($field, $input)) {
                 $update_date[$field] = $input[$field];
             }
