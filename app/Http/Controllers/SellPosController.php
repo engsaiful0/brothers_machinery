@@ -2909,14 +2909,24 @@ class SellPosController extends Controller
             'autoLangToFont' => true,
             'autoVietnamese' => true,
             'autoArabic' => true,
-            'margin_top' => 8,
-            'margin_bottom' => 8,
+            // Keep content inside the blank area of the pre-printed quotation pad.
+            'margin_top' => 40,
+            'margin_bottom' => 32,
+            'margin_left' => 15,
+            'margin_right' => 15,
             'format' => 'A4',
         ]);
 
         $mpdf->useSubstitutions = true;
-        $mpdf->SetWatermarkText($receipt_details->business_name, 0.1);
-        $mpdf->showWatermarkText = true;
+        if ($branding['pad_path']) {
+            // Pad image covers the whole A4 sheet behind the content on every page.
+            $mpdf->SetWatermarkImage($branding['pad_path'], 1, [210, 297], [0, 0]);
+            $mpdf->showWatermarkImage = true;
+            $mpdf->watermarkImgBehind = true;
+        } else {
+            $mpdf->SetWatermarkText($receipt_details->business_name, 0.1);
+            $mpdf->showWatermarkText = true;
+        }
         $mpdf->SetTitle($pdf_name . '-' . $receipt_details->invoice_no . '.pdf');
         $mpdf->WriteHTML($body);
         $mpdf->Output($pdf_name . '-' . $receipt_details->invoice_no . '.pdf', 'I');
@@ -2964,7 +2974,14 @@ class SellPosController extends Controller
         // The company name is already printed on its own line above the address.
         $address = preg_replace('/^\s*'.preg_quote($company_name, '/').'\s*,\s*/i', '', trim($address), 1);
 
+        // Full-page A4 image of the company pad, printed behind the quotation.
+        $pad_file = collect(['png', 'jpg', 'jpeg'])
+            ->map(fn ($ext) => 'img/quotation_pad.'.$ext)
+            ->first(fn ($file) => file_exists(public_path($file)));
+
         return [
+            'pad_image' => $pad_file ? asset($pad_file) : null,
+            'pad_path' => $pad_file ? public_path($pad_file) : null,
             'primary_logo' => !empty($business->logo) && file_exists(public_path('uploads/business_logos/'.$business->logo))
                 ? asset('uploads/business_logos/'.$business->logo) : null,
             'bd_logo' => $fileUrl('bd_logo'),

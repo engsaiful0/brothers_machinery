@@ -1,100 +1,167 @@
+@php
+    // Printed on the pre-printed Brothers Machinery pad: no header/footer of our own,
+    // content stays inside the pad's blank area (same margins as the invoice).
+    $contact = $transaction->contact;
+    $contact_person = $transaction->contact_person;
+    $sales_rep = $transaction->sales_person;
+
+    $customer_name = optional($contact)->name ?: (optional($contact)->supplier_business_name ?? '');
+    $office_address = implode(', ', array_filter(array_map('trim', [
+        optional($contact)->address_line_1 ?? '',
+        optional($contact)->address_line_2 ?? '',
+        optional($contact)->city ?? '',
+        optional($contact)->state ?? '',
+    ])));
+    $delivery_address = trim($transaction->shipping_address() ?: strip_tags($transaction->shipping_address ?? ''));
+    $contact_name = optional($contact_person)->name ?? '';
+    $contact_phone = $transaction->contact_person_mobile ?: (optional($contact_person)->mobile ?: (optional($contact)->mobile ?? ''));
+    $quotation_date = ! empty($transaction->transaction_date)
+        ? \Carbon\Carbon::parse($transaction->transaction_date)->format('d-M-y')
+        : ($receipt_details->invoice_date ?? '');
+    $sales_rep_name = $sales_rep ? trim("{$sales_rep->surname} {$sales_rep->first_name} {$sales_rep->last_name}") : '';
+    $sales_rep_contact = optional($sales_rep)->contact_number ?? '';
+    $title = ! empty($sub_status) && $sub_status === 'proforma' ? 'PROFORMA INVOICE' : 'QUOTATION';
+@endphp
 <!doctype html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Quotation {{ $receipt_details->invoice_no ?? '' }}</title>
     <style>
-        @page { size: A4; margin: 12mm 12mm 22mm; }
+        {{-- Browser print only: mPDF breaks onto dozens of pages with @page and sets its own margins.
+             Page margins are 0 so the pad can cover the whole sheet (Chrome clips anything in the margins);
+             the pad's header/footer space comes from the .page-frame thead/tfoot, repeated on every page. --}}
+        @if(!empty($browser_print))
+        @page { size: A4; margin: 0; }
+        body { padding: 0 15mm; }
+        .page-frame > thead > tr > td, .page-frame > tfoot > tr > td, .page-frame > tbody > tr > td { padding: 0; border: 0; }
+        .page-frame > thead > tr > td { height: 40mm; }
+        .page-frame > tfoot > tr > td { height: 32mm; }
+        .pad-bg { position: fixed; top: 0; left: 0; width: 210mm; height: 297mm; z-index: -1; }
+        .pad-bg img { display: block; width: 100%; height: 100%; }
+        @media screen {
+            body { position: relative; max-width: 210mm; min-height: 297mm; margin: 18px auto; box-shadow: 0 0 5px #aaa; }
+            .pad-bg { position: absolute; }
+        }
+        @endif
         * { box-sizing: border-box; }
-        body { margin: 0; color: #222; font: 12px Arial, sans-serif; }
-        .header { display: table; width: 100%; table-layout: fixed; border-bottom: 2px solid #2f5597; padding-bottom: 10px; }
-        .header-cell { display: table-cell; vertical-align: middle; }
-        .header-left, .header-right { width: 22%; text-align: center; }
-        .header-center { width: 56%; text-align: center; }
-        .header img { max-width: 100%; max-height: 75px; object-fit: contain; }
-        .brand-logo { max-width: 48%; max-height: 52px !important; margin: 2px; vertical-align: middle; }
-        .company-name { margin: 0 0 5px; color: #1f3763; font-size: 20px; }
-        .company-info { line-height: 1.5; }
-        .email-website { display: block; white-space: nowrap; font-size: 10px; }
-        h2 { margin: 12px 0 8px; text-align: center; font-size: 18px; letter-spacing: 1px; }
+        body { margin: 0; color: #000; font: 12px Arial, sans-serif; }
         table { width: 100%; border-collapse: collapse; }
-        .info { margin: 10px 0 14px; }
-        .info td { width: 50%; padding: 4px 7px; border: 0; }
-        .info strong { color: #333; }
+        .meta { margin-bottom: 12px; }
+        .meta td { padding: 1px 0; border: 0; vertical-align: top; }
+        .meta .meta-label { width: 20%; white-space: nowrap; }
+        .meta .meta-colon { width: 3%; text-align: center; }
+        .meta .meta-value { width: 37%; padding-right: 12px; }
+        .meta .meta-label-right { width: 22%; text-align: right; white-space: nowrap; }
+        .meta .meta-value-right { width: 15%; white-space: nowrap; }
+        .meta .doc-title { padding-bottom: 6px; font-size: 15px; font-weight: bold; text-align: center; text-decoration: underline; }
         .items th, .items td { border: 1px solid #777; padding: 6px; vertical-align: top; text-align: left; }
         .items th { background: #edf1f7; }
         .number { white-space: nowrap; }
-        .totals { width: 43%; margin: 10px 0 0 auto; }
-        .totals td { padding: 4px 6px; }
-        .totals .number { text-align: right; }
-        .grand-total { border-top: 2px solid #333; font-size: 14px; font-weight: bold; }
+        .items .number { text-align: right; }
+        .items .total-label, .items .total-value { text-align: right; font-weight: bold; }
         .terms { margin-top: 12px; white-space: pre-line; }
-        .footer-image { position: fixed; bottom: -16mm; left: 0; width: 100%; text-align: center; }
-        .footer-image img { display: block; width: 100%; height: auto; max-height: 25mm; object-fit: contain; }
-        .no-print { margin: 12px 0; text-align: center; }
-        @media screen { body { max-width: 210mm; margin: 18px auto; padding: 12mm; box-shadow: 0 0 5px #aaa; } .footer-image { display: none; } }
+        .no-print { position: absolute; top: 0; left: 0; right: 0; margin: 12px 0; text-align: center; z-index: 1; }
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
     @if(!empty($browser_print))
         <div class="no-print"><button type="button" onclick="window.print()">Print Quotation</button></div>
+        {{-- The PDF draws the pad itself (see downloadQuotationPdf). --}}
+        @if(!empty($branding['pad_image']))
+            <div class="pad-bg"><img src="{{ $branding['pad_image'] }}" alt=""></div>
+        @endif
+        <table class="page-frame">
+            <thead><tr><td></td></tr></thead>
+            <tfoot><tr><td></td></tr></tfoot>
+            <tbody><tr><td>
     @endif
-    <div class="header">
-        <div class="header-cell header-left">
-            @if($branding['primary_logo'])<img src="{{ $branding['primary_logo'] }}" alt="Company Logo">@endif
-        </div>
-        <div class="header-cell header-center">
-            <h1 class="company-name">{{ $branding['company_name'] ?: ($receipt_details->business_name ?? '') }}</h1>
-            <div class="company-info">
-                @if($branding['address']){{ $branding['address'] }}<br>@endif
-                @if($branding['mobile'])Mobile: {{ $branding['mobile'] }}<br>@endif
-                @if($branding['email'] || $branding['website'])
-                    <span class="email-website">
-                        @if($branding['email'])Email: {{ $branding['email'] }}@endif
-                        @if($branding['email'] && $branding['website']) &nbsp;|&nbsp; @endif
-                        @if($branding['website']){{ $branding['website'] }}@endif
-                    </span>
-                @endif
-            </div>
-        </div>
-        <div class="header-cell header-right">
-            @if($branding['bd_logo'])<img class="brand-logo" src="{{ $branding['bd_logo'] }}" alt="B&amp;D">@endif
-            @if($branding['atlas_logo'])<img class="brand-logo" src="{{ $branding['atlas_logo'] }}" alt="Atlas Copco">@endif
-        </div>
-    </div>
 
-    <h2>{{ !empty($sub_status) && $sub_status === 'proforma' ? 'PROFORMA INVOICE' : 'QUOTATION' }}</h2>
-    <table class="info">
+    <table class="meta">
         <tr>
-            <td><strong>Quotation No:</strong> {{ $receipt_details->invoice_no ?: '--' }}</td>
-            <td><strong>Date:</strong> {{ $receipt_details->invoice_date ?: '--' }}</td>
+            <td colspan="6" class="doc-title">{{ $title }}</td>
         </tr>
         <tr>
-            <td><strong>Requisition Number:</strong> {{ $transaction->requisition_number ?: '--' }}</td>
-            <td><strong>Group Name:</strong> {{ $customer_group_name ?: '--' }}</td>
+            <td class="meta-label">Customer Name</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $customer_name }}</td>
+            <td class="meta-label-right">Date</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value-right">{{ $quotation_date }}</td>
         </tr>
         <tr>
-            <td><strong>Customer Name:</strong> {{ optional($transaction->contact)->name ?: '--' }}</td>
-            <td><strong>Contact Person:</strong> {{ optional($transaction->contact_person)->name ?: '--' }}</td>
+            <td class="meta-label">Office Address</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $office_address }}</td>
+            <td class="meta-label-right">Quotation No</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value-right">{{ $receipt_details->invoice_no ?? $transaction->invoice_no }}</td>
         </tr>
         <tr>
-            <td><strong>Mobile:</strong> {{ $transaction->contact_person_mobile ?: (optional($transaction->contact_person)->mobile ?: optional($transaction->contact)->mobile ?: '--') }}</td>
-            <td><strong>Email:</strong> {{ $transaction->contact_person_email ?: (optional($transaction->contact_person)->email ?: optional($transaction->contact)->email ?: '--') }}</td>
+            <td class="meta-label">Requisition No</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $transaction->requisition_number }}</td>
+            <td class="meta-label-right">Sales Rep. Name</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value-right">{{ $sales_rep_name }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Delivery Address</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $delivery_address }}</td>
+            <td class="meta-label-right">Sales Rep. Contact</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value-right">{{ $sales_rep_contact }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Contact Name</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $contact_name }}</td>
+            <td colspan="3"></td>
+        </tr>
+        <tr>
+            <td class="meta-label">Phone No</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $contact_phone }}</td>
+            <td colspan="3"></td>
         </tr>
     </table>
 
+    @php
+        $subtotal = (float) ($transaction->total_before_tax ?? 0);
+        $discount_value = (float) ($transaction->discount_amount ?? 0);
+        $discount = $transaction->discount_type === 'percentage' ? $subtotal * $discount_value / 100 : $discount_value;
+        // Order discount is not shown; fold it into the sub total so the totals still add up.
+        $subtotal -= $discount;
+        $vat = (float) ($transaction->vat_amount ?? 0);
+        $grand_total = (float) ($transaction->final_total ?? 0);
+        $order_tax = (float) ($transaction->tax_amount ?? 0);
+        $shipping = (float) ($transaction->shipping_charges ?? 0);
+        $packing_charge = (float) ($transaction->packing_charge ?? 0);
+        $amount_in_words = $receipt_details->total_in_words ?: app(\App\Utils\Util::class)->numToWord($grand_total, null, 'indian');
+        $vat_label = $transaction->vat_type === 'percentage'
+            ? 'VAT on Total Amount ('.rtrim(rtrim(number_format((float) $transaction->vat_rate, 2, '.', ''), '0'), '.').'%)'
+            : 'VAT on Total Amount';
+
+        // Printed as the last rows of the product table (tbody, not tfoot, so Chrome doesn't repeat them per page).
+        $total_rows = [['Total Amount', $subtotal]];
+        if (! empty($transaction->vat_type) || $vat > 0) $total_rows[] = [$vat_label, $vat];
+        if ($order_tax > 0) $total_rows[] = ['Order Tax ('.(optional($transaction->tax)->name ?: 'Tax').')', $order_tax];
+        if ($shipping > 0) $total_rows[] = ['Shipping', $shipping];
+        if ($packing_charge > 0) $total_rows[] = ['Packing Charge', $packing_charge];
+    @endphp
     <table class="items">
-        <thead><tr><th style="width:5%">#</th><th>Description</th><th style="width:10%">Qty</th><th style="width:15%" class="number">Unit Price</th><th style="width:14%" class="number">Discount</th><th style="width:17%" class="number">Amount</th></tr></thead>
+        <thead><tr><th style="width:5%">#</th><th>Description</th><th style="width:10%">Qty</th><th style="width:16%" class="number">Unit Price</th><th style="width:18%" class="number">Amount</th></tr></thead>
         <tbody>
         @foreach($transaction->sell_lines as $index => $line)
             @php
                 $product = $line->product;
                 $variation = $line->variations;
                 $quantity = (float) $line->quantity;
-                $unit_price = (float) ($line->unit_price_before_discount ?? $line->unit_price ?? 0);
-                $line_discount = (float) $line->get_discount_amount() * $quantity;
-                $line_total = (float) ($line->unit_price_inc_tax ?? $line->unit_price ?? 0) * $quantity;
+                // Discount is not shown, so the unit price is the net (after-discount) price.
+                $unit_price = (float) ($line->unit_price_inc_tax ?? $line->unit_price ?? 0);
+                $line_total = $unit_price * $quantity;
                 $brand_name = optional(optional($product)->brand)->name;
                 $product_name = preg_replace('/\bBD\s*-\s*\d+\s*[A-Z]?\b/i', '', optional($product)->name ?? '');
                 $product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name), " \t\n\r,;:-");
@@ -115,44 +182,29 @@
                     </td>
                     <td>{{ rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.') }} {{ optional(optional($product)->unit)->short_name }}</td>
                     <td class="number">{{ number_format($unit_price, 2) }}</td>
-                    <td class="number">{{ $line_discount > 0 ? number_format($line_discount, 2) : '--' }}</td>
                     <td class="number">{{ number_format($line_total, 2) }}</td>
                 </tr>
             @endif
         @endforeach
+        @foreach($total_rows as [$label, $amount])
+            <tr>
+                <td colspan="4" class="total-label">{{ $label }}</td>
+                <td class="number total-value">{{ number_format($amount, 2) }}</td>
+            </tr>
+        @endforeach
+            <tr>
+                <td colspan="5"><strong>In Words:</strong> {{ $amount_in_words }}</td>
+            </tr>
         </tbody>
     </table>
-
-    @php
-        $currency = $receipt_details->currency['symbol'] ?? '';
-        $subtotal = (float) ($transaction->total_before_tax ?? 0);
-        $discount_value = (float) ($transaction->discount_amount ?? 0);
-        $discount = $transaction->discount_type === 'percentage' ? $subtotal * $discount_value / 100 : $discount_value;
-        $vat = (float) ($transaction->vat_amount ?? 0);
-        $grand_total = (float) ($transaction->final_total ?? 0);
-        $order_tax = (float) ($transaction->tax_amount ?? 0);
-        $shipping = (float) ($transaction->shipping_charges ?? 0);
-        $packing_charge = (float) ($transaction->packing_charge ?? 0);
-        $amount_in_words = $receipt_details->total_in_words ?: app(\App\Utils\Util::class)->numToWord($grand_total, null, 'indian');
-        $vat_label = $transaction->vat_type === 'percentage'
-            ? 'VAT on Total Amount ('.rtrim(rtrim(number_format((float) $transaction->vat_rate, 2, '.', ''), '0'), '.').'%)'
-            : 'VAT on Total Amount';
-    @endphp
-    <table class="totals">
-        <tr><td>Sub Total</td><td class="number">{{ $currency }}{{ number_format($subtotal, 2) }}</td></tr>
-        <tr><td>Discount{{ $transaction->discount_type === 'percentage' && $discount > 0 ? ' ('.rtrim(rtrim(number_format($discount_value, 2, '.', ''), '0'), '.').'%)' : '' }}</td><td class="number">- {{ $currency }}{{ number_format($discount, 2) }}</td></tr>
-        @if(!empty($transaction->vat_type) || $vat > 0)<tr><td>{{ $vat_label }}</td><td class="number">{{ $currency }}{{ number_format($vat, 2) }}</td></tr>@endif
-        @if($order_tax > 0)<tr><td>Order Tax ({{ optional($transaction->tax)->name ?: 'Tax' }})</td><td class="number">{{ $currency }}{{ number_format($order_tax, 2) }}</td></tr>@endif
-        @if($shipping > 0)<tr><td>Shipping</td><td class="number">{{ $currency }}{{ number_format($shipping, 2) }}</td></tr>@endif
-        @if($packing_charge > 0)<tr><td>Packing Charge</td><td class="number">{{ $currency }}{{ number_format($packing_charge, 2) }}</td></tr>@endif
-        <tr class="grand-total"><td>Grand Total</td><td class="number">{{ $currency }}{{ number_format($grand_total, 2) }}</td></tr>
-    </table>
-    <div class="terms"><strong>In Words:</strong> {{ $amount_in_words }}</div>
 
     @if(!empty($transaction->payment_terms))<div class="terms"><strong>Payment Terms:</strong> {{ $transaction->payment_terms }}</div>@endif
     @if(!empty($transaction->shipping_details))<div class="terms"><strong>Shipping Details:</strong> {{ $transaction->shipping_details }}</div>@endif
     @if(!empty($transaction->additional_notes))<div class="terms"><strong>Terms / Notes:</strong><br>{{ $transaction->additional_notes }}</div>@endif
-    @if($branding['footer_image'])<div class="footer-image"><img src="{{ $branding['footer_image'] }}" alt="Quotation footer"></div>@endif
+    @if(!empty($browser_print))
+            </td></tr></tbody>
+        </table>
+    @endif
     @if(!empty($browser_print))<script>window.addEventListener('load', function () { window.print(); });</script>@endif
 </body>
 </html>
