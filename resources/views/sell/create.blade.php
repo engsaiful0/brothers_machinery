@@ -961,7 +961,7 @@
 		function renderCustomers(groupId, selectedCustomerId) {
 			customer.empty().append(new Option('', ''));
 			allCustomers.filter(row => !groupId || String(row.customer_group_id) === String(groupId))
-				.forEach(row => customer.append(new Option(row.name + (row.supplier_business_name ? ' (' + row.supplier_business_name + ')' : ''), row.id)));
+				.forEach(row => customer.append(new Option(row.name || row.supplier_business_name || row.contact_id || '', row.id)));
 			if (selectedCustomerId) customer.val(String(selectedCustomerId));
 			customer.trigger('change');
 		}
