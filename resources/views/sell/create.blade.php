@@ -953,24 +953,40 @@
 	<script>
 	$(function () {
 		const group = $('#customer_group_id'), customer = $('#customer_id'), person = $('#contact_person_id');
-		const customersUrl = @json(url('/sales/customer-groups'));
+		const allCustomersUrl = @json(url('/sales/customers'));
 		const contactPersonsUrl = @json(url('/sales/customers'));
+		let allCustomers = [];
 		customer.select2({width: '100%', placeholder: @json(__('contact.customer')), allowClear: true, minimumResultsForSearch: 0});
-		window.loadSalesGroupCustomers = function (groupId, selectedCustomerId) {
+		// Show all customers, or only those of groupId when a group is chosen.
+		function renderCustomers(groupId, selectedCustomerId) {
 			customer.empty().append(new Option('', ''));
-			if (!groupId) { customer.trigger('change'); return $.Deferred().resolve().promise(); }
-			return $.getJSON(customersUrl + '/' + encodeURIComponent(groupId) + '/customers').done(function (rows) {
-				rows.forEach(row => customer.append(new Option(row.name + (row.supplier_business_name ? ' (' + row.supplier_business_name + ')' : ''), row.id)));
-				if (selectedCustomerId) customer.val(String(selectedCustomerId));
-				customer.trigger('change');
+			allCustomers.filter(row => !groupId || String(row.customer_group_id) === String(groupId))
+				.forEach(row => customer.append(new Option(row.name + (row.supplier_business_name ? ' (' + row.supplier_business_name + ')' : ''), row.id)));
+			if (selectedCustomerId) customer.val(String(selectedCustomerId));
+			customer.trigger('change');
+		}
+		window.loadSalesGroupCustomers = function (groupId, selectedCustomerId) {
+			return $.getJSON(allCustomersUrl).done(function (rows) {
+				allCustomers = rows;
+				const selected = rows.find(row => String(row.id) === String(selectedCustomerId));
+				if (selected) groupId = selected.customer_group_id || '';
+				group.val(groupId || '');
+				renderCustomers(groupId, selectedCustomerId);
 			});
 		};
+		window.loadSalesGroupCustomers('');
 		function clearPerson() { person.empty().append(new Option('Select contact person', '')); $('#contact_person_email,#contact_person_mobile').val(''); }
 		group.on('change', function () {
 			clearPerson();
-			window.loadSalesGroupCustomers(this.value);
+			renderCustomers(this.value);
 		});
-		customer.on('change', function () { clearPerson(); if (!this.value) return; $.getJSON(contactPersonsUrl + '/' + encodeURIComponent(this.value) + '/contact-persons', function (rows) { rows.forEach(row => person.append(new Option(row.name, row.id))); }); });
+		customer.on('change', function () {
+			clearPerson();
+			if (!this.value) return;
+			const row = allCustomers.find(item => String(item.id) === String(this.value));
+			// Fill the group from the customer; plain .val() so the list isn't re-filtered.
+			if (row) group.val(row.customer_group_id ? String(row.customer_group_id) : '');
+			$.getJSON(contactPersonsUrl + '/' + encodeURIComponent(this.value) + '/contact-persons', function (rows) { rows.forEach(row => person.append(new Option(row.name, row.id))); }); });
 		person.on('change', function () { if (!this.value) return; $.getJSON(contactPersonsUrl + '/' + encodeURIComponent(customer.val()) + '/contact-persons', function (rows) { const row = rows.find(item => String(item.id) === String(person.val())); $('#contact_person_email').val(row ? row.email : ''); $('#contact_person_mobile').val(row ? row.mobile : ''); }); });
 	});
 	</script>

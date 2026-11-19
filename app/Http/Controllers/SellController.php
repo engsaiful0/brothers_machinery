@@ -42,6 +42,14 @@ class SellController extends Controller
             ->orderBy('name')->get(['id', 'name', 'supplier_business_name']);
     }
 
+    public function allCustomers()
+    {
+        $business_id = request()->session()->get('user.business_id');
+
+        return Contact::where('business_id', $business_id)->whereIn('type', ['customer', 'both'])
+            ->orderBy('name')->get(['id', 'name', 'supplier_business_name', 'customer_group_id']);
+    }
+
     public function contactPersonsByCustomer($customer)
     {
         $business_id = request()->session()->get('user.business_id');
