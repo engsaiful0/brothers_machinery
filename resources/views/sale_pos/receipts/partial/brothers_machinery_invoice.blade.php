@@ -1,21 +1,24 @@
 @php
     $invoice_number = trim($receipt_details->invoice_no ?? '');
     $invoice_number = preg_replace('/^invoice\s*no\.?\s*/i', '', $invoice_number);
-    $bill_no = 'INVOICE NO. ' . ltrim($invoice_number, '# ');
+    $bill_no = ltrim($invoice_number, '# ');
 
     $bill_date = ! empty($receipt_details->transaction_date)
-        ? \Carbon\Carbon::parse($receipt_details->transaction_date)->format('d.m.Y')
+        ? \Carbon\Carbon::parse($receipt_details->transaction_date)->format('d-M-y')
         : ($receipt_details->invoice_date ?? '');
 
     $customer_company = $receipt_details->customer_name ?? $receipt_details->contact_name ?? '';
+    $office_address = trim($receipt_details->customer_address_line ?? $receipt_details->customer_city ?? '');
+    $delivery_address = trim(strip_tags($receipt_details->shipping_address ?? ''));
+    $contact_name = trim($receipt_details->customer_contact_person_name ?? '');
+    $contact_phone = trim($receipt_details->packing_contact_mobile ?? '');
 
     $po_ref = trim($receipt_details->purchase_order_no ?? $receipt_details->brothers_po_ref ?? ($receipt_details->sell_custom_field_1_value ?? ''));
-    $po_date = trim($receipt_details->purchase_order_date ?? '');
     $challan_no = trim($receipt_details->delivery_challan_no ?? $receipt_details->brothers_challan_no ?? ($receipt_details->sell_custom_field_2_value ?? ''));
     $second_date = trim($receipt_details->brothers_second_date ?? ($receipt_details->sell_custom_field_3_value ?? ''));
     if ($second_date !== '' && preg_match('/^\d{4}-\d{2}-\d{2}/', $second_date)) {
         try {
-            $second_date = \Carbon\Carbon::parse($second_date)->format('d.m.Y');
+            $second_date = \Carbon\Carbon::parse($second_date)->format('d-M-y');
         } catch (\Exception $e) {
             // keep as entered
         }
@@ -77,44 +80,49 @@
         color: #000 !important;
     }
 
-    .brothers-bill-title {
-        text-align: center;
-        font-size: 14pt;
-        font-weight: bold;
-        text-decoration: underline;
-        margin: 0 0 14px 0;
-        letter-spacing: 0.02em;
-    }
-
     .brothers-meta {
         width: 100%;
         margin-bottom: 12px;
         border-collapse: collapse;
+        font-size: 11pt;
     }
 
     .brothers-meta td {
         vertical-align: top;
-        padding: 0;
+        padding: 1px 0;
         border: none;
     }
 
-    .brothers-meta-left {
-        width: 58%;
+    .brothers-meta .meta-label {
+        width: 20%;
+        white-space: nowrap;
+    }
+
+    .brothers-meta .meta-colon {
+        width: 3%;
+        text-align: center;
+    }
+
+    .brothers-meta .meta-value {
+        width: 37%;
         padding-right: 12px;
     }
 
-    .brothers-meta-right {
-        width: 42%;
+    .brothers-meta .meta-label-right {
+        width: 22%;
         text-align: right;
+        white-space: nowrap;
     }
 
-    .brothers-customer-name {
+    .brothers-meta .meta-value-right {
+        width: 15%;
+        white-space: nowrap;
+    }
+
+    .brothers-bill-title {
         font-weight: bold;
-        text-transform: uppercase;
-    }
-
-    .brothers-customer-address {
-        margin-top: 2px;
+        font-size: 13pt;
+        text-align: center;
     }
 
     .brothers-lines-table {
@@ -220,34 +228,50 @@
 </style>
 
 <div class="brothers-invoice">
-    <h1 class="brothers-bill-title">{{ $bill_no }}</h1>
-
     <table class="brothers-meta">
         <tr>
-            <td class="brothers-meta-left">
-                <div class="brothers-customer-name">{{ $customer_company ?: '--' }}</div>
-                @php
-                    $customer_address_line = trim($receipt_details->customer_address_line ?? $receipt_details->customer_city ?? '');
-                @endphp
-                @if ($customer_address_line !== '')
-                    <div class="brothers-customer-address">{{ $customer_address_line }}</div>
-                @endif
-            </td>
-            <td class="brothers-meta-right"></td>
+            <td class="meta-label">Customer Name</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $customer_company }}</td>
+            <td colspan="3" class="brothers-bill-title">BILL</td>
         </tr>
         <tr>
-            <td class="brothers-meta-left" style="padding-top: 8px;">
-                Ref: Purchase Order No: {{ $po_ref }}
-            </td>
-            <td class="brothers-meta-right" style="padding-top: 8px;">
-                Purchase Order Date: {{ $po_date }}
-            </td>
+            <td class="meta-label">Office Address</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $office_address }}</td>
+            <td class="meta-label-right">Date</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value-right">{{ $second_date !== '' ? $second_date : $bill_date }}</td>
         </tr>
         <tr>
-            <td class="brothers-meta-left"></td>
-            <td class="brothers-meta-right">
-                Date: {{ $second_date !== '' ? $second_date : $bill_date }}
-            </td>
+            <td class="meta-label">P.O No</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $po_ref }}</td>
+            <td class="meta-label-right">Bill No</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value-right">{{ $bill_no }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Delivery Address</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $delivery_address }}</td>
+            <td class="meta-label-right">Sales Rep. Name</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value-right">{{ $signature_name }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Contact Name</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $contact_name }}</td>
+            <td class="meta-label-right">Sales Rep. Contact</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value-right">{{ $signature_contact }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Contact Phone No</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $contact_phone }}</td>
+            <td colspan="3"></td>
         </tr>
     </table>
 
@@ -321,11 +345,13 @@
                     <td class="brothers-totals-value">{{ $vat_total }}</td>
                 </tr>
             @endif
-            <tr class="brothers-totals-row">
-                <td colspan="2" class="brothers-totals-spacer"></td>
-                <td colspan="2" class="brothers-totals-label">NET TOTAL:</td>
-                <td class="brothers-totals-value">{{ $net_total }}</td>
-            </tr>
+            @if($has_discount)
+                <tr class="brothers-totals-row">
+                    <td colspan="2" class="brothers-totals-spacer"></td>
+                    <td colspan="2" class="brothers-totals-label">NET TOTAL:</td>
+                    <td class="brothers-totals-value">{{ $net_total }}</td>
+                </tr>
+            @endif
             <tr class="brothers-in-words">
                 <td colspan="5">IN WORDS: {{ $amount_in_words }}</td>
             </tr>
