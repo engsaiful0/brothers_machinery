@@ -123,6 +123,8 @@
         font-weight: bold;
         font-size: 13pt;
         text-align: center;
+        text-decoration: underline;
+        padding-bottom: 6px;
     }
 
     .brothers-lines-table {
@@ -134,7 +136,7 @@
 
     .brothers-lines-table th,
     .brothers-lines-table td {
-        border: 1px solid #000;
+        border: 0.5pt solid #555;
         padding: 6px 8px;
         vertical-align: top;
     }
@@ -177,7 +179,7 @@
     }
 
     .brothers-totals-row td {
-        border-top: 1px solid #000;
+        border-top: 0.5pt solid #555;
     }
 
     .brothers-totals-label {
@@ -198,9 +200,9 @@
     }
 
     .brothers-in-words td {
-        border: 1px solid #000;
+        border: 0.5pt solid #555;
         padding: 8px;
-        font-weight: bold;
+        font-weight: normal;
     }
 
     .brothers-sell-note {
@@ -230,42 +232,45 @@
 <div class="brothers-invoice">
     <table class="brothers-meta">
         <tr>
+            <td colspan="6" class="brothers-bill-title">BILL</td>
+        </tr>
+        <tr>
             <td class="meta-label">Customer Name</td>
             <td class="meta-colon">:</td>
             <td class="meta-value">{{ $customer_company }}</td>
-            <td colspan="3" class="brothers-bill-title">BILL</td>
-        </tr>
-        <tr>
-            <td class="meta-label">Office Address</td>
-            <td class="meta-colon">:</td>
-            <td class="meta-value">{{ $office_address }}</td>
             <td class="meta-label-right">Date</td>
             <td class="meta-colon">:</td>
             <td class="meta-value-right">{{ $second_date !== '' ? $second_date : $bill_date }}</td>
         </tr>
         <tr>
-            <td class="meta-label">P.O No</td>
+            <td class="meta-label">Office Address</td>
             <td class="meta-colon">:</td>
-            <td class="meta-value">{{ $po_ref }}</td>
+            <td class="meta-value">{{ $office_address }}</td>
             <td class="meta-label-right">Bill No</td>
             <td class="meta-colon">:</td>
             <td class="meta-value-right">{{ $bill_no }}</td>
         </tr>
         <tr>
-            <td class="meta-label">Delivery Address</td>
+            <td class="meta-label">P.O No</td>
             <td class="meta-colon">:</td>
-            <td class="meta-value">{{ $delivery_address }}</td>
+            <td class="meta-value">{{ $po_ref }}</td>
             <td class="meta-label-right">Sales Rep. Name</td>
             <td class="meta-colon">:</td>
             <td class="meta-value-right">{{ $signature_name }}</td>
         </tr>
         <tr>
-            <td class="meta-label">Contact Name</td>
+            <td class="meta-label">Delivery Address</td>
             <td class="meta-colon">:</td>
-            <td class="meta-value">{{ $contact_name }}</td>
+            <td class="meta-value">{{ $delivery_address }}</td>
             <td class="meta-label-right">Sales Rep. Contact</td>
             <td class="meta-colon">:</td>
             <td class="meta-value-right">{{ $signature_contact }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Contact Name</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $contact_name }}</td>
+            <td colspan="3"></td>
         </tr>
         <tr>
             <td class="meta-label">Contact Phone No</td>
@@ -353,7 +358,7 @@
                 </tr>
             @endif
             <tr class="brothers-in-words">
-                <td colspan="5">IN WORDS: {{ $amount_in_words }}</td>
+                <td colspan="5"><strong>IN WORDS:</strong> {{ $amount_in_words }}</td>
             </tr>
         </tfoot>
     </table>
