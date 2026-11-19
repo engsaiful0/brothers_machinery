@@ -61,6 +61,11 @@
         .items .number { text-align: right; }
         .items .total-label, .items .total-value { text-align: right; font-weight: bold; }
         .terms { margin-top: 12px; white-space: pre-line; }
+        .greeting { margin: 0 0 8px; line-height: 1.5; }
+        .commercial-terms-title { margin: 18px 0 8px; text-align: center; font-weight: bold; text-decoration: underline; }
+        .commercial-terms td { padding: 1px 0; border: 0; vertical-align: top; }
+        .commercial-terms .term-label { width: 20%; white-space: nowrap; }
+        .commercial-terms .term-colon { width: 3%; text-align: center; }
         .no-print { position: absolute; top: 0; left: 0; right: 0; margin: 12px 0; text-align: center; z-index: 1; }
         @media print { .no-print { display: none !important; } }
     </style>
@@ -151,6 +156,7 @@
         if ($shipping > 0) $total_rows[] = ['Shipping', $shipping];
         if ($packing_charge > 0) $total_rows[] = ['Packing Charge', $packing_charge];
     @endphp
+    <p class="greeting">Dear Sir,<br>As per your requirement, we are pleased to quote as follows:</p>
     <table class="items">
         <thead><tr><th style="width:5%">#</th><th>Description</th><th style="width:10%">Qty</th><th style="width:16%" class="number">Unit Price</th><th style="width:18%" class="number">Amount</th></tr></thead>
         <tbody>
@@ -197,6 +203,19 @@
             </tr>
         </tbody>
     </table>
+
+    @if(!empty($transaction->commercial_terms))
+        <div class="commercial-terms-title">COMMERCIAL TERMS &amp; CONDITIONS</div>
+        <table class="commercial-terms">
+            @foreach($transaction->commercial_terms as $term)
+                <tr>
+                    <td class="term-label">{{ $term['title'] }}</td>
+                    <td class="term-colon">:</td>
+                    <td>{{ $term['description'] }}</td>
+                </tr>
+            @endforeach
+        </table>
+    @endif
 
     @if(!empty($transaction->payment_terms))<div class="terms"><strong>Payment Terms:</strong> {{ $transaction->payment_terms }}</div>@endif
     @if(!empty($transaction->shipping_details))<div class="terms"><strong>Shipping Details:</strong> {{ $transaction->shipping_details }}</div>@endif

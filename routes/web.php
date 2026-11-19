@@ -394,6 +394,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     //Customer Groups
     Route::resource('customer-group', CustomerGroupController::class);
 
+    //Commercial terms & conditions picked on quotations
+    Route::resource('quotation-terms', \App\Http\Controllers\QuotationTermController::class)->except(['show']);
+
     //Import opening stock
     Route::get('/import-opening-stock', [ImportOpeningStockController::class, 'index']);
     Route::post('/import-opening-stock/store', [ImportOpeningStockController::class, 'store']);

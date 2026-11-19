@@ -380,6 +380,13 @@ class AdminSidebarMenu
                                 ['icon' => '', 'active' => request()->segment(1) == 'sells' && request()->segment(2) == 'quotations']
                             );
                         }
+                        if (in_array('add_sale', $enabled_modules) && auth()->user()->can('direct_sell.access')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\QuotationTermController::class, 'index']),
+                                'Commercial Terms',
+                                ['icon' => '', 'active' => request()->segment(1) == 'quotation-terms']
+                            );
+                        }
 
                         if (auth()->user()->can('access_sell_return') || auth()->user()->can('access_own_sell_return')) {
                             $sub->url(

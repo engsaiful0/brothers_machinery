@@ -486,6 +486,9 @@
 						{!! Form::textarea('sale_note', $transaction->additional_notes, ['class' => 'form-control', 'rows' => 3]); !!}
 					</div>
 			    </div>
+				@if($transaction->is_quotation)
+					@include('sell.partials.commercial_terms_field')
+				@endif
 			    <input type="hidden" name="is_direct_sale" value="1">
 				<input type="hidden" name="is_serial_no" value="1">
 			@endcomponent

@@ -542,6 +542,7 @@ class SellPosController extends Controller
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
                 $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
+                $this->saveCommercialTerms($request, $transaction, $business_id);
 
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
@@ -1398,6 +1399,7 @@ class SellPosController extends Controller
                 DB::beginTransaction();
 
                 $transaction = $this->transactionUtil->updateSellTransaction($id, $business_id, $input, $invoice_total, $user_id);
+                $this->saveCommercialTerms($request, $transaction, $business_id);
 
                 //update service staff timer
                 if (!$is_direct_sale && $transaction->status == 'final') {
@@ -2954,6 +2956,25 @@ class SellPosController extends Controller
         return view('sale_pos.receipts.quotation_print', compact(
             'receipt_details', 'location_details', 'sub_status', 'transaction', 'branding', 'customer_group_name'
         ))->with('browser_print', true);
+    }
+
+    /**
+     * Store a copy of the commercial terms ticked on the quotation form, in print order.
+     * Forms without the terms field (POS, ordinary sales) leave the saved terms untouched.
+     */
+    private function saveCommercialTerms(Request $request, $transaction, $business_id)
+    {
+        if (! $request->has('commercial_terms_submitted')) {
+            return;
+        }
+
+        $ids = array_map('intval', (array) $request->input('commercial_term_ids', []));
+        $terms = \App\QuotationTerm::where('business_id', $business_id)->whereIn('id', $ids)
+            ->orderBy('sort_order')->orderBy('id')
+            ->get(['id', 'title', 'description']);
+
+        $transaction->commercial_terms = $terms->isEmpty() ? null : $terms->toArray();
+        $transaction->save();
     }
 
     private function quotationPrintBranding($business_id, $location_details)
