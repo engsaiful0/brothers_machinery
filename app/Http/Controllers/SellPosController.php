@@ -668,6 +668,11 @@ class SellPosController extends Controller
                 SellCreatedOrModified::dispatch($transaction);
 
                 if ($request->input('is_save_and_print') == 1) {
+                    // Quotations have their own pad layout, which prints itself on load.
+                    if ($transaction->is_quotation) {
+                        return redirect()->route('quotation.print', [$transaction->id]);
+                    }
+
                     $url = $this->transactionUtil->getInvoiceUrl($transaction->id, $business_id);
 
                     return redirect()->to($url . '?print_on_load=true');
@@ -1535,6 +1540,11 @@ class SellPosController extends Controller
                 DB::commit();
 
                 if ($request->input('is_save_and_print') == 1) {
+                    // Quotations have their own pad layout, which prints itself on load.
+                    if ($transaction->is_quotation) {
+                        return redirect()->route('quotation.print', [$id]);
+                    }
+
                     $url = $this->transactionUtil->getInvoiceUrl($id, $business_id);
 
                     return redirect()->to($url . '?print_on_load=true');
