@@ -8,10 +8,6 @@
         : ($receipt_details->invoice_date ?? '');
 
     $customer_company = $receipt_details->customer_name ?? $receipt_details->contact_name ?? '';
-    $customer_group = $receipt_details->packing_customer_group_name ?? '';
-    $customer_contact_person = $receipt_details->customer_contact_person_name ?? '';
-    $customer_mobile = $receipt_details->packing_contact_mobile ?? $receipt_details->customer_mobile ?? '';
-    $customer_email = $receipt_details->packing_contact_email ?? $receipt_details->customer_email ?? '';
 
     $po_ref = trim($receipt_details->purchase_order_no ?? $receipt_details->brothers_po_ref ?? ($receipt_details->sell_custom_field_1_value ?? ''));
     $po_date = trim($receipt_details->purchase_order_date ?? '');
@@ -28,6 +24,7 @@
     $currency_symbols = array_filter(['৳', $receipt_details->currency_symbol ?? '']);
     $gross_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->subtotal ?? '0.00')));
     $discount_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->discount ?? '0.00')));
+    $has_discount = (float) preg_replace('/[^\d.]/', '', $discount_total) > 0;
     $vat_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->vat ?? '0.00')));
     $net_total = trim(str_replace($currency_symbols, '', (string) ($receipt_details->total ?? '0.00')));
     $net_unformatted = $receipt_details->total_unformatted ?? 0;
@@ -228,11 +225,7 @@
     <table class="brothers-meta">
         <tr>
             <td class="brothers-meta-left">
-                <div><strong>Group Name:</strong> {{ $customer_group ?: '--' }}</div>
-                <div class="brothers-customer-name"><strong>Customer Name:</strong> {{ $customer_company ?: '--' }}</div>
-                <div><strong>Contact Person:</strong> {{ $customer_contact_person ?: '--' }}</div>
-                <div><strong>Mobile:</strong> {{ $customer_mobile ?: '--' }}</div>
-                <div><strong>Email:</strong> {{ $customer_email ?: '--' }}</div>
+                <div class="brothers-customer-name">{{ $customer_company ?: '--' }}</div>
                 @php
                     $customer_address_line = trim($receipt_details->customer_address_line ?? $receipt_details->customer_city ?? '');
                 @endphp
@@ -292,7 +285,7 @@
                     <td class="col-desc">
                         <div class="brothers-item-name">{{ $product_name }}</div>
                         @if ($brand_name !== '')
-                            <div class="brothers-item-model">Brand Name: {{ $brand_name }}</div>
+                            <div class="brothers-item-model">Brand: {{ $brand_name }}</div>
                         @endif
                         @if ($product_description !== '')
                             <div class="brothers-item-model">{{ $product_description }}</div>
@@ -314,11 +307,13 @@
                 <td colspan="2" class="brothers-totals-label">TOTAL AMOUNT:</td>
                 <td class="brothers-totals-value">{{ $gross_total }}</td>
             </tr>
-            <tr class="brothers-totals-row">
-                <td colspan="2" class="brothers-totals-spacer"></td>
-                <td colspan="2" class="brothers-totals-label">DISCOUNT:</td>
-                <td class="brothers-totals-value">{{ $discount_total }}</td>
-            </tr>
+            @if($has_discount)
+                <tr class="brothers-totals-row">
+                    <td colspan="2" class="brothers-totals-spacer"></td>
+                    <td colspan="2" class="brothers-totals-label">DISCOUNT:</td>
+                    <td class="brothers-totals-value">{{ $discount_total }}</td>
+                </tr>
+            @endif
             @if(!empty($receipt_details->vat))
                 <tr class="brothers-totals-row">
                     <td colspan="2" class="brothers-totals-spacer"></td>
@@ -331,18 +326,6 @@
                 <td colspan="2" class="brothers-totals-label">NET TOTAL:</td>
                 <td class="brothers-totals-value">{{ $net_total }}</td>
             </tr>
-            @if(isset($receipt_details->total_paid) || isset($receipt_details->total_due))
-                <tr class="brothers-totals-row">
-                    <td colspan="2" class="brothers-totals-spacer"></td>
-                    <td colspan="2" class="brothers-totals-label">PAID AMOUNT:</td>
-                    <td class="brothers-totals-value">{{ $receipt_details->total_paid ?? '0.00' }}</td>
-                </tr>
-                <tr class="brothers-totals-row">
-                    <td colspan="2" class="brothers-totals-spacer"></td>
-                    <td colspan="2" class="brothers-totals-label">DUE AMOUNT:</td>
-                    <td class="brothers-totals-value">{{ $receipt_details->total_due ?? '0.00' }}</td>
-                </tr>
-            @endif
             <tr class="brothers-in-words">
                 <td colspan="5">IN WORDS: {{ $amount_in_words }}</td>
             </tr>
