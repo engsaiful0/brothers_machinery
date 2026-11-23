@@ -304,7 +304,6 @@
                     $product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name));
                     $product_variation = trim((string) ($line['product_variation'] ?? ''));
                     $variation_name = trim((string) ($line['variation'] ?? ''));
-                    $variation_sku = trim((string) ($line['sub_sku'] ?? ''));
                     $brand_name = trim(strip_tags($line['brand'] ?? ''));
                     $product_description = html_entity_decode(strip_tags($line['product_description'] ?? ''), ENT_QUOTES, 'UTF-8');
                     // Product descriptions may repeat the country-prefixed item number (for example, "BD - 090").
@@ -320,7 +319,6 @@
                             {{ $product_name }}
                             @if ($product_variation !== '') - {{ $product_variation }} @endif
                             @if ($variation_name !== '') - {{ $variation_name }} @endif
-                            @if ($variation_sku !== '') , {{ $variation_sku }} @endif
                         </div>
                         @foreach(($line['product_models'] ?? []) as $product_model)
                             <div class="brothers-item-model">{{ $product_model['label'] }}: {{ $product_model['value'] }}</div>
