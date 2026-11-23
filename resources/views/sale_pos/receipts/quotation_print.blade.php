@@ -134,11 +134,11 @@
     </table>
 
     @php
-        $subtotal = (float) ($transaction->total_before_tax ?? 0);
+        $subtotal = max(0, (float) ($transaction->total_before_tax ?? 0));
         $discount_value = (float) ($transaction->discount_amount ?? 0);
         $discount = $transaction->discount_type === 'percentage' ? $subtotal * $discount_value / 100 : $discount_value;
-        // Order discount is not shown; fold it into the sub total so the totals still add up.
-        $subtotal -= $discount;
+        $discount = min(max(0, $discount), $subtotal);
+        $net_total = max(0, $subtotal - $discount);
         $vat = (float) ($transaction->vat_amount ?? 0);
         $grand_total = (float) ($transaction->final_total ?? 0);
         $order_tax = (float) ($transaction->tax_amount ?? 0);
@@ -151,6 +151,10 @@
 
         // Printed as the last rows of the product table (tbody, not tfoot, so Chrome doesn't repeat them per page).
         $total_rows = [['Total Amount', $subtotal]];
+        if ($discount > 0) {
+            $total_rows[] = ['Discount', $discount];
+            $total_rows[] = ['Net Total', $net_total];
+        }
         if (! empty($transaction->vat_type) || $vat > 0) $total_rows[] = [$vat_label, $vat];
         if ($order_tax > 0) $total_rows[] = ['Order Tax ('.(optional($transaction->tax)->name ?: 'Tax').')', $order_tax];
         if ($shipping > 0) $total_rows[] = ['Shipping', $shipping];
@@ -158,7 +162,7 @@
     @endphp
     <p class="greeting">Dear Sir,<br>As per your requirement, we are pleased to quote as follows:</p>
     <table class="items">
-        <thead><tr><th style="width:5%">#</th><th>Description</th><th style="width:10%">Qty</th><th style="width:16%" class="number">Unit Price</th><th style="width:18%" class="number">Amount</th></tr></thead>
+        <thead><tr><th style="width:5%">Sl No.</th><th>Description</th><th style="width:10%">Qty</th><th style="width:16%" class="number">Unit Price</th><th style="width:18%" class="number">Amount</th></tr></thead>
         <tbody>
         @foreach($transaction->sell_lines as $index => $line)
             @php
@@ -199,7 +203,7 @@
             </tr>
         @endforeach
             <tr>
-                <td colspan="5"><strong>In Words:</strong> {{ $amount_in_words }}</td>
+                <td colspan="5"><strong>IN WORDS:</strong> {{ $amount_in_words }}</td>
             </tr>
         </tbody>
     </table>
