@@ -2166,6 +2166,8 @@ class TransactionUtil extends Util
         $output_lines = [];
         //$output_taxes = ['taxes' => []];
         $product_custom_fields_settings = ! empty($il->product_custom_fields) ? $il->product_custom_fields : [];
+        $business_custom_labels = json_decode($business_details->custom_labels ?? '', true) ?: [];
+        $product_custom_labels = $business_custom_labels['product'] ?? [];
 
         $is_warranty_enabled = ! empty($business_details->common_settings['enable_product_warranty']) ? true : false;
 
@@ -2229,6 +2231,18 @@ class TransactionUtil extends Util
                 'line_discount_amount_uf' => $line->line_discount_amount,
                 'line_discount_type_uf' => $line->line_discount_type,
             ];
+
+            $line_array['product_models'] = [];
+            for ($field_number = 1; $field_number <= 20; $field_number++) {
+                $field_label = $product_custom_labels['custom_field_' . $field_number] ?? '';
+                $field_value = $product->getAttribute('product_custom_field' . $field_number);
+                if ($field_label !== '' && stripos($field_label, 'model') !== false && ! empty($field_value)) {
+                    $line_array['product_models'][] = [
+                        'label' => $field_label,
+                        'value' => $field_value,
+                    ];
+                }
+            }
 
             $temp = [];
 

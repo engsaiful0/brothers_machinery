@@ -73,9 +73,9 @@
     .packing-slip-meta td { padding: 1px 0; border: 0; vertical-align: top; }
     .packing-slip-meta .meta-label { width: 20%; white-space: nowrap; }
     .packing-slip-meta .meta-colon { width: 3%; text-align: center; }
-    .packing-slip-meta .meta-value { width: 37%; padding-right: 12px; overflow-wrap: anywhere; }
-    .packing-slip-meta .meta-label-right { width: 22%; text-align: right; white-space: nowrap; }
-    .packing-slip-meta .meta-value-right { width: 15%; overflow-wrap: anywhere; }
+    .packing-slip-meta .meta-value { width: 27%; padding-right: 12px; overflow-wrap: anywhere; }
+    .packing-slip-meta .meta-label-right { width: 20%; text-align: right; white-space: nowrap; }
+    .packing-slip-meta .meta-value-right { width: 27%; overflow-wrap: anywhere; }
     .packing-slip-reference { text-align: left; }
     .salan_info { margin: 0 0 8px; padding: 0; font-size: 18px; font-weight: normal; line-height: 1.5; }
     .salan_info strong { font-weight: bold; }
@@ -101,6 +101,7 @@
     .packing-slip-reference-table { font-size: 18px; }
     .packing-slip-signature { padding-top: 86px; margin-bottom: 20px !important; page-break-inside: avoid; }
     .packing-slip-signature b { display: inline-block; padding-top: 8px; border-top: 1px solid #555; min-width: 180px; }
+    .packing-slip-delivery-name { display: block; margin-bottom: 2px; }
     .packing-slip .center-block { display: block; max-width: 100%; margin: 0 auto; }
     .packing-slip-footer { margin-top: 20px !important; padding-top: 12px; border-top: 1px solid #ddd; }
     @media screen and (max-width: 600px) {
@@ -178,31 +179,31 @@
 	<table class="packing-slip-meta color-555">
 	<tr>
 		<td class="meta-label">Customer Name</td><td class="meta-colon">:</td>
-		<td class="meta-value">{{ $receipt_details->packing_customer_name ?: '--' }}</td>
+		<td class="meta-value">{{ $receipt_details->packing_customer_name }}</td>
 		<td class="meta-label-right">{{ $receipt_details->date_label ?: 'Date' }}</td><td class="meta-colon">:</td>
-		<td class="meta-value-right">{{ $receipt_details->invoice_date ?: '--' }}</td>
+		<td class="meta-value-right">{{ $receipt_details->invoice_date }}</td>
 	</tr>
 	<tr>
 		<td class="meta-label">Office Address</td><td class="meta-colon">:</td>
-		<td class="meta-value">{{ $receipt_details->customer_address_line ?: '--' }}</td>
+		<td class="meta-value">{{ $receipt_details->customer_address_line }}</td>
 		<td class="meta-label-right">@lang('sale.invoice_no')</td><td class="meta-colon">:</td>
-		<td class="meta-value-right">{{ $receipt_details->invoice_no ?: '--' }}</td>
+		<td class="meta-value-right">{{ $receipt_details->invoice_no }}</td>
 	</tr>
 	<tr>
 		<td class="meta-label">Contact Name</td><td class="meta-colon">:</td>
-		<td class="meta-value">{{ $receipt_details->customer_contact_person_name ?: '--' }}</td>
+		<td class="meta-value">{{ $receipt_details->customer_contact_person_name }}</td>
 		<td class="meta-label-right">Challan No</td><td class="meta-colon">:</td>
-		<td class="meta-value-right">{{ $receipt_details->delivery_challan_no ?: '--' }}</td>
+		<td class="meta-value-right">{{ $receipt_details->delivery_challan_no }}</td>
 	</tr>
 	<tr>
 		<td class="meta-label">Contact Phone No</td><td class="meta-colon">:</td>
-		<td class="meta-value">{{ $receipt_details->packing_contact_mobile ?: '--' }}</td>
+		<td class="meta-value">{{ $receipt_details->packing_contact_mobile }}</td>
 		<td class="meta-label-right">Email</td><td class="meta-colon">:</td>
-		<td class="meta-value-right">{{ $receipt_details->packing_contact_email ?: '--' }}</td>
+		<td class="meta-value-right">{{ $receipt_details->packing_contact_email }}</td>
 	</tr>
 	<tr>
 		<td class="meta-label">@lang('lang_v1.shipping_address')</td><td class="meta-colon">:</td>
-		<td class="meta-value" colspan="4">{{ $packing_shipping_address ?: '--' }}
+		<td class="meta-value" colspan="4">{{ $packing_shipping_address }}
 		@if(!empty($receipt_details->shipping_custom_field_1_label))
 			<br><strong>{!!$receipt_details->shipping_custom_field_1_label!!}:</strong> {!!$receipt_details->shipping_custom_field_1_value ?? ''!!}
 		@endif
@@ -275,7 +276,10 @@
 		<b class="pull-left">@lang('lang_v1.authorized_signatory')</b>
 	</div>
 	<div class="col-md-6 invoice-col width-50 text-right">
-		<b>Delivery Person: {{ $receipt_details->delivery_person ?: '--' }}</b>
+		@if(!empty($receipt_details->delivery_person))
+			<span class="packing-slip-delivery-name">{{ $receipt_details->delivery_person }}</span>
+		@endif
+		<b>Delivery Person</b>
 	</td>
 	</tr>
 	</table>
