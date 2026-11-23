@@ -68,6 +68,14 @@
     .packing-slip-info-table { width: 100%; border: 0; border-collapse: collapse; table-layout: fixed; }
     .packing-slip-info-table td { width: 50%; border: 0; padding: 0 16px 0 0; vertical-align: top; }
     .packing-slip-info-table td + td { padding: 0 0 0 16px; }
+    .packing-slip-business td[colspan="2"] { width: 100%; }
+    .packing-slip-meta { width: 100%; margin-bottom: 20px; border-collapse: collapse; table-layout: fixed; }
+    .packing-slip-meta td { padding: 1px 0; border: 0; vertical-align: top; }
+    .packing-slip-meta .meta-label { width: 20%; white-space: nowrap; }
+    .packing-slip-meta .meta-colon { width: 3%; text-align: center; }
+    .packing-slip-meta .meta-value { width: 37%; padding-right: 12px; overflow-wrap: anywhere; }
+    .packing-slip-meta .meta-label-right { width: 22%; text-align: right; white-space: nowrap; }
+    .packing-slip-meta .meta-value-right { width: 15%; overflow-wrap: anywhere; }
     .packing-slip-reference { text-align: left; }
     .salan_info { margin: 0 0 8px; padding: 0; font-size: 18px; font-weight: normal; line-height: 1.5; }
     .salan_info strong { font-weight: bold; }
@@ -83,13 +91,12 @@
     .packing-slip-items th { background: #f1f3f5 !important; color: #222 !important; font-weight: bold; }
     .packing-slip-items thead { display: table-header-group; }
     .packing-slip-items tr { page-break-inside: avoid; }
-    .packing-slip-items .packing-slip-number { width: 5%; text-align: center; }
-    .packing-slip-items .packing-slip-name { width: 22%; text-align: left; }
-    .packing-slip-items .packing-slip-brand { width: 13%; text-align: left; }
-    .packing-slip-items .packing-slip-part { width: 14%; text-align: left; }
-    .packing-slip-items .packing-slip-description { width: 30%; text-align: left; }
-    .packing-slip-items .packing-slip-quantity { width: 16%; text-align: right; }
-    .packing-slip-product-name { font-weight: bold; }
+    .packing-slip-items .packing-slip-number { width: 10%; text-align: center; }
+    .packing-slip-items .packing-slip-name { width: 60%; text-align: left; }
+    .packing-slip-items .packing-slip-part { width: 18%; text-align: left; }
+    .packing-slip-items .packing-slip-quantity { width: 12%; text-align: right; }
+    .packing-slip-product-name { font-weight: bold; text-transform: uppercase; }
+    .packing-slip-product-brand { margin-top: 2px; font-size: 12px; font-style: italic; }
     .packing-slip-product-detail { margin-top: 2px; font-size: 12px; }
     .packing-slip-reference-table { font-size: 18px; }
     .packing-slip-signature { padding-top: 86px; margin-bottom: 20px !important; page-break-inside: avoid; }
@@ -126,9 +133,9 @@
 			<td>
 
 <!-- business information here -->
-	<table class="packing-slip-info-table packing-slip-business">
+<table class="packing-slip-info-table packing-slip-business">
 	<tr>
-	<td class="color-555">
+	<td class="color-555" colspan="2">
 		<!-- Logo -->
 		@if(!empty($receipt_details->logo))
 			<img src="{{$receipt_details->logo}}" class="img">
@@ -165,33 +172,39 @@
 			</p>
 		@endif
 	</td>
-
-	<td class="packing-slip-reference color-555">
-		<p class="salan_info">
-			<strong>Challan No:</strong> {{ $receipt_details->delivery_challan_no ?: '--' }}
-			@if(!empty($receipt_details->date_label))
-				<br><strong>{{ $receipt_details->date_label }}</strong> {{ $receipt_details->invoice_date }}
-			@endif
-			<br><strong>@lang('sale.invoice_no'):</strong> {{ $receipt_details->invoice_no }}
-		</p>
-	</td>
 	</tr>
 	</table>
 
-	<table class="packing-slip-info-table color-555 packing-slip-parties">
+	<table class="packing-slip-meta color-555">
 	<tr>
-	<td class="word-wrap">
-		<strong>Group Name:</strong> {{ $receipt_details->packing_customer_group_name ?: '--' }}<br>
-		<strong>Customer Name:</strong> {{ $receipt_details->packing_customer_name ?: '--' }}<br>
-		<strong>Contact Person:</strong> {{ $receipt_details->customer_contact_person_name ?: '--' }}<br>
-		<strong>Mobile:</strong> {{ $receipt_details->packing_contact_mobile ?: '--' }}<br>
-		<strong>Email:</strong> {{ $receipt_details->packing_contact_email ?: '--' }}
-	</td>
-	<td class="word-wrap">
-		<strong>@lang('lang_v1.shipping_address'):</strong><br>
-		{!! $packing_shipping_address !!}
+		<td class="meta-label">Customer Name</td><td class="meta-colon">:</td>
+		<td class="meta-value">{{ $receipt_details->packing_customer_name ?: '--' }}</td>
+		<td class="meta-label-right">{{ $receipt_details->date_label ?: 'Date' }}</td><td class="meta-colon">:</td>
+		<td class="meta-value-right">{{ $receipt_details->invoice_date ?: '--' }}</td>
+	</tr>
+	<tr>
+		<td class="meta-label">Office Address</td><td class="meta-colon">:</td>
+		<td class="meta-value">{{ $receipt_details->customer_address_line ?: '--' }}</td>
+		<td class="meta-label-right">@lang('sale.invoice_no')</td><td class="meta-colon">:</td>
+		<td class="meta-value-right">{{ $receipt_details->invoice_no ?: '--' }}</td>
+	</tr>
+	<tr>
+		<td class="meta-label">Contact Name</td><td class="meta-colon">:</td>
+		<td class="meta-value">{{ $receipt_details->customer_contact_person_name ?: '--' }}</td>
+		<td class="meta-label-right">Challan No</td><td class="meta-colon">:</td>
+		<td class="meta-value-right">{{ $receipt_details->delivery_challan_no ?: '--' }}</td>
+	</tr>
+	<tr>
+		<td class="meta-label">Contact Phone No</td><td class="meta-colon">:</td>
+		<td class="meta-value">{{ $receipt_details->packing_contact_mobile ?: '--' }}</td>
+		<td class="meta-label-right">Email</td><td class="meta-colon">:</td>
+		<td class="meta-value-right">{{ $receipt_details->packing_contact_email ?: '--' }}</td>
+	</tr>
+	<tr>
+		<td class="meta-label">@lang('lang_v1.shipping_address')</td><td class="meta-colon">:</td>
+		<td class="meta-value" colspan="4">{{ $packing_shipping_address ?: '--' }}
 		@if(!empty($receipt_details->shipping_custom_field_1_label))
-			<br><strong>{!!$receipt_details->shipping_custom_field_1_label!!} :</strong> {!!$receipt_details->shipping_custom_field_1_value ?? ''!!}
+			<br><strong>{!!$receipt_details->shipping_custom_field_1_label!!}:</strong> {!!$receipt_details->shipping_custom_field_1_value ?? ''!!}
 		@endif
 
 		@if(!empty($receipt_details->shipping_custom_field_2_label))
@@ -207,7 +220,7 @@
 		@endif
 
 		@if(!empty($receipt_details->shipping_custom_field_5_label))
-			<br><strong>{!!$receipt_details->shipping_custom_field_2_label!!}:</strong> {!!$receipt_details->shipping_custom_field_5_value ?? ''!!}
+			<br><strong>{!!$receipt_details->shipping_custom_field_5_label!!}:</strong> {!!$receipt_details->shipping_custom_field_5_value ?? ''!!}
 		@endif
 	</td>
 	</tr>
@@ -218,11 +231,9 @@
 		<table class="packing-slip-items">
 			<thead>
                 <tr>
-                    <th scope="col" class="packing-slip-number">#</th>
+					<th scope="col" class="packing-slip-number">Sl No.</th>
                     <th scope="col" class="packing-slip-name">Product Name</th>
-                    <th scope="col" class="packing-slip-brand">Brand</th>
                     <th scope="col" class="packing-slip-part">Part Number</th>
-                    <th scope="col" class="packing-slip-description">Description</th>
                     <th scope="col" class="packing-slip-quantity">{{$receipt_details->table_qty_label}}</th>
                 </tr>
 			</thead>
@@ -236,27 +247,18 @@
 						$product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name));
 						$product_description = html_entity_decode(strip_tags($line['product_description'] ?? ''), ENT_QUOTES, 'UTF-8');
 						$product_description = preg_replace('/\bBD\s*-\s*\d+\b/i', '', $product_description);
-						$product_description = trim(preg_replace('/\s{2,}/u', ' ', $product_description));
+						$product_description = trim(preg_replace('/\s{2,}/u', ' ', $product_description), " \t\n\r,;:-");
 					@endphp
 					<tr>
 						<td class="text-center">
 							{{$loop->iteration}}
 						</td>
-						<td><div class="packing-slip-product-name">{{ $product_name }}@if(!empty($line['product_variation']) && $line['product_variation'] != 'DUMMY') ({{ $line['product_variation'] }})@endif @if(!empty($line['variation']) && $line['variation'] != 'DUMMY') {{ $line['variation'] }}@endif</div></td>
-						<td>{{ $line['brand'] ?? '' }}</td>
-						<td>{{ $part_number }}</td>
 						<td>
-                            {{ trim($product_description, " \t\n\r,;:-") }}
-                            @if(!empty($line['product_custom_fields']))<div class="packing-slip-product-detail">{{ $line['product_custom_fields'] }}</div>@endif
-                            @if(!empty($line['sell_line_note']))<div class="packing-slip-product-detail">{{ strip_tags($line['sell_line_note']) }}</div>@endif
-                            @if(!empty($line['lot_number']))<div class="packing-slip-product-detail">{{ $line['lot_number_label'] }}: {{ $line['lot_number'] }}</div>@endif
-                            @if(!empty($line['product_expiry']))<div class="packing-slip-product-detail">{{ $line['product_expiry_label'] }}: {{ $line['product_expiry'] }}</div>@endif
-                            @if(!empty($line['modifiers']))
-                                @foreach($line['modifiers'] as $modifier)
-                                    <div class="packing-slip-product-detail">{{ $modifier['name'] }} {{ $modifier['variation'] ?? '' }} ({{ $modifier['quantity'] }} {{ $modifier['units'] ?? '' }})</div>
-                                @endforeach
-                            @endif
-						</td>
+                            <div class="packing-slip-product-name">{{ $product_name }}@if(!empty($line['product_variation']) && $line['product_variation'] != 'DUMMY') ({{ $line['product_variation'] }})@endif @if(!empty($line['variation']) && $line['variation'] != 'DUMMY') {{ $line['variation'] }}@endif</div>
+                            @if(!empty($line['brand']))<div class="packing-slip-product-brand">Brand: {{ $line['brand'] }}</div>@endif
+                            @if($product_description !== '')<div class="packing-slip-product-detail">{{ $product_description }}</div>@endif
+                        </td>
+						<td>{{ $part_number }}</td>
 						<td class="text-right">
 							{{$line['quantity']}} {{$line['units']}}
 						</td>

@@ -3011,7 +3011,7 @@ class SellPosController extends Controller
             ->first(fn ($file) => file_exists(public_path($file)));
 
         return [
-            'pad_image' => $pad_file ? asset($pad_file) : null,
+            'pad_image' => $pad_file ? asset($pad_file) . '?v=' . filemtime(public_path($pad_file)) : null,
             'pad_path' => $pad_file ? public_path($pad_file) : null,
             'primary_logo' => !empty($business->logo) && file_exists(public_path('uploads/business_logos/'.$business->logo))
                 ? asset('uploads/business_logos/'.$business->logo) : null,
