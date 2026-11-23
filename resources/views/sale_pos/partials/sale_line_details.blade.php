@@ -23,8 +23,8 @@
     @foreach($sell->sell_lines as $sell_line)
         <tr>
             <td>{{ $loop->iteration }}</td>
-            <td>
-                {{ $sell_line->product->name }}
+            <td style="white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere;">
+                <span style="white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere;">{{ $sell_line->product->name }}</span>
                 @if( $sell_line->product->type == 'variable')
                 - {{ $sell_line->variations->product_variation->name ?? ''}}
                 - {{ $sell_line->variations->name ?? ''}},

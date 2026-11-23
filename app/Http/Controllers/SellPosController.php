@@ -714,7 +714,9 @@ class SellPosController extends Controller
                 }
             } else {
                 $output = ['success' => 0,
-                    'msg' => trans('messages.something_went_wrong'),
+                    'msg' => !empty($input['is_quotation'])
+                        ? 'The quotation was not saved because no product lines were submitted.'
+                        : trans('messages.something_went_wrong'),
                 ];
             }
         } catch (\Exception $e) {
@@ -727,6 +729,10 @@ class SellPosController extends Controller
             }
             if (get_class($e) == \App\Exceptions\AdvanceBalanceNotAvailable::class) {
                 $msg = $e->getMessage();
+            }
+            if (!empty($input['is_quotation']) && (auth()->user()->can('admin') || auth()->user()->can('superadmin'))
+                && $msg !== $e->getMessage()) {
+                $msg .= ' Details: ' . $e->getMessage();
             }
 
             $output = ['success' => 0,
