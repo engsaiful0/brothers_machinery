@@ -40,8 +40,9 @@
         .pad-bg { position: fixed; top: 0; left: 0; width: 210mm; height: 297mm; z-index: -1; }
         .pad-bg img { display: block; width: 100%; height: 100%; }
         @media screen {
-            body { position: relative; width: 210mm; max-width: 210mm; min-height: 297mm; margin: 18px auto; box-shadow: 0 0 5px #aaa; }
-            .pad-bg { position: fixed; top: 18px; left: 50%; width: 210mm; height: 297mm; transform: translateX(-50%); }
+            body { position: relative; width: 210mm; max-width: 210mm; min-height: 297mm; margin: 18px auto; padding: 0; box-shadow: 0 0 5px #aaa; }
+            .pad-bg { position: absolute; top: 0; left: 0; width: 100%; height: 297mm; transform: none; }
+            .page-frame { width: calc(100% - 30mm); margin: 0 15mm; }
         }
         @endif
         * { box-sizing: border-box; }
