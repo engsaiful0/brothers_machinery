@@ -20,6 +20,9 @@
         : ($receipt_details->invoice_date ?? '');
     $sales_rep_name = $sales_rep ? trim("{$sales_rep->surname} {$sales_rep->first_name} {$sales_rep->last_name}") : '';
     $sales_rep_contact = optional($sales_rep)->contact_number ?? '';
+    $signature_name = trim($receipt_details->sales_person ?? $receipt_details->signature_user_name ?? $receipt_details->added_by ?? '');
+    $signature_designation = trim($receipt_details->signature_user_designation ?? '');
+    $signature_company = trim($branding['company_name'] ?? 'Brothers Machinery');
     $title = ! empty($sub_status) && $sub_status === 'proforma' ? 'PROFORMA INVOICE' : 'QUOTATION';
 @endphp
 <!doctype html>
@@ -62,6 +65,8 @@
         .items .number { text-align: right; }
         .items .total-label, .items .total-value { text-align: right; font-weight: bold; }
         .terms { margin-top: 12px; white-space: pre-line; }
+        .quotation-signature { margin-top: 28px; line-height: 1.8; }
+        .quotation-signature-company { display: inline-block; margin-bottom: 2.5em; }
         .greeting { margin: 0 0 8px; line-height: 1.5; }
         .commercial-terms-title { margin: 18px 0 8px; text-align: center; font-weight: bold; text-decoration: underline; }
         .commercial-terms td { padding: 1px 0; border: 0; vertical-align: top; }
@@ -146,6 +151,7 @@
         $shipping = (float) ($transaction->shipping_charges ?? 0);
         $packing_charge = (float) ($transaction->packing_charge ?? 0);
         $amount_in_words = $receipt_details->total_in_words ?: app(\App\Utils\Util::class)->numToWord($grand_total, null, 'indian');
+        $amount_in_words = strtoupper(str_ireplace(['lakh', 'lakhs'], 'LAC', $amount_in_words));
         $vat_label = $transaction->vat_type === 'percentage'
             ? 'VAT on Total Amount ('.rtrim(rtrim(number_format((float) $transaction->vat_rate, 2, '.', ''), '0'), '.').'%)'
             : 'VAT on Total Amount';
@@ -204,7 +210,7 @@
             </tr>
         @endforeach
             <tr>
-                <td colspan="5"><strong>IN WORDS:</strong> {{ $amount_in_words }}</td>
+                <td colspan="5"><strong>IN WORDS: {{ strtoupper($amount_in_words) }}</strong></td>
             </tr>
         </tbody>
     </table>
@@ -225,6 +231,12 @@
     @if(!empty($transaction->payment_terms))<div class="terms"><strong>Payment Terms:</strong> {{ $transaction->payment_terms }}</div>@endif
     @if(!empty($transaction->shipping_details))<div class="terms"><strong>Shipping Details:</strong> {{ $transaction->shipping_details }}</div>@endif
     @if(!empty($transaction->additional_notes))<div class="terms"><strong>Terms / Notes:</strong><br>{{ $transaction->additional_notes }}</div>@endif
+    <div class="quotation-signature">
+        <strong>Best Regards</strong><br>
+        <span class="quotation-signature-company"><strong>{{ $signature_company }}</strong></span><br>
+        @if($signature_name)<strong>{{ $signature_name }}</strong><br>@endif
+        @if($signature_designation){{ $signature_designation }}@endif
+    </div>
     @if(!empty($browser_print))
             </td></tr></tbody>
         </table>
