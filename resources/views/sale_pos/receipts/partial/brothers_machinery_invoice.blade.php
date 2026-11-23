@@ -124,7 +124,7 @@
         font-size: 13pt;
         text-align: center;
         text-decoration: underline;
-        padding-bottom: 6px;
+        padding-bottom: 24px;
     }
 
     .brothers-lines-table {
@@ -254,23 +254,25 @@
             <td class="meta-label">P.O No</td>
             <td class="meta-colon">:</td>
             <td class="meta-value">{{ $po_ref }}</td>
-            <td class="meta-label-right">Sales Rep. Name</td>
+            <td class="meta-label-right">Chalan No</td>
             <td class="meta-colon">:</td>
-            <td class="meta-value-right">{{ $signature_name }}</td>
+            <td class="meta-value-right">{{ $challan_no }}</td>
         </tr>
         <tr>
             <td class="meta-label">Delivery Address</td>
             <td class="meta-colon">:</td>
             <td class="meta-value">{{ $delivery_address }}</td>
-            <td class="meta-label-right">Sales Rep. Contact</td>
+            <td class="meta-label-right">Sales Rep. Name</td>
             <td class="meta-colon">:</td>
-            <td class="meta-value-right">{{ $signature_contact }}</td>
+            <td class="meta-value-right">{{ $signature_name }}</td>
         </tr>
         <tr>
             <td class="meta-label">Contact Name</td>
             <td class="meta-colon">:</td>
             <td class="meta-value">{{ $contact_name }}</td>
-            <td colspan="3"></td>
+            <td class="meta-label-right">Sales Rep. Contact</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value-right">{{ $signature_contact }}</td>
         </tr>
         <tr>
             <td class="meta-label">Contact Phone No</td>
