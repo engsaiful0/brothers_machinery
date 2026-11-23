@@ -22,10 +22,15 @@
     $packing_shipping_address = preg_replace('/^\s*Brothers Machinery\b(?:\s*[,;:|–—-]\s*|\s*<br\s*\/?\s*>\s*)?/i', '', $packing_shipping_address);
 @endphp
 <style>
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
     .packing-slip {
         max-width: 210mm;
         margin: 0 auto;
-        padding: 24px;
+        padding: 42mm 15mm 32mm;
         background: #fff;
         color: #222;
         font-family: Arial, sans-serif;
@@ -46,14 +51,16 @@
     .packing-slip .text-center { text-align: center; }
     .packing-slip .pull-left { float: left; }
     .packing-slip .word-wrap { overflow-wrap: anywhere; }
+    .packing-slip-business { display: none !important; }
     .packing-slip-title {
-        padding-bottom: 14px;
-        border-bottom: 2px solid #333;
-        margin-bottom: 20px !important;
-        font-size: 24px !important;
+        padding-bottom: 0;
+        margin-bottom: 18px !important;
+        font-size: 18px !important;
         font-weight: bold;
         letter-spacing: 1px;
-        text-align: left !important;
+        text-align: center !important;
+        text-decoration: underline;
+        text-transform: uppercase;
     }
     .packing-slip-business { margin-bottom: 18px !important; }
     .packing-slip-business img { max-height: 80px; max-width: 100%; width: auto; margin-bottom: 8px; }
@@ -99,39 +106,26 @@
     .packing-slip-product-brand { margin-top: 2px; font-size: 12px; font-style: italic; }
     .packing-slip-product-detail { margin-top: 2px; font-size: 12px; }
     .packing-slip-reference-table { font-size: 18px; }
-    .packing-slip-signature { padding-top: 86px; margin-bottom: 20px !important; page-break-inside: avoid; }
+    .packing-slip-signature { padding-top: 80px; margin-bottom: 12px !important; }
     .packing-slip-signature b { display: inline-block; padding-top: 8px; border-top: 1px solid #555; min-width: 180px; }
     .packing-slip-delivery-name { display: block; margin-bottom: 2px; }
     .packing-slip .center-block { display: block; max-width: 100%; margin: 0 auto; }
     .packing-slip-footer { margin-top: 20px !important; padding-top: 12px; border-top: 1px solid #ddd; }
     @media screen and (max-width: 600px) {
-        .packing-slip { padding: 16px; }
+        .packing-slip { padding: 42mm 16px 32mm; }
         .packing-slip .invoice-col { float: none; width: 100%; padding: 0; }
         .packing-slip .invoice-col + .invoice-col { padding: 16px 0 0; }
         .packing-slip-items th, .packing-slip-items td { padding: 8px 6px; }
     }
     @media print {
-        .packing-slip { max-width: none; padding: 0; font-size: 11pt; }
-        .packing-slip-document > thead { display: table-row-group; }
+        .packing-slip { max-width: none; padding: 42mm 15mm 32mm; font-size: 11pt; }
     }
 </style>
 <div class="packing-slip">
-<table class="packing-slip-document" style="width:100%; color: #000000 !important;">
-	<thead>
-		<tr>
-			<td>
-
-			<p class="packing-slip-title text-right color-555 font-30">
+	<div class="packing-slip-document" style="width:100%; color: #000000 !important;">
+		<p class="packing-slip-title text-center color-555 font-30">
 				@lang('lang_v1.packing_slip')
 			</p>
-
-			</td>
-		</tr>
-	</thead>
-
-	<tbody>
-		<tr>
-			<td>
 
 <!-- business information here -->
 <table class="packing-slip-info-table packing-slip-business">
@@ -244,7 +238,6 @@
 						$product_name = html_entity_decode(strip_tags($line['name'] ?? ''), ENT_QUOTES, 'UTF-8');
 						$part_number = $line['part_number'] ?? '';
 						if ($part_number === '') $part_number = $line['sub_sku'] ?? '';
-						$product_name = preg_replace('/\bBD\s*-\s*\d+\b/i', '', $product_name);
 						$product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name));
 						$product_description = html_entity_decode(strip_tags($line['product_description'] ?? ''), ENT_QUOTES, 'UTF-8');
 						$product_description = preg_replace('/\bBD\s*-\s*\d+\b/i', '', $product_description);
@@ -255,9 +248,25 @@
 							{{$loop->iteration}}
 						</td>
 						<td>
-                            <div class="packing-slip-product-name">{{ $product_name }}@if(!empty($line['product_variation']) && $line['product_variation'] != 'DUMMY') ({{ $line['product_variation'] }})@endif @if(!empty($line['variation']) && $line['variation'] != 'DUMMY') {{ $line['variation'] }}@endif</div>
-                            @if(!empty($line['brand']))<div class="packing-slip-product-brand">Brand: {{ $line['brand'] }}</div>@endif
-                            @if($product_description !== '')<div class="packing-slip-product-detail">{{ $product_description }}</div>@endif
+                            <div class="packing-slip-product-name">{{ $product_name }}
+                                @if(!empty($line['product_variation']) && $line['product_variation'] != 'DUMMY')
+                                    ({{ $line['product_variation'] }})
+                                @endif
+                                @if(!empty($line['variation']) && $line['variation'] != 'DUMMY')
+                                    {{ $line['variation'] }}
+                                @endif
+                            </div>
+                            @foreach(($line['product_models'] ?? []) as $model)
+                                @if(!empty($model['value']))
+                                    <div class="packing-slip-product-detail"><strong>{{ $model['label'] }}:</strong> {{ $model['value'] }}</div>
+                                @endif
+                            @endforeach
+                            @if(!empty($line['brand']))
+                                <div class="packing-slip-product-brand">Brand: {{ $line['brand'] }}</div>
+                            @endif
+                            @if($product_description !== '')
+                                <div class="packing-slip-product-detail">{{ $product_description }}</div>
+                            @endif
                         </td>
 						<td>{{ $part_number }}</td>
 						<td class="text-right">
@@ -280,9 +289,8 @@
 			<span class="packing-slip-delivery-name">{{ $receipt_details->delivery_person }}</span>
 		@endif
 		<b>Delivery Person</b>
-	</td>
-	</tr>
-	</table>
+	</div>
+</div>
 
 {{-- Barcode --}}
 @if($receipt_details->show_barcode)
@@ -302,8 +310,5 @@
 	</div>
 @endif
 
-			</td>
-		</tr>
-	</tbody>
-</table>
+	</div>
 </div>
