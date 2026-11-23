@@ -54,12 +54,12 @@
     .packing-slip-business { display: none !important; }
     .packing-slip-title {
         padding-bottom: 0;
-        margin-bottom: 18px !important;
+        margin-top: 25px !important;
+        margin-bottom: 36px !important;
         font-size: 18px !important;
         font-weight: bold;
         letter-spacing: 1px;
         text-align: center !important;
-        text-decoration: underline;
         text-transform: uppercase;
     }
     .packing-slip-business { margin-bottom: 18px !important; }
@@ -98,10 +98,9 @@
     .packing-slip-items th { background: #f1f3f5 !important; color: #222 !important; font-weight: bold; }
     .packing-slip-items thead { display: table-header-group; }
     .packing-slip-items tr { page-break-inside: avoid; }
-    .packing-slip-items .packing-slip-number { width: 10%; text-align: center; }
-    .packing-slip-items .packing-slip-name { width: 60%; text-align: left; }
-    .packing-slip-items .packing-slip-part { width: 18%; text-align: left; }
-    .packing-slip-items .packing-slip-quantity { width: 12%; text-align: right; }
+    .packing-slip-items .packing-slip-number { width: 12%; text-align: center; }
+    .packing-slip-items .packing-slip-name { width: 73%; text-align: left; }
+    .packing-slip-items .packing-slip-quantity { width: 15%; text-align: right; }
     .packing-slip-product-name { font-weight: bold; text-transform: uppercase; }
     .packing-slip-product-brand { margin-top: 2px; font-size: 12px; font-style: italic; }
     .packing-slip-product-detail { margin-top: 2px; font-size: 12px; }
@@ -228,7 +227,6 @@
                 <tr>
 					<th scope="col" class="packing-slip-number">Sl No.</th>
                     <th scope="col" class="packing-slip-name">Product Name</th>
-                    <th scope="col" class="packing-slip-part">Part Number</th>
                     <th scope="col" class="packing-slip-quantity">{{$receipt_details->table_qty_label}}</th>
                 </tr>
 			</thead>
@@ -236,8 +234,6 @@
 				@foreach($receipt_details->lines as $line)
 					@php
 						$product_name = html_entity_decode(strip_tags($line['name'] ?? ''), ENT_QUOTES, 'UTF-8');
-						$part_number = $line['part_number'] ?? '';
-						if ($part_number === '') $part_number = $line['sub_sku'] ?? '';
 						$product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name));
 						$product_description = html_entity_decode(strip_tags($line['product_description'] ?? ''), ENT_QUOTES, 'UTF-8');
 						$product_description = preg_replace('/\bBD\s*-\s*\d+\b/i', '', $product_description);
@@ -268,7 +264,6 @@
                                 <div class="packing-slip-product-detail">{{ $product_description }}</div>
                             @endif
                         </td>
-						<td>{{ $part_number }}</td>
 						<td class="text-right">
 							{{$line['quantity']}} {{$line['units']}}
 						</td>
@@ -288,7 +283,7 @@
 		@if(!empty($receipt_details->delivery_person))
 			<span class="packing-slip-delivery-name">{{ $receipt_details->delivery_person }}</span>
 		@endif
-		<b>Delivery Person</b>
+		<b>Customer Signatory</b>
 	</div>
 </div>
 
