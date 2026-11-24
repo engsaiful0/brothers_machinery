@@ -19,7 +19,7 @@ if (! function_exists('quantity_unit_label')) {
 
         // Unit short names such as "Pc(s)" are already marked as plural-capable.
         $label = preg_replace('/\s*\(s\)$/i', '', $label);
-        if ((float) $quantity > 1.0) {
+        if ((float) $quantity !== 1.0) {
             $lower = strtolower($label);
             if (preg_match('/(box|class|glass|brush|church)$/', $lower)) {
                 $label .= 'es';
@@ -33,6 +33,49 @@ if (! function_exists('quantity_unit_label')) {
         }
 
         return strtoupper($label);
+    }
+}
+
+/** Format a displayed quantity and its unit without changing the stored value. */
+if (! function_exists('format_quantity_with_unit')) {
+    function format_quantity_with_unit($quantity, $unit, $formattedQuantity = null)
+    {
+        if ($formattedQuantity === null) {
+            $precision = function_exists('session') ? (int) session('business.quantity_precision', 2) : 2;
+            $decimal = function_exists('session') ? session('currency.decimal_separator', '.') : '.';
+            $thousands = function_exists('session') ? session('currency.thousand_separator', ',') : ',';
+            $formattedQuantity = is_numeric($quantity) ? number_format((float) $quantity, $precision, $decimal, $thousands) : (string) $quantity;
+        }
+        $displayQuantity = (string) $formattedQuantity;
+
+        $displayQuantity = normalize_quantity_display($displayQuantity);
+
+        return trim($displayQuantity.' '.quantity_unit_label($quantity, $unit));
+    }
+}
+
+/** Remove redundant zeros from a rendered quantity without changing decimal precision. */
+if (! function_exists('normalize_quantity_display')) {
+    function normalize_quantity_display($quantity)
+    {
+        $quantity = trim((string) $quantity);
+
+        $quantity = preg_replace_callback('/^([+-]?)0*(\d+)/', function ($matches) {
+            $integer = ltrim($matches[2], '0');
+
+            return $matches[1].($integer === '' ? '0' : $integer);
+        }, $quantity);
+
+        $decimalSeparator = function_exists('session') ? session('currency.decimal_separator', '.') : '.';
+        $separatorPosition = strrpos($quantity, $decimalSeparator);
+        if ($separatorPosition !== false) {
+            $fraction = substr($quantity, $separatorPosition + strlen($decimalSeparator));
+            if ($fraction !== '' && preg_match('/^0+$/', $fraction)) {
+                $quantity = substr($quantity, 0, $separatorPosition);
+            }
+        }
+
+        return $quantity;
     }
 }
 

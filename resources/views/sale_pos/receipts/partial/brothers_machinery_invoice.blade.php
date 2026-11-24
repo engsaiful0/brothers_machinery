@@ -296,10 +296,11 @@
             @forelse ($receipt_details->lines as $line)
                 @php
                     $sl = str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT);
-                    $qty_display = str_pad((string) (int) round($line['quantity_uf'] ?? 0), 2, '0', STR_PAD_LEFT);
-                    if (! empty($line['units'])) {
-                        $qty_display .= ' ' . strtoupper($line['units']);
-                    }
+                    $qty_display = format_quantity_with_unit(
+                        $line['quantity_uf'] ?? 0,
+                        $line['unit_short_name'] ?? '',
+                        $line['quantity'] ?? null
+                    );
                     $product_name = html_entity_decode(strip_tags($line['name'] ?? ''), ENT_QUOTES, 'UTF-8');
                     $product_name = trim(preg_replace('/\s{2,}/u', ' ', $product_name));
                     $product_variation = trim((string) ($line['product_variation'] ?? ''));

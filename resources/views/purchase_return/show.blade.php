@@ -79,7 +79,7 @@
                     @endif
                   </td>
                   <td><span class="display_currency" data-currency_symbol="true">{{ $purchase_line->purchase_price_inc_tax }}</span></td>
-                  <td>{{@format_quantity($purchase_line->quantity_returned)}} {{ quantity_unit_label($purchase_line->quantity_returned, $unit_name) }}</td>
+                  <td>{{ format_quantity_with_unit($purchase_line->quantity_returned, $unit_name, number_format($purchase_line->quantity_returned, session('business.quantity_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator'])) }}</td>
                   <td>
                     @php
                       $line_total = $purchase_line->purchase_price_inc_tax * $purchase_line->quantity_returned;

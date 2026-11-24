@@ -2197,9 +2197,10 @@ class TransactionUtil extends Util
                 'variation' => (empty($variation->name) || $variation->name == 'DUMMY') ? '' : $variation->name,
                 'product_variation' => (empty($product_variation->name) || $product_variation->name == 'DUMMY') ? '' : $product_variation->name,
                 //Field for 2nd column
-                'quantity' => $this->num_f($line->quantity, false, $business_details, true),
+                'quantity' => normalize_quantity_display($this->num_f($line->quantity, false, $business_details, true)),
                 'quantity_uf' => $line->quantity,
                 'units' => quantity_unit_label($line->quantity, $unit_name),
+                'unit_short_name' => $unit_name,
 
                 'base_unit_name' => $base_unit_name,
                 'base_unit_multiplier' => ! empty($line->multiplier) && $line->multiplier != 1 ? $this->num_f($line->multiplier, false, $business_details) : 1,
@@ -2354,7 +2355,7 @@ class TransactionUtil extends Util
                         'name' => $product->name,
                         'variation' => (empty($variation->name) || $variation->name == 'DUMMY') ? '' : $variation->name,
                         //Field for 2nd column
-                        'quantity' => $this->num_f($modifier_line->quantity, false, $business_details),
+                        'quantity' => normalize_quantity_display($this->num_f($modifier_line->quantity, false, $business_details)),
                         'units' => quantity_unit_label($modifier_line->quantity, ! empty($unit->short_name) ? $unit->short_name : ''),
 
                         //Field for 3rd column
@@ -2435,7 +2436,7 @@ class TransactionUtil extends Util
                 'name' => $product->name,
                 'variation' => (empty($variation->name) || $variation->name == 'DUMMY') ? '' : $variation->name,
                 //Field for 2nd column
-                'quantity' => $this->num_f($line->quantity_returned, false, $business_details, true),
+                'quantity' => normalize_quantity_display($this->num_f($line->quantity_returned, false, $business_details, true)),
                 'units' => quantity_unit_label($line->quantity_returned, $unit_name),
                 'tax_unformatted' => $line->item_tax,
                 'unit_price' => $this->num_f($line->unit_price, false, $business_details),

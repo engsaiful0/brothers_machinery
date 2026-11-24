@@ -99,7 +99,14 @@ function __currency_trans_from_en(
         precision = __quantity_precision;
     }
 
-    return accounting.formatMoney(input, symbol, precision, thousand, decimal, format);
+    var formatted = accounting.formatMoney(input, symbol, precision, thousand, decimal, format);
+    if (is_quantity) {
+        var parts = formatted.split(decimal);
+        if (parts.length === 2 && /^0+$/.test(parts[1])) {
+            formatted = parts[0];
+        }
+    }
+    return formatted;
 }
 
 //Same as __currency_trans_from_en but appends the currency short code, e.g. "$ 50.00 (USD)"
