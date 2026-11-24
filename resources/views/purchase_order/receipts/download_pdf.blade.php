@@ -357,7 +357,7 @@
 		</tr>
 		<tr>
 			<td colspan="6">
-				{!!ucfirst($total_in_words)!!}
+				{{ format_amount_in_words($total_in_words) }}
 			</td>
 		</tr>
 		<tr>

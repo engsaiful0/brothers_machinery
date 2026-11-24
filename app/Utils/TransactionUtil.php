@@ -1581,7 +1581,7 @@ class TransactionUtil extends Util
         }
         if (! empty($il->common_settings['show_total_in_words'])) {
             $word_format = isset($il->common_settings['num_to_word_format']) ? $il->common_settings['num_to_word_format'] : 'international';
-            $output['total_in_words'] = $this->numToWord($transaction->final_total, null, $word_format);
+            $output['total_in_words'] = format_amount_in_words($this->numToWord($transaction->final_total, null, $word_format));
         }
 
         $output['total_unformatted'] = $transaction->final_total;
@@ -2075,7 +2075,7 @@ class TransactionUtil extends Util
                 }
             }
             $word_format = isset($il->common_settings['num_to_word_format']) ? $il->common_settings['num_to_word_format'] : 'indian';
-            $output['total_in_words'] = $this->numToWord($transaction->final_total, null, $word_format);
+            $output['total_in_words'] = format_amount_in_words($this->numToWord($transaction->final_total, null, $word_format));
 
             $signature_user = $user;
             if (! empty($transaction->commission_agent)) {
@@ -6756,7 +6756,7 @@ class TransactionUtil extends Util
         $logo = $invoice_layout->show_logo != 0 && ! empty($invoice_layout->logo) && file_exists(public_path('uploads/invoice_logos/'.$invoice_layout->logo)) ? asset('uploads/invoice_logos/'.$invoice_layout->logo) : false;
 
         $word_format = $invoice_layout->common_settings['num_to_word_format'] ? $invoice_layout->common_settings['num_to_word_format'] : 'international';
-        $total_in_words = $this->numToWord($purchase->final_total, null, $word_format);
+        $total_in_words = format_amount_in_words($this->numToWord($purchase->final_total, null, $word_format));
 
         $custom_labels = json_decode(session('business.custom_labels'), true);
 

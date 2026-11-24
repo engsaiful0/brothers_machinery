@@ -34,12 +34,12 @@
 
     $util = app(\App\Utils\Util::class);
     if (! empty($receipt_details->total_in_words)) {
-        $amount_in_words = strtoupper(str_ireplace(['lakh', 'lakhs'], 'LAC', $receipt_details->total_in_words)) . ' ONLY.';
+        $amount_in_words = format_amount_in_words(str_ireplace(['lakh', 'lakhs'], 'LAC', $receipt_details->total_in_words));
     } else {
         $words_raw = strtoupper(trim($util->numToWord($net_unformatted, null, 'indian')));
         $words_raw = preg_replace('/\s+/', ' ', $words_raw);
         $words_raw = str_ireplace(['lakh', 'lakhs'], 'LAC', $words_raw);
-        $amount_in_words = $words_raw . ' ONLY.';
+        $amount_in_words = format_amount_in_words($words_raw);
     }
 
     $signature_name = trim($receipt_details->sales_person ?? $receipt_details->signature_user_name ?? $receipt_details->added_by ?? '');
@@ -369,7 +369,7 @@
                 </tr>
             @endif
             <tr class="brothers-in-words">
-                <td colspan="5"><strong>IN WORDS:</strong> {{ $amount_in_words }}</td>
+                <td colspan="5"><strong>IN WORDS:</strong> {{ format_amount_in_words($amount_in_words) }}</td>
             </tr>
         </tfoot>
     </table>

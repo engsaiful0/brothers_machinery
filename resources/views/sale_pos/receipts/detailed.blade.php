@@ -809,7 +809,7 @@
                                 @if (!empty($receipt_details->total_in_words))
                                     <tr>
                                         <td colspan="2" class="text-right">
-                                            <small>({{ $receipt_details->total_in_words }})</small>
+                                            <small>({{ format_amount_in_words($receipt_details->total_in_words) }})</small>
                                         </td>
                                     </tr>
                                 @endif

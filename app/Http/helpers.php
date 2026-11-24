@@ -79,6 +79,23 @@ if (! function_exists('normalize_quantity_display')) {
     }
 }
 
+/** Add the required BDT prefix and ONLY suffix to converted amount words. */
+if (! function_exists('format_amount_in_words')) {
+    function format_amount_in_words($words)
+    {
+        $words = strtoupper(trim((string) $words));
+        if ($words === '') {
+            return '';
+        }
+        $words = preg_replace('/^IN\s+WORDS\s*:\s*/i', '', $words);
+        $words = preg_replace('/^(?:BDT\b\s*)+/i', '', $words);
+        $words = preg_replace('/(?:\s+ONLY\b)+[.!]?\s*$/i', '', $words);
+        $words = trim($words, " \t\n\r\0\x0B.,;");
+
+        return 'BDT'.($words === '' ? '' : ' '.$words).' ONLY';
+    }
+}
+
 if (! function_exists('humanFilesize')) {
     function humanFilesize($size, $precision = 2)
     {

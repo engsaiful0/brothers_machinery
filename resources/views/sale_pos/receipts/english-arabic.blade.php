@@ -226,7 +226,7 @@
 							<br>
                         <span>
                             @if(!empty($receipt_details->total_unformatted))
-                                {{ app(\App\Utils\TransactionUtil::class)->numberToCurrencyWords($receipt_details->total_unformatted, 'riyal', 'halala', 'en') }}
+                                {{ format_amount_in_words(app(\App\Utils\TransactionUtil::class)->numberToCurrencyWords($receipt_details->total_unformatted, 'riyal', 'halala', 'en')) }}
                             @endif
                         </span>
                         <br>

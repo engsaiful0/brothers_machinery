@@ -151,7 +151,7 @@
         $shipping = (float) ($transaction->shipping_charges ?? 0);
         $packing_charge = (float) ($transaction->packing_charge ?? 0);
         $amount_in_words = $receipt_details->total_in_words ?: app(\App\Utils\Util::class)->numToWord($grand_total, null, 'indian');
-        $amount_in_words = strtoupper(str_ireplace(['lakh', 'lakhs'], 'LAC', $amount_in_words));
+        $amount_in_words = format_amount_in_words(str_ireplace(['lakh', 'lakhs'], 'LAC', $amount_in_words));
         $vat_label = $transaction->vat_type === 'percentage'
             ? 'VAT on Total Amount ('.rtrim(rtrim(number_format((float) $transaction->vat_rate, 2, '.', ''), '0'), '.').'%)'
             : 'VAT on Total Amount';
@@ -210,7 +210,7 @@
             </tr>
         @endforeach
             <tr>
-                <td colspan="5"><strong>IN WORDS: {{ strtoupper($amount_in_words) }}</strong></td>
+                <td colspan="5"><strong>IN WORDS: {{ format_amount_in_words($amount_in_words) }}</strong></td>
             </tr>
         </tbody>
     </table>

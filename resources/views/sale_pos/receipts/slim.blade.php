@@ -630,7 +630,7 @@
 				@if(!empty($receipt_details->total_in_words))
 				<p colspan="2" class="text-right mb-0">
 					<small>
-					({{$receipt_details->total_in_words}})
+					({{ format_amount_in_words($receipt_details->total_in_words) }})
 					</small>
 				</p>
 				@endif
