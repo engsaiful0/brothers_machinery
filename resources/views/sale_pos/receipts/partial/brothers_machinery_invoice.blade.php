@@ -124,7 +124,11 @@
         font-size: 13pt;
         text-align: center;
         text-decoration: underline;
-        padding-bottom: 40px;
+    }
+
+    .brothers-bill-spacer td {
+        height: 1.35em;
+        padding: 0;
     }
 
     .brothers-lines-table {
@@ -233,6 +237,9 @@
     <table class="brothers-meta">
         <tr>
             <td colspan="6" class="brothers-bill-title">BILL</td>
+        </tr>
+        <tr class="brothers-bill-spacer">
+            <td colspan="6">&nbsp;</td>
         </tr>
         <tr>
             <td class="meta-label">Customer Name</td>
