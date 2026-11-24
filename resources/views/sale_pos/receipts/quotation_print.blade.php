@@ -59,6 +59,7 @@
         .meta .meta-label-right { width: 22%; text-align: right; white-space: nowrap; }
         .meta .meta-value-right { width: 15%; white-space: nowrap; }
         .meta .doc-title { padding-bottom: 6px; font-size: 15px; font-weight: bold; text-align: center; text-decoration: underline; }
+        .meta .doc-title-spacer { height: 1.35em; padding: 0; }
         .items th, .items td { border: 1px solid #777; padding: 6px; vertical-align: top; text-align: left; }
         .items th { background: #edf1f7; }
         .number { white-space: nowrap; }
@@ -92,6 +93,9 @@
     <table class="meta">
         <tr>
             <td colspan="6" class="doc-title">{{ $title }}</td>
+        </tr>
+        <tr>
+            <td colspan="6" class="doc-title-spacer">&nbsp;</td>
         </tr>
         <tr>
             <td class="meta-label">Customer Name</td>

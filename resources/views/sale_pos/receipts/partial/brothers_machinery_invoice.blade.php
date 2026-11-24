@@ -241,6 +241,9 @@
         <tr class="brothers-bill-spacer">
             <td colspan="6">&nbsp;</td>
         </tr>
+        <tr class="brothers-bill-spacer">
+            <td colspan="6">&nbsp;</td>
+        </tr>
         <tr>
             <td class="meta-label">Customer Name</td>
             <td class="meta-colon">:</td>
