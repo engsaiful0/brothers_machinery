@@ -59,24 +59,14 @@
                 </td>
             @endif
             @if($sell->type == 'sales_order')
-                <td><span class="display_currency" data-currency_symbol="false" data-is_quantity="true">{{ $sell_line->quantity - $sell_line->so_quantity_invoiced }}</span> {{ quantity_unit_label($sell_line->quantity - $sell_line->so_quantity_invoiced, !empty($sell_line->sub_unit) ? $sell_line->sub_unit->short_name : $sell_line->product->unit->short_name) }}</td>
+                <td>{{ format_quantity_with_unit($sell_line->quantity - $sell_line->so_quantity_invoiced, !empty($sell_line->sub_unit) ? $sell_line->sub_unit->short_name : $sell_line->product->unit->short_name) }}</td>
             @endif
             <td>
-                @if(!empty($for_ledger))
-                    {{@format_quantity($sell_line->quantity)}}
-                @else
-                    <span class="display_currency" data-currency_symbol="false" data-is_quantity="true">{{ $sell_line->quantity }}</span> 
-                @endif
-                    @if(!empty($sell_line->sub_unit)) {{$sell_line->sub_unit->short_name}} @else {{$sell_line->product->unit->short_name}} @endif
+                {{ format_quantity_with_unit($sell_line->quantity, !empty($sell_line->sub_unit) ? $sell_line->sub_unit->short_name : $sell_line->product->unit->short_name) }}
 
                 @if(!empty($sell_line->product->second_unit) && $sell_line->secondary_unit_quantity != 0)
                     <br>
-                    @if(!empty($for_ledger))
-                        {{@format_quantity($sell_line->secondary_unit_quantity)}}
-                    @else
-                        <span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $sell_line->secondary_unit_quantity }}</span> 
-                    @endif
-                    {{ quantity_unit_label($sell_line->secondary_unit_quantity, $sell_line->product->second_unit->short_name) }}
+                    {{ format_quantity_with_unit($sell_line->secondary_unit_quantity, $sell_line->product->second_unit->short_name) }}
                 @endif
             </td>
             @if(!empty($pos_settings['inline_service_staff']))
