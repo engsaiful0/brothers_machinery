@@ -124,7 +124,7 @@
         font-size: 13pt;
         text-align: center;
         text-decoration: underline;
-        padding-bottom: 24px;
+        padding-bottom: 40px;
     }
 
     .brothers-lines-table {

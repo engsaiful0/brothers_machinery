@@ -23,7 +23,7 @@
     $signature_name = trim($receipt_details->sales_person ?? $receipt_details->signature_user_name ?? $receipt_details->added_by ?? '');
     $signature_designation = trim($receipt_details->signature_user_designation ?? '');
     $signature_company = trim($branding['company_name'] ?? 'Brothers Machinery');
-    $title = ! empty($sub_status) && $sub_status === 'proforma' ? 'PROFORMA INVOICE' : 'QUOTATION';
+    $title = ! empty($sub_status) && $sub_status === 'proforma' ? 'PROFORMA INVOICE' : 'Price Quotation';
 @endphp
 <!doctype html>
 <html>
@@ -233,7 +233,7 @@
     @if(!empty($transaction->additional_notes))<div class="terms"><strong>Terms / Notes:</strong><br>{{ $transaction->additional_notes }}</div>@endif
     <div class="quotation-signature">
         <strong>Best Regards</strong><br>
-        <span class="quotation-signature-company"><strong>{{ $signature_company }}</strong></span><br>
+        From <span class="quotation-signature-company"><strong>{{ $signature_company }}</strong></span><br>
         @if($signature_name)<strong>{{ $signature_name }}</strong><br>@endif
         @if($signature_designation){{ $signature_designation }}@endif
     </div>
