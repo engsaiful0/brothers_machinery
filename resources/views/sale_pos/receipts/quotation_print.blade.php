@@ -197,7 +197,7 @@
                         @if($brand_name)<br>Brand: {{ $brand_name }}@endif
                         @if($description)<br>{{ strip_tags($description) }}@endif
                     </td>
-                    <td>{{ rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.') }} {{ optional(optional($product)->unit)->short_name }}</td>
+                    <td>{{ rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.') }} {{ quantity_unit_label($quantity, optional(optional($product)->unit)->short_name) }}</td>
                     <td class="number">{{ number_format($unit_price, 2) }}</td>
                     <td class="number">{{ number_format($line_total, 2) }}</td>
                 </tr>

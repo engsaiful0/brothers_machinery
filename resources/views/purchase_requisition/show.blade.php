@@ -38,14 +38,14 @@
                                     @endif
                                 </td>
                                 <td>
-                                    {{@format_quantity($purchase_line->quantity)}} {{$purchase_line->product->unit->short_name}}
+                                    {{@format_quantity($purchase_line->quantity)}} {{ quantity_unit_label($purchase_line->quantity, $purchase_line->product->unit->short_name) }}
 
                                     @if(!empty($purchase_line->product->second_unit) && !empty($purchase_line->secondary_unit_quantity))
                                         <br>
-                                        {{@format_quantity($purchase_line->secondary_unit_quantity)}} {{$purchase_line->product->second_unit->short_name}}
+                                        {{@format_quantity($purchase_line->secondary_unit_quantity)}} {{ quantity_unit_label($purchase_line->secondary_unit_quantity, $purchase_line->product->second_unit->short_name) }}
                                     @endif
                                 </td>
-                                <td>{{@format_quantity( $purchase_line->quantity - $purchase_line->po_quantity_purchased)}} {{$purchase_line->product->unit->short_name}}</td>
+                                <td>{{@format_quantity( $purchase_line->quantity - $purchase_line->po_quantity_purchased)}} {{ quantity_unit_label($purchase_line->quantity - $purchase_line->po_quantity_purchased, $purchase_line->product->unit->short_name) }}</td>
                             </tr>
                             @endforeach
                         </tbody>

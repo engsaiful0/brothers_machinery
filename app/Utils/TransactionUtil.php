@@ -2199,7 +2199,7 @@ class TransactionUtil extends Util
                 //Field for 2nd column
                 'quantity' => $this->num_f($line->quantity, false, $business_details, true),
                 'quantity_uf' => $line->quantity,
-                'units' => $unit_name,
+                'units' => quantity_unit_label($line->quantity, $unit_name),
 
                 'base_unit_name' => $base_unit_name,
                 'base_unit_multiplier' => ! empty($line->multiplier) && $line->multiplier != 1 ? $this->num_f($line->multiplier, false, $business_details) : 1,
@@ -2355,7 +2355,7 @@ class TransactionUtil extends Util
                         'variation' => (empty($variation->name) || $variation->name == 'DUMMY') ? '' : $variation->name,
                         //Field for 2nd column
                         'quantity' => $this->num_f($modifier_line->quantity, false, $business_details),
-                        'units' => ! empty($unit->short_name) ? $unit->short_name : '',
+                        'units' => quantity_unit_label($modifier_line->quantity, ! empty($unit->short_name) ? $unit->short_name : ''),
 
                         //Field for 3rd column
                         'unit_price_inc_tax' => $this->num_f($modifier_line->unit_price_inc_tax, false, $business_details),
@@ -2436,7 +2436,7 @@ class TransactionUtil extends Util
                 'variation' => (empty($variation->name) || $variation->name == 'DUMMY') ? '' : $variation->name,
                 //Field for 2nd column
                 'quantity' => $this->num_f($line->quantity_returned, false, $business_details, true),
-                'units' => $unit_name,
+                'units' => quantity_unit_label($line->quantity_returned, $unit_name),
                 'tax_unformatted' => $line->item_tax,
                 'unit_price' => $this->num_f($line->unit_price, false, $business_details),
                 'tax' => $this->num_f($line->item_tax, false, $business_details),

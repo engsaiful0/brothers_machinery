@@ -84,8 +84,8 @@
 			                 	@endif
 			              	</td>
 			              	<td class="add_without_price_hide"><span class="display_currency" data-currency_symbol="true">{{ $purchase_line->purchase_price_inc_tax }}</span></td>
-			              	<td><span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $purchase_line->quantity }}</span> {{$unit_name}}</td>
-			              	<td><span class="display_currency" data-currency_symbol="false" data-is_quantity="true">{{ $qty_available }}</span> {{$unit_name}}</td>
+			               	<td><span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $purchase_line->quantity }}</span> {{ quantity_unit_label($purchase_line->quantity, $unit_name) }}</td>
+			               	<td><span class="display_currency" data-currency_symbol="false" data-is_quantity="true">{{ $qty_available }}</span> {{ quantity_unit_label($qty_available, $unit_name) }}</td>
 			              	<td>
 			              		@php
 					                $check_decimal = 'false';

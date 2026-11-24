@@ -100,7 +100,7 @@
                 @endif
                @endif
             </td>
-            <td>{{ @format_quantity($sell_lines->quantity) }} {{$sell_lines->product->unit->short_name ?? ""}}</td>
+            <td>{{ @format_quantity($sell_lines->quantity) }} {{ quantity_unit_label($sell_lines->quantity, $sell_lines->product->unit->short_name ?? '') }}</td>
             <td class="show_price_with_permission">
               <span class="display_currency" data-currency_symbol="true">{{ $sell_lines->unit_price_inc_tax * $sell_lines->quantity }}</span>
             </td>

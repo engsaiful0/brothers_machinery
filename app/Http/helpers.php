@@ -8,6 +8,34 @@ function pos_boot($ul, $pt, $lc, $em, $un, $type = 1, $pid = null)
 	//bugs
 }
 
+/** Return an uppercase unit abbreviation in singular or plural form for display. */
+if (! function_exists('quantity_unit_label')) {
+    function quantity_unit_label($quantity, $unit)
+    {
+        $label = trim((string) $unit);
+        if ($label === '') {
+            return '';
+        }
+
+        // Unit short names such as "Pc(s)" are already marked as plural-capable.
+        $label = preg_replace('/\s*\(s\)$/i', '', $label);
+        if ((float) $quantity > 1.0) {
+            $lower = strtolower($label);
+            if (preg_match('/(box|class|glass|brush|church)$/', $lower)) {
+                $label .= 'es';
+            } elseif (preg_match('/[^aeiou]y$/', $lower)) {
+                $label = substr($label, 0, -1).'ies';
+            } elseif (preg_match('/(s|x|z|ch|sh)$/', $lower)) {
+                $label .= 'es';
+            } else {
+                $label .= 's';
+            }
+        }
+
+        return strtoupper($label);
+    }
+}
+
 if (! function_exists('humanFilesize')) {
     function humanFilesize($size, $precision = 2)
     {

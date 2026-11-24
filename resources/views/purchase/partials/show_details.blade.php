@@ -195,11 +195,11 @@
               </td>
               @if($purchase->type == 'purchase_order')
                 <td>
-                  <span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $purchase_line->quantity - $purchase_line->po_quantity_purchased }}</span> @if(!empty($purchase_line->actual_name)) {{$purchase_line->sub_unit->actual_name}} @else {{$purchase_line->product->unit->actual_name}} @endif
+                  <span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $purchase_line->quantity - $purchase_line->po_quantity_purchased }}</span> {{ quantity_unit_label($purchase_line->quantity - $purchase_line->po_quantity_purchased, !empty($purchase_line->sub_unit) ? $purchase_line->sub_unit->short_name : $purchase_line->product->unit->short_name) }}
                 </td>
               @endif
               <td>
-                <span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $purchase_line->quantity }}</span> @if(!empty($purchase_line->sub_unit)) {{$purchase_line->sub_unit->actual_name}} @else {{$purchase_line->product->unit->actual_name}} @endif 
+                <span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $purchase_line->quantity }}</span> {{ quantity_unit_label($purchase_line->quantity, !empty($purchase_line->sub_unit) ? $purchase_line->sub_unit->short_name : $purchase_line->product->unit->short_name) }}
                 @if($purchase_line->product->unit->sub_units)
                   @foreach($purchase_line->product->unit->sub_units as $sub_unit)
                     @if($sub_unit->id == $purchase_line->sub_unit_id)
@@ -210,7 +210,7 @@
                 @endif
                 @if(!empty($purchase_line->product->second_unit) && $purchase_line->secondary_unit_quantity != 0)
                     <br>
-                    <span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $purchase_line->secondary_unit_quantity }}</span> {{$purchase_line->product->second_unit->actual_name}}
+                    <span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $purchase_line->secondary_unit_quantity }}</span> {{ quantity_unit_label($purchase_line->secondary_unit_quantity, $purchase_line->product->second_unit->short_name) }}
                 @endif
 
               </td>

@@ -59,7 +59,7 @@
                 </td>
             @endif
             @if($sell->type == 'sales_order')
-                <td><span class="display_currency" data-currency_symbol="false" data-is_quantity="true">{{ $sell_line->quantity - $sell_line->so_quantity_invoiced }}</span> @if(!empty($sell_line->sub_unit)) {{$sell_line->sub_unit->short_name}} @else {{$sell_line->product->unit->short_name}} @endif</td>
+                <td><span class="display_currency" data-currency_symbol="false" data-is_quantity="true">{{ $sell_line->quantity - $sell_line->so_quantity_invoiced }}</span> {{ quantity_unit_label($sell_line->quantity - $sell_line->so_quantity_invoiced, !empty($sell_line->sub_unit) ? $sell_line->sub_unit->short_name : $sell_line->product->unit->short_name) }}</td>
             @endif
             <td>
                 @if(!empty($for_ledger))
@@ -76,7 +76,7 @@
                     @else
                         <span class="display_currency" data-is_quantity="true" data-currency_symbol="false">{{ $sell_line->secondary_unit_quantity }}</span> 
                     @endif
-                    {{$sell_line->product->second_unit->short_name}}
+                    {{ quantity_unit_label($sell_line->secondary_unit_quantity, $sell_line->product->second_unit->short_name) }}
                 @endif
             </td>
             @if(!empty($pos_settings['inline_service_staff']))

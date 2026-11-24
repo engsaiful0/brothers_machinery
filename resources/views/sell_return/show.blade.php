@@ -61,7 +61,7 @@
                   @endif
                 </td>
                 <td><span class="display_currency" data-currency_symbol="true">{{ $sell_line->unit_price_inc_tax }}</span></td>
-                <td>{{@format_quantity($sell_line->quantity_returned)}} {{$unit_name}}</td>
+                <td>{{@format_quantity($sell_line->quantity_returned)}} {{ quantity_unit_label($sell_line->quantity_returned, $unit_name) }}</td>
                 <td>
                   @php
                     $line_total = $sell_line->unit_price_inc_tax * $sell_line->quantity_returned;

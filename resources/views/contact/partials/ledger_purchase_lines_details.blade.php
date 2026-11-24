@@ -21,7 +21,7 @@
          - {{ $purchase_line->variations->sub_sku ?? ''}}
       </td>
           
-      <td>{{@format_quantity($purchase_line->quantity)}} @if(!empty($purchase_line->sub_unit)) {{$purchase_line->sub_unit->short_name}} @else {{$purchase_line->product->unit->short_name}} @endif
+      <td>{{@format_quantity($purchase_line->quantity)}} {{ quantity_unit_label($purchase_line->quantity, !empty($purchase_line->sub_unit) ? $purchase_line->sub_unit->short_name : $purchase_line->product->unit->short_name) }}
       </td>
       <td >@format_currency($purchase_line->pp_without_discount)</td>
       <td >{{@num_format($purchase_line->discount_percent)}} %</td>
