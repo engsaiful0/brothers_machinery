@@ -10,6 +10,9 @@ class Transaction extends Model
 
     //Transaction status = ['received','pending','ordered','draft','final', 'in_transit', 'completed']
 
+    /** Introduction line printed above a quotation's product table when none was entered. */
+    const DEFAULT_QUOTATION_INTRO = 'As per your requirement, we are pleased to quote as follows:';
+
     /**
      * The attributes that aren't mass assignable.
      *

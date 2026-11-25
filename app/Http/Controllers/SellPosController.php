@@ -2980,6 +2980,13 @@ class SellPosController extends Controller
      */
     private function saveCommercialTerms(Request $request, $transaction, $business_id)
     {
+        // Quotation introduction line, saved per quotation (blank falls back to the default on print).
+        if ($request->has('quotation_intro_submitted')) {
+            $intro = trim((string) $request->input('quotation_intro', ''));
+            $transaction->quotation_intro = $intro === '' ? null : mb_substr($intro, 0, 2000);
+            $transaction->save();
+        }
+
         if (! $request->has('commercial_terms_submitted')) {
             return;
         }

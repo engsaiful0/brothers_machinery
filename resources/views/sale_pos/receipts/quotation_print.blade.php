@@ -171,7 +171,8 @@
         if ($shipping > 0) $total_rows[] = ['Shipping', $shipping];
         if ($packing_charge > 0) $total_rows[] = ['Packing Charge', $packing_charge];
     @endphp
-    <p class="greeting">Dear Sir,<br>As per your requirement, we are pleased to quote as follows:</p>
+    @php $quotation_intro = trim((string) ($transaction->quotation_intro ?? '')) ?: \App\Transaction::DEFAULT_QUOTATION_INTRO; @endphp
+    <p class="greeting">Dear Sir,<br>{!! nl2br(e($quotation_intro)) !!}</p>
     <table class="items">
         <thead><tr><th style="width:5%">Sl No.</th><th>Description</th><th style="width:10%">Qty</th><th style="width:16%" class="number">Unit Price</th><th style="width:18%" class="number">Amount</th></tr></thead>
         <tbody>
@@ -199,6 +200,8 @@
                     <td>
                         <strong>{{ $product_name ?: '--' }}{{ $variation_name ? ' - '.trim($variation_name) : '' }}</strong>
                         @if($brand_name)<br>Brand: {{ $brand_name }}@endif
+                        {{-- This line's own IMEI / serial no. / other info typed on the quotation form. --}}
+                        @if(trim((string) $line->sell_line_note) !== '')<br>{!! nl2br(e(trim($line->sell_line_note))) !!}@endif
                         @if($description)<br>{{ strip_tags($description) }}@endif
                     </td>
                     <td>{{ format_quantity_with_unit($quantity, optional(optional($product)->unit)->short_name, rtrim(rtrim(number_format($quantity, 2, '.', ''), '0'), '.')) }}</td>

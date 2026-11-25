@@ -83,7 +83,7 @@ $(document).ready(function() {
     });
 
     //get customer
-    if ($('select#customer_id').attr('data-group-filtered') !== '1') $('select#customer_id').select2({
+    $('select#customer_id').select2({
         ajax: {
             url: '/contacts/customers',
             dataType: 'json',
@@ -358,10 +358,7 @@ $(document).ready(function() {
                 }
 
             if (item.enable_stock == 1 && item.qty_available <= 0 && !is_overselling_allowed && !for_so && !is_draft) {
-                var string = '<li class="ui-state-disabled">' + item.name + (item.country_label ? ' – ' + item.country_label : '');
-                if (item.part_number) {
-                    string += '<br>Part Number: ' + $('<div>').text(item.part_number).html();
-                }
+                var string = '<li class="ui-state-disabled">' + item.name;
                 if (item.type == 'variable') {
                     string += '-' + item.variation;
                 }
@@ -372,16 +369,13 @@ $(document).ready(function() {
                 string +=
                     ' (' +
                     item.sub_sku +
-                    ')';
-                if (item.part_number) {
-                    string += '<br>Part Number: ' + $('<div>').text(item.part_number).html();
-                }
-                string += '<br> Price: ' +
+                    ')' +
+                    '<br> Price: ' +
                     __currency_trans_from_en(selling_price, false, false, __currency_precision, true) +
                     ' (Out of stock) </li>';
                 return $(string).appendTo(ul);
             } else {
-                var string = '<div>' + item.name + (item.country_label ? ' – ' + item.country_label : '');
+                var string = '<div>' + item.name;
                 if (item.type == 'variable') {
                     string += '-' + item.variation;
                 }
@@ -391,11 +385,7 @@ $(document).ready(function() {
                     selling_price = item.variation_group_price;
                 }
 
-                string += ' (' + item.sub_sku + ')';
-                if (item.part_number) {
-                    string += '<br>Part Number: ' + $('<div>').text(item.part_number).html();
-                }
-                string += '<br> Price: ' + __currency_trans_from_en(selling_price, false, false, __currency_precision, true);
+                string += ' (' + item.sub_sku + ')' + '<br> Price: ' + __currency_trans_from_en(selling_price, false, false, __currency_precision, true);
                 if (item.enable_stock == 1) {
                     var qty_available = __currency_trans_from_en(item.qty_available, false, false, __currency_precision, true);
                     string += ' - ' + qty_available + item.unit;
@@ -1071,35 +1061,9 @@ $(document).ready(function() {
         $('.contact_modal')
             .find('select#contact_type')
             .val('customer')
-            .trigger('change')
             .closest('div.contact_type_div')
             .addClass('hide');
-        $('.contact_modal').find('input[name="contact_type_radio"][value="individual"]')
-            .prop('checked', true).trigger('change');
-        if ($('select#customer_id').attr('data-group-filtered') === '1') {
-            $('.contact_modal').find('select[name="customer_group_id"]').val($('#customer_group_id').val());
-        }
-        $('.quick-contact-errors').hide().find('ul').empty();
         $('.contact_modal').modal('show');
-    });
-    $(document).on('click', '#quick_add_contact #add-customer-person', function() {
-        var nextIndex = 0;
-        $('#quick_add_contact #customer-contact-persons input[name^="contact_persons["]').each(function() {
-            var match = this.name.match(/^contact_persons\[(\d+)\]/);
-            if (match) nextIndex = Math.max(nextIndex, parseInt(match[1], 10) + 1);
-        });
-        var row = '<div class="row customer-contact-person" style="border-bottom:1px solid #eee; margin-bottom:10px;">' +
-            '<div class="col-md-3"><div class="form-group"><label>Name</label><input class="form-control" name="contact_persons[' + nextIndex + '][name]" maxlength="191"></div></div>' +
-            '<div class="col-md-3"><div class="form-group"><label>Designation</label><input class="form-control" name="contact_persons[' + nextIndex + '][designation]" maxlength="191"></div></div>' +
-            '<div class="col-md-2"><div class="form-group"><label>Mobile Number</label><input class="form-control" name="contact_persons[' + nextIndex + '][mobile]" maxlength="30"></div></div>' +
-            '<div class="col-md-3"><div class="form-group"><label>Email Address</label><input type="email" class="form-control" name="contact_persons[' + nextIndex + '][email]" maxlength="191"></div></div>' +
-            '<div class="col-md-1"><label>&nbsp;</label><button type="button" class="btn btn-danger btn-block remove-customer-person" aria-label="Remove contact person" title="Remove contact person"><i class="fa fa-times" aria-hidden="true"></i></button></div></div>';
-        $('#quick_add_contact #customer-contact-persons').append(row);
-    });
-    $(document).on('click', '#quick_add_contact .remove-customer-person', function(e) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        $(this).closest('.customer-contact-person').remove();
     });
     $('form#quick_add_contact')
         .submit(function(e) {
@@ -1109,7 +1073,7 @@ $(document).ready(function() {
             rules: {
                 contact_id: {
                     remote: {
-                        url: base_path + '/contacts/check-contacts-id',
+                        url: '/contacts/check-contacts-id',
                         type: 'post',
                         data: {
                             contact_id: function() {
@@ -1164,7 +1128,6 @@ $(document).ready(function() {
                         checkMobileAndSubmitQuick(form);
                     }
                 },
-                error: function(xhr) { showQuickContactAjaxError(xhr); },
             });
         } else {
             // If no tax number, proceed to mobile check
@@ -1205,7 +1168,6 @@ $(document).ready(function() {
                     submitQuickContactForm(form);
                 }
             },
-            error: function(xhr) { showQuickContactAjaxError(xhr); },
         });
     }
 
@@ -1219,9 +1181,6 @@ $(document).ready(function() {
     //Updates for add sell
     $('select#discount_type, input#discount_amount, input#shipping_charges, \
         input#rp_redeemed_amount').change(function() {
-        pos_total_row();
-    });
-    $('select#vat_type, input#vat_rate').on('change keyup', function() {
         pos_total_row();
     });
     $('select#tax_rate_id').change(function() {
@@ -2364,8 +2323,7 @@ function calculate_billing_details(price_total) {
         $('#packing_charge_text').text(__currency_trans_from_en(packing_charge, false));
     }
 
-    var vat_amount = pos_vat_amount(price_total - discount);
-    var total_payable = price_total + order_tax + vat_amount - discount + shipping_charges + packing_charge + additional_expense;
+    var total_payable = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense;
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
     var round_off_data = __round(total_payable, rounding_multiple);
@@ -2425,16 +2383,6 @@ function pos_order_tax(price_total, discount) {
     $('span#order_tax').text(__currency_trans_from_en(order_tax, false));
 
     return order_tax;
-}
-
-function pos_vat_amount(taxable_amount) {
-    var type = $('#vat_type').val();
-    var value = __read_number($('#vat_rate')) || 0;
-    var amount = type === 'flat' ? value : (type === 'percentage' ? taxable_amount * value / 100 : 0);
-    if (!isFinite(amount) || amount < 0) amount = 0;
-    __write_number($('input#vat_amount_input'), amount);
-    $('span#vat_amount').text(__currency_trans_from_en(amount, false));
-    return amount;
 }
 
 function calculate_balance_due() {
@@ -2595,7 +2543,6 @@ function reset_pos_form(){
 }
 
 function set_default_customer() {
-    if ($('select#customer_id').attr('data-group-filtered') === '1') return;
     var default_customer_id = $('#default_customer_id').val();
     var default_customer_name = $('#default_customer_name').val();
     var default_customer_balance = $('#default_customer_balance').val();
@@ -3570,45 +3517,20 @@ function submitQuickContactForm(form) {
                     name += result.data.supplier_business_name;
                 }
                 
-                var groupFiltered = $('select#customer_id').attr('data-group-filtered') === '1';
-                if (groupFiltered && window.loadSalesGroupCustomers) {
-                    var groupId = result.data.customer_group_id || $('.contact_modal').find('select[name="customer_group_id"]').val();
-                    $('#customer_group_id').val(groupId);
-                    window.loadSalesGroupCustomers(groupId, result.data.id);
-                } else {
-                    $('select#customer_id').append($('<option>', { value: result.data.id, text: name }));
-                    $('select#customer_id').val(result.data.id).trigger('change');
-                }
+                $('select#customer_id').append(
+                    $('<option>', { value: result.data.id, text: name })
+                );
+                $('select#customer_id')
+                    .val(result.data.id)
+                    .trigger('change');
                 $('div.contact_modal').modal('hide');
                 update_shipping_address(result.data)
                 toastr.success(result.msg);
             } else {
-                showQuickContactError(result.msg || LANG.something_went_wrong);
+                toastr.error(result.msg);
             }
         },
-        error: function(xhr) {
-            $(form).find('button[type="submit"]').removeAttr('disabled disable');
-            showQuickContactAjaxError(xhr);
-        },
     });
-}
-
-function showQuickContactError(message) {
-    var errorList = $('.quick-contact-errors').show().find('ul').empty();
-    errorList.append($('<li>').text(message));
-}
-
-function showQuickContactAjaxError(xhr) {
-    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
-        var errorList = $('.quick-contact-errors').show().find('ul').empty();
-        $.each(xhr.responseJSON.errors, function(field, messages) {
-            $.each(messages, function(_, message) { errorList.append($('<li>').text(message)); });
-        });
-        return;
-    }
-    showQuickContactError(xhr.responseJSON && (xhr.responseJSON.message || xhr.responseJSON.msg)
-        ? (xhr.responseJSON.message || xhr.responseJSON.msg)
-        : LANG.something_went_wrong);
 }
 
 $(document).on('click', '#send_for_sell_return', function(e) {

@@ -487,6 +487,7 @@
 					</div>
 			    </div>
 				@if($transaction->is_quotation)
+					@include('sell.partials.quotation_intro_field')
 					@include('sell.partials.commercial_terms_field')
 				@endif
 			    <input type="hidden" name="is_direct_sale" value="1">
