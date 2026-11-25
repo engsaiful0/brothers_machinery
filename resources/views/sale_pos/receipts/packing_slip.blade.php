@@ -31,12 +31,13 @@
         max-width: 210mm;
         margin: 0 auto;
         padding: 42mm 15mm 32mm;
-        background: #fff;
-        color: #222;
-        font-family: Arial, sans-serif;
-        font-size: 13px;
-        line-height: 1.5;
+        background: transparent;
+        color: #000;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 12pt;
+        line-height: 1.35;
     }
+    .packing-slip * { color: #000 !important; }
     .packing-slip, .packing-slip * { box-sizing: border-box; }
     .packing-slip .row { margin: 0; }
     .packing-slip .row::after { content: ""; display: table; clear: both; }
@@ -44,9 +45,9 @@
     .packing-slip .invoice-col + .invoice-col { padding: 0 0 0 16px; }
     .packing-slip .col-xs-12 { float: none; width: 100%; padding: 0; }
     .packing-slip p { margin: 0 0 8px; }
-    .packing-slip .color-555 { color: #222 !important; }
-    .packing-slip .font-30 { font-size: 18px; line-height: 1.4; }
-    .packing-slip .font-23 { font-size: 13px; line-height: 1.5; }
+    .packing-slip .color-555 { color: #000 !important; }
+    .packing-slip .font-30 { font-size: 13pt; line-height: 1.35; }
+    .packing-slip .font-23 { font-size: 11pt; line-height: 1.35; }
     .packing-slip .text-right { text-align: right; }
     .packing-slip .text-center { text-align: center; }
     .packing-slip .pull-left { float: left; }
@@ -54,17 +55,17 @@
     .packing-slip-business { display: none !important; }
     .packing-slip-title {
         padding-bottom: 0;
-        margin-top: 25px !important;
-        margin-bottom: 36px !important;
-        font-size: 18px !important;
+        margin-top: 0 !important;
+        margin-bottom: calc(2.7em + 8px) !important;
+        font-size: 13pt !important;
         font-weight: bold;
-        letter-spacing: 1px;
         text-align: center !important;
+        text-decoration: underline;
         text-transform: uppercase;
     }
     .packing-slip-business { margin-bottom: 18px !important; }
     .packing-slip-business img { max-height: 80px; max-width: 100%; width: auto; margin-bottom: 8px; }
-    .packing-slip-business-name { font-size: 20px; font-weight: bold; color: #222; }
+    .packing-slip-business-name { font-size: 13pt; font-weight: bold; }
     .packing-slip-reference p { padding-bottom: 8px; border: 0; }
     .packing-slip-parties {
         margin-bottom: 20px !important;
@@ -76,7 +77,7 @@
     .packing-slip-info-table td { width: 50%; border: 0; padding: 0 16px 0 0; vertical-align: top; }
     .packing-slip-info-table td + td { padding: 0 0 0 16px; }
     .packing-slip-business td[colspan="2"] { width: 100%; }
-    .packing-slip-meta { width: 100%; margin-bottom: 20px; border-collapse: collapse; table-layout: fixed; }
+    .packing-slip-meta { width: 100%; margin-bottom: 12px; border-collapse: collapse; table-layout: fixed; font-size: 11pt; }
     .packing-slip-meta td { padding: 1px 0; border: 0; vertical-align: top; }
     .packing-slip-meta .meta-label { width: 20%; white-space: nowrap; }
     .packing-slip-meta .meta-colon { width: 3%; text-align: center; }
@@ -84,32 +85,33 @@
     .packing-slip-meta .meta-label-right { width: 20%; text-align: right; white-space: nowrap; }
     .packing-slip-meta .meta-value-right { width: 27%; overflow-wrap: anywhere; }
     .packing-slip-reference { text-align: left; }
-    .salan_info { margin: 0 0 8px; padding: 0; font-size: 18px; font-weight: normal; line-height: 1.5; }
+    .salan_info { margin: 0 0 8px; padding: 0; font-size: 11pt; font-weight: normal; line-height: 1.35; }
     .salan_info strong { font-weight: bold; }
-    .packing-slip-items { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0; }
+    .packing-slip-items { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 8px 0 0; font-size: 11pt; }
     .packing-slip-items th, .packing-slip-items td {
-        padding: 10px 12px;
-        border: 1px solid #ccc;
+        padding: 6px 8px;
+        border: 0.5pt solid #555;
         vertical-align: top;
-        font-size: 13px;
+        font-size: 11pt;
         overflow-wrap: anywhere;
         word-break: normal;
     }
-    .packing-slip-items th { background: #f1f3f5 !important; color: #222 !important; font-weight: bold; }
+    .packing-slip-items th { background: transparent !important; font-weight: bold; text-align: center !important; }
     .packing-slip-items thead { display: table-header-group; }
     .packing-slip-items tr { page-break-inside: avoid; }
-    .packing-slip-items .packing-slip-number { width: 12%; text-align: center; }
-    .packing-slip-items .packing-slip-name { width: 73%; text-align: left; }
-    .packing-slip-items .packing-slip-quantity { width: 15%; text-align: right; }
+    .packing-slip-items .packing-slip-number { width: 6%; text-align: center; }
+    .packing-slip-items .packing-slip-name { width: 76%; text-align: left; }
+    .packing-slip-items .packing-slip-quantity { width: 18%; text-align: center; }
     .packing-slip-product-name { font-weight: bold; text-transform: uppercase; }
-    .packing-slip-product-brand { margin-top: 2px; font-size: 12px; font-style: italic; }
-    .packing-slip-product-detail { margin-top: 2px; font-size: 12px; }
-    .packing-slip-reference-table { font-size: 18px; }
-    .packing-slip-signature { padding-top: 80px; margin-bottom: 12px !important; }
-    .packing-slip-signature b { display: inline-block; padding-top: 8px; border-top: 1px solid #555; min-width: 180px; }
+    .packing-slip-product-brand { margin-top: 2px; font-style: italic; font-weight: normal; }
+    .packing-slip-product-detail { margin-top: 2px; font-style: italic; font-weight: normal; }
+    .packing-slip-product-detail strong { font-weight: normal; }
+    .packing-slip-reference-table { font-size: 11pt; }
+    .packing-slip-signature { padding-top: 80px; margin-bottom: 12px !important; font-size: 12pt; }
+    .packing-slip-signature b { display: inline-block; padding-top: 8px; border-top: 0.5pt solid #555; min-width: 180px; }
     .packing-slip-delivery-name { display: block; margin-bottom: 2px; }
     .packing-slip .center-block { display: block; max-width: 100%; margin: 0 auto; }
-    .packing-slip-footer { margin-top: 20px !important; padding-top: 12px; border-top: 1px solid #ddd; }
+    .packing-slip-footer { margin-top: 20px !important; padding-top: 12px; border-top: 0.5pt solid #555; }
     @media screen and (max-width: 600px) {
         .packing-slip { padding: 42mm 16px 32mm; }
         .packing-slip .invoice-col { float: none; width: 100%; padding: 0; }
@@ -117,7 +119,7 @@
         .packing-slip-items th, .packing-slip-items td { padding: 8px 6px; }
     }
     @media print {
-        .packing-slip { max-width: none; padding: 42mm 15mm 32mm; font-size: 11pt; }
+        .packing-slip { padding: 42mm 15mm 32mm; }
     }
 </style>
 <div class="packing-slip">
@@ -225,7 +227,7 @@
 		<table class="packing-slip-items">
 			<thead>
                 <tr>
-					<th scope="col" class="packing-slip-number">Sl No.</th>
+					<th scope="col" class="packing-slip-number">S/L</th>
                     <th scope="col" class="packing-slip-name">Product Name</th>
                     <th scope="col" class="packing-slip-quantity">{{$receipt_details->table_qty_label}}</th>
                 </tr>
@@ -241,7 +243,7 @@
 					@endphp
 					<tr>
 						<td class="text-center">
-							{{$loop->iteration}}
+							{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}
 						</td>
 						<td>
                             <div class="packing-slip-product-name">{{ $product_name }}
@@ -264,7 +266,7 @@
                                 <div class="packing-slip-product-detail">{{ $product_description }}</div>
                             @endif
                         </td>
-						<td class="text-right">
+						<td class="text-center">
 							{{$line['quantity']}} {{$line['units']}}
 						</td>
 					</tr>
