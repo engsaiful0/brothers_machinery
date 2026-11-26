@@ -55,7 +55,7 @@
     .packing-slip-business { display: none !important; }
     .packing-slip-title {
         padding-bottom: 0;
-        margin-top: 0 !important;
+        margin-top: 1.35em !important; /* one blank line above the title */
         margin-bottom: calc(2.7em + 8px) !important;
         font-size: 13pt !important;
         font-weight: bold;

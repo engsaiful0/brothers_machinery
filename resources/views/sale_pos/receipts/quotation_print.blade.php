@@ -199,7 +199,7 @@
                     <td>{{ $index + 1 }}</td>
                     <td>
                         <strong>{{ $product_name ?: '--' }}{{ $variation_name ? ' - '.trim($variation_name) : '' }}</strong>
-                        @if($brand_name)<br>Brand: {{ $brand_name }}@endif
+                        @if($brand_name)<br>BRAND: {{ mb_strtoupper($brand_name) }}@endif
                         {{-- This line's own IMEI / serial no. / other info typed on the quotation form. --}}
                         @if(trim((string) $line->sell_line_note) !== '')<br>{!! nl2br(e(trim($line->sell_line_note))) !!}@endif
                         @if($description)<br>{{ strip_tags($description) }}@endif
