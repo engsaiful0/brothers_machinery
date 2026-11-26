@@ -100,7 +100,7 @@
         <tr>
             <td class="meta-label">Customer Name</td>
             <td class="meta-colon">:</td>
-            <td class="meta-value">{{ $customer_name }}</td>
+            <td class="meta-value"><strong>{{ $customer_name }}</strong></td>
             <td class="meta-label-right">Date</td>
             <td class="meta-colon">:</td>
             <td class="meta-value-right">{{ $quotation_date }}</td>

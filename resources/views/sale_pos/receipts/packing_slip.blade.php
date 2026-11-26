@@ -174,7 +174,7 @@
 	<table class="packing-slip-meta color-555">
 	<tr>
 		<td class="meta-label">Customer Name</td><td class="meta-colon">:</td>
-		<td class="meta-value">{{ $receipt_details->packing_customer_name }}</td>
+		<td class="meta-value"><strong>{{ $receipt_details->packing_customer_name }}</strong></td>
 		<td class="meta-label-right">{{ $receipt_details->date_label ?: 'Date' }}</td><td class="meta-colon">:</td>
 		<td class="meta-value-right">{{ $receipt_details->invoice_date }}</td>
 	</tr>
@@ -183,6 +183,12 @@
 		<td class="meta-value">{{ $receipt_details->customer_address_line }}</td>
 		<td class="meta-label-right">@lang('sale.invoice_no')</td><td class="meta-colon">:</td>
 		<td class="meta-value-right">{{ $receipt_details->invoice_no }}</td>
+	</tr>
+	<tr>
+		<td class="meta-label">P.O No</td><td class="meta-colon">:</td>
+		<td class="meta-value">{{ $receipt_details->purchase_order_no ?? '' }}</td>
+		<td class="meta-label-right">P.O Date</td><td class="meta-colon">:</td>
+		<td class="meta-value-right">{{ $receipt_details->purchase_order_date_print ?? '' }}</td>
 	</tr>
 	<tr>
 		<td class="meta-label">Contact Name</td><td class="meta-colon">:</td>

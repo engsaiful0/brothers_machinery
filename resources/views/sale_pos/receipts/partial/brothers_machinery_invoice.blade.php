@@ -247,7 +247,7 @@
         <tr>
             <td class="meta-label">Customer Name</td>
             <td class="meta-colon">:</td>
-            <td class="meta-value">{{ $customer_company }}</td>
+            <td class="meta-value"><strong>{{ $customer_company }}</strong></td>
             <td class="meta-label-right">Date</td>
             <td class="meta-colon">:</td>
             <td class="meta-value-right">{{ $second_date !== '' ? $second_date : $bill_date }}</td>
@@ -267,6 +267,12 @@
             <td class="meta-label-right">Chalan No</td>
             <td class="meta-colon">:</td>
             <td class="meta-value-right">{{ $challan_no }}</td>
+        </tr>
+        <tr>
+            <td class="meta-label">P.O Date</td>
+            <td class="meta-colon">:</td>
+            <td class="meta-value">{{ $receipt_details->purchase_order_date_print ?? '' }}</td>
+            <td colspan="3"></td>
         </tr>
         <tr>
             <td class="meta-label">Delivery Address</td>

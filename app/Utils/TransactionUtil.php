@@ -1353,6 +1353,8 @@ class TransactionUtil extends Util
         $output['purchase_order_no'] = $transaction->purchase_order_no;
         $output['purchase_order_date'] = ! empty($transaction->purchase_order_date)
             ? $this->format_date($transaction->purchase_order_date, false, $business_details) : null;
+        $output['purchase_order_date_print'] = ! empty($transaction->purchase_order_date)
+            ? \Carbon\Carbon::parse($transaction->purchase_order_date)->format('d-M-y') : '';
 
         $output['transaction_date'] = $transaction->transaction_date;
         $output['date_time_format'] = $business_details->date_format;
